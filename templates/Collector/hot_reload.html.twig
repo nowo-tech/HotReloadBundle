@@ -11,7 +11,7 @@
     }[status]|default(status) %}
 
     {% set icon %}
-        <span class="icon">{{ source('@NowoHotReload/Icon/hot-reload.svg') }}</span>
+        <span class="icon">{{ source('@NowoHotReloadBundle/Icon/hot-reload.svg') }}</span>
         <span class="sf-toolbar-value">{{ status_label }}</span>
     {% endset %}
 
@@ -49,7 +49,7 @@
 
 {% block menu %}
     <span class="label{{ collector.status == 'active' ? '' : ' disabled' }}">
-        <span class="icon">{{ source('@NowoHotReload/Icon/hot-reload.svg') }}</span>
+        <span class="icon">{{ source('@NowoHotReloadBundle/Icon/hot-reload.svg') }}</span>
         <strong>Hot Reload</strong>
         <span class="count">
             <span>{{ collector.status }}</span>

@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 final class HotReloadResponseSubscriber implements EventSubscriberInterface
 {
-    public const string REQUEST_ATTR_INJECTED = '_nowo_hot_reload_injected';
+    public const REQUEST_ATTR_INJECTED = '_nowo_hot_reload_injected';
 
     /**
      * @param list<string> $cspScriptSrcHosts

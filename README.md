@@ -1,10 +1,10 @@
 # Hot Reload Bundle
 
-[![CI](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/hot-reload-bundle.svg?style=flat)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/hot-reload-bundle.svg)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-7.4%20%7C%208.0%2B-000000?logo=symfony)](https://symfony.com) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/HotReloadBundle.svg?style=social&label=Star)](https://github.com/nowo-tech/HotReloadBundle) [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](#tests-and-coverage)
+[![CI](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/hot-reload-bundle.svg?style=flat)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/hot-reload-bundle.svg)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.1%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-7.4%20%7C%208.0%20%7C%208.1%20%7C%208.2-000000?logo=symfony)](https://symfony.com) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/HotReloadBundle.svg?style=social&label=Star)](https://github.com/nowo-tech/HotReloadBundle) [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](#tests-and-coverage)
 
 > ⭐ **Found this useful?** [Install from Packagist](https://packagist.org/packages/nowo-tech/hot-reload-bundle) · Give it a **star** on [GitHub](https://github.com/nowo-tech/HotReloadBundle) so more developers can find it.
 
-**Hot Reload Bundle** — Symfony integration for [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-reload/) ([dunglas/frankenphp-hot-reload](https://github.com/dunglas/frankenphp-hot-reload)). When enabled, it injects the Mercure hub meta tag, optional Idiomorph, and the frankenphp-hot-reload ESM module into HTML responses so the browser can morph or reload after PHP (and watched) file changes. **Dev-only** · PHP 8.1+ · Symfony **7.4** or **8.0+**.
+**Hot Reload Bundle** — Symfony integration for [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-reload/) ([dunglas/frankenphp-hot-reload](https://github.com/dunglas/frankenphp-hot-reload)). When enabled, it injects the Mercure hub meta tag, optional Idiomorph, and the frankenphp-hot-reload ESM module into HTML responses so the browser can morph or reload after PHP (and watched) file changes. **Dev-only** · PHP 8.1+ · Symfony **7.4+** and **8.0–8.2**.
 
 ![FrankenPHP Friendly Worker Mode](docs/images/frankenphp-friendly.png)
 
@@ -42,7 +42,7 @@ Server side: enable Mercure (`anonymous`) and `php_server { hot_reload }` in you
 ## Requirements
 
 - PHP `>=8.1` (<8.6); **Symfony 8.x** requires **PHP 8.4+**
-- Symfony **7.4** or **8.0+** (`symfony/*` `^7.4 || ^8.0`)
+- Symfony **7.4+** and **8.0–8.2** (`symfony/*` `^7.4 || ^8.0`)
 - FrankenPHP with Hot Reload + Mercure configured in the Caddyfile (dev)
 - `twig/twig` optional — required only for `{{ nowo_hot_reload_assets() }}`
 
@@ -83,7 +83,7 @@ Official references:
 
 ## Demo
 
-- `demo/symfony8` — Symfony **8.1** (PHP **8.5**), host port **8011** by default (`PORT` in `.env`)
+- `demo/symfony8` — Symfony **8.2** (PHP **8.5**), host port **8011** by default (`PORT` in `.env`)
 
 The demo runs **FrankenPHP + Caddy** in Docker. See [docs/DEMO-FRANKENPHP.md](docs/DEMO-FRANKENPHP.md).
 

@@ -20,11 +20,12 @@ help:
 
 up:
 	@if [ ! -f .env ]; then cp .env.example .env 2>/dev/null || true; fi
+	$(COMPOSE) build
+	@echo "Installing Composer dependencies (before FrankenPHP worker boot)..."
+	$(COMPOSE) run --rm --no-deps -e COMPOSER_MEMORY_LIMIT=-1 --entrypoint composer php install --no-interaction
 	$(COMPOSE) up -d
 	@echo "Waiting for container to be ready..."
 	@sleep 5
-	@echo "Installing dependencies..."
-	@$(COMPOSE) exec -T -e COMPOSER_MEMORY_LIMIT=-1 php composer install --no-interaction
 	@$(COMPOSE) exec -T php php bin/console assets:install public --symlink --no-interaction 2>/dev/null || true
 	@$(MAKE) assets
 	@PORT=$$(grep "^PORT=" .env 2>/dev/null | cut -d= -f2 | tr -d '\r'); \

@@ -23,7 +23,7 @@ use function is_string;
  */
 final class HotReloadDataCollector implements DataCollectorInterface, LateDataCollectorInterface
 {
-    public const string NAME = 'nowo_hot_reload';
+    public const NAME = 'nowo_hot_reload';
 
     /** @var array<string, mixed> */
     private array $data = [];

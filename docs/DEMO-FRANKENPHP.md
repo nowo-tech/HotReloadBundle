@@ -2,7 +2,7 @@
 
 This bundle includes a runnable demo with FrankenPHP in:
 
-- `demo/symfony8` — Symfony **8.1** (FrankenPHP PHP **8.5**, REQ-DEMO-010)
+- `demo/symfony8` — Symfony **8.2** (`8.2.x-dev` until the November 2026 stable; FrankenPHP PHP **8.5**, REQ-DEMO-010)
 
 The demo uses:
 

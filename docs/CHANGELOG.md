@@ -8,12 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.3.0] - 2026-08-17](#130---2026-08-17)
 - [[1.2.1] - 2026-08-17](#121---2026-08-17)
 - [[1.2.0] - 2026-08-17](#120---2026-08-17)
 - [[1.1.0] - 2026-08-17](#110---2026-08-17)
 - [[1.0.0] - 2026-08-17](#100---2026-08-17)
 
 ## [Unreleased]
+
+## [1.3.0] - 2026-08-17
+
+### Changed
+
+- Declared and tested compatibility with **Symfony 7.4+** and **8.0–8.2** (`symfony/*` `^7.4 || ^8.0`). CI matrix is now `7.4`, `8.0`, `8.1`, and `8.2` (dropped leftover 6.4 / 7.0 cells that could not install). The Symfony 8 demo targets **8.2**.
+
+### Fixed
+
+- Twig namespace is **`NowoHotReloadBundle`** (REQ-TWIG-002). `TwigPathsPass` registers `@NowoHotReloadBundle/...` on the native loader (`addPath` after optional `prependPath` for `templates/bundles/NowoHotReloadBundle/`). The 1.2.1 Symfony-default `@NowoHotReload/...` remains a BC alias. Profiler template: `@NowoHotReloadBundle/Collector/hot_reload.html.twig`.
+- PHP **8.2** parse errors from typed class constants (`public const string`); constants are untyped so the 7.4 + PHP 8.2 CI cell and coverage job pass.
+- Demo smoke: install Composer dependencies with `docker compose run` **before** starting FrankenPHP worker mode, so the php service does not exit before `composer install`.
 
 ## [1.2.1] - 2026-08-17
 
@@ -65,8 +78,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documented as **development-only**; do not enable FrankenPHP `hot_reload` or register this bundle in production. See [SECURITY.md](SECURITY.md).
 
+[1.3.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.3.0
 [1.2.1]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.2.1
 [1.2.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.0.0
-[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.3.0...HEAD

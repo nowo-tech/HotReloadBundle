@@ -6,7 +6,7 @@
 
 ## Overview
 
-HotReloadBundle injects [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-reload/) client assets (meta Mercure URL, optional Idiomorph, frankenphp-hot-reload ESM) into Symfony HTML responses in development. Auto-inject via `HotReloadResponseSubscriber` or Twig `{{ nowo_hot_reload_assets() }}`.
+HotReloadBundle injects [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-reload/) client assets (meta Mercure URL, optional Idiomorph, frankenphp-hot-reload ESM) into Symfony HTML responses in development. Auto-inject via `HotReloadResponseSubscriber` or Twig `{{ nowo_hot_reload_assets() }}`. Supported runtimes: PHP `>=8.1 <8.6`, Symfony **7.4+** and **8.0–8.2**.
 
 ## Functional requirements
 

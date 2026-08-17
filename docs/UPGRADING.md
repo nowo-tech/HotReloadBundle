@@ -2,10 +2,28 @@
 
 ## Table of contents
 
+- [From 1.2.1 → 1.3.0](#from-121--130)
 - [From 1.2.0 → 1.2.1](#from-120--121)
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.2.1 → 1.3.0
+
+Twig namespace is `NowoHotReloadBundle` (REQ-TWIG-002). The Web Profiler template path is `@NowoHotReloadBundle/Collector/hot_reload.html.twig`.
+
+Supported Symfony range is **7.4+** and **8.0–8.2** (`^7.4 || ^8.0`). Symfony 6.x and 7.0–7.3 are not supported.
+
+```bash
+composer require nowo-tech/hot-reload-bundle:^1.3 --dev
+```
+
+### Checklist
+
+1. If you referenced `@NowoHotReload/...` (1.2.1 profiler path), switch to `@NowoHotReloadBundle/...`. The old namespace stays registered as a BC alias for this major.
+2. Template overrides belong in `templates/bundles/NowoHotReloadBundle/` (see [USAGE.md](USAGE.md#overriding-templates-req-twig-001)).
+3. Hosts on Symfony **8.2** (including `8.2.x-dev`) can install this bundle with the existing `^7.4 || ^8.0` constraints; Symfony 8.x still requires PHP **8.4+**.
+4. No config changes.
 
 ## From 1.2.0 → 1.2.1
 

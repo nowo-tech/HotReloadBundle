@@ -2,7 +2,7 @@
 
 Runnable FrankenPHP demo:
 
-- `symfony8` — Symfony **8.1**, PHP **8.4+** (http://localhost:8011)
+- `symfony8` — Symfony **8.2** (`8.2.x-dev` until the November 2026 stable), PHP **8.4+** (http://localhost:8011)
 
 ## Quick start
 

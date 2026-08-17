@@ -39,5 +39,5 @@ Performance implications (one HTML rewrite when the gate is open; zero body work
 
 ## Web Debug Toolbar
 
-When Twig is available, `HotReloadDataCollector` registers as profiler id `nowo_hot_reload`. No extra configuration is required. The panel reports whether assets were injected on the request (`lateCollect` reads `_nowo_hot_reload_injected`).
+When Twig is available, `HotReloadDataCollector` registers as profiler id `nowo_hot_reload`. No extra configuration is required. The panel reports whether assets were injected on the request (`lateCollect` reads `_nowo_hot_reload_injected`). Templates use `@NowoHotReloadBundle/...`; overrides live under `templates/bundles/NowoHotReloadBundle/` — see [USAGE.md](USAGE.md#overriding-templates-req-twig-001).
 

@@ -4,6 +4,16 @@ This bundle injects FrankenPHP Hot Reload **client** assets into HTML. The **ser
 
 **Dev only.** Do not enable `hot_reload` or this bundle in production. See [Security](SECURITY.md).
 
+## Table of contents
+
+- [Auto-inject (default)](#auto-inject-default)
+- [Twig manual inject](#twig-manual-inject)
+- [Caddyfile — classic (`php_server` + hot reload)](#caddyfile--classic-php_server--hot-reload)
+- [Caddyfile — worker mode + watch](#caddyfile--worker-mode--watch)
+- [Optional: explicit Mercure URL](#optional-explicit-mercure-url)
+- [Preserve toolbar / custom DOM](#preserve-toolbar--custom-dom)
+- [Overriding templates (REQ-TWIG-001)](#overriding-templates-req-twig-001)
+
 ## Auto-inject (default)
 
 With `auto_inject: true` and a successful render gate (`enabled` + Mercure URL / env, or `require_frankenphp_env: false`), `HotReloadResponseSubscriber` runs on the main HTML response and inserts the snippet:
@@ -119,3 +129,30 @@ nowo_hot_reload:
 ```
 
 See [Performance](PERFORMANCE.md) for injection cost when the gate is open vs closed.
+
+## Overriding templates (REQ-TWIG-001)
+
+The profiler / Web Debug Toolbar templates use the Twig namespace **`NowoHotReloadBundle`** (REQ-TWIG-002). Application files under `templates/bundles/NowoHotReloadBundle/` **always** win over the copies shipped in the package.
+
+A full-file override **freezes** that `<subpath>`: vendor updates to the same file will not apply until you delete or merge the override. Prefer leaving these files untouched unless you need a surgical change (icon or panel markup).
+
+### Overridable subpaths
+
+| `<subpath>` | Purpose |
+| --- | --- |
+| `Collector/hot_reload.html.twig` | Web Debug Toolbar / Profiler panel |
+| `Icon/hot-reload.svg` | Toolbar and profiler menu icon |
+
+### Procedure
+
+1. Identify the `<subpath>` from the table above (path relative to the bundle `templates/` directory).
+2. Create in the application: `templates/bundles/NowoHotReloadBundle/<subpath>` (same relative path and filename).
+3. Clear the Symfony / Twig cache if needed: `php bin/console cache:clear`.
+
+Example: to replace the profiler icon, create:
+
+```text
+templates/bundles/NowoHotReloadBundle/Icon/hot-reload.svg
+```
+
+Logical names in PHP and Twig are `@NowoHotReloadBundle/<subpath>`. The Symfony-stripped namespace `@NowoHotReload/...` remains registered as a BC alias for this major; new overrides and references should use `@NowoHotReloadBundle`.

@@ -3,7 +3,7 @@
 ## Requirements
 
 - PHP `>=8.1` (<8.6). Symfony **8.x** requires **PHP 8.4+**.
-- Symfony **7.4** or **8.0+** (`symfony/config`, `symfony/dependency-injection`, `symfony/http-foundation`, `symfony/http-kernel` with `^7.4 || ^8.0`).
+- Symfony **7.4+** and **8.0–8.2** (`symfony/config`, `symfony/dependency-injection`, `symfony/http-foundation`, `symfony/http-kernel` with `^7.4 || ^8.0`). Symfony **8.2** is under development (`8.2.x-dev`) until November 2026; apps on that line need `minimum-stability: dev` (or `8.2.*@dev`) until the stable tag.
 - FrankenPHP with Hot Reload enabled in the Caddyfile (Mercure + `hot_reload`). See [Usage](USAGE.md).
 - `twig/twig` optional — required only for `{{ nowo_hot_reload_assets() }}`.
 
