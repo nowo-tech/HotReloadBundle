@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Nowo\HotReloadBundle\Tests\Integration\DependencyInjection;
 
+use Nowo\HotReloadBundle\DataCollector\HotReloadDataCollector;
 use Nowo\HotReloadBundle\DependencyInjection\HotReloadExtension;
 use Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber;
 use Nowo\HotReloadBundle\HotReloadAssets;
@@ -33,6 +34,7 @@ final class HotReloadExtensionIntegrationTest extends TestCase
         self::assertTrue($container->hasDefinition(HotReloadAssets::class));
         self::assertTrue($container->hasDefinition(HotReloadResponseSubscriber::class));
         self::assertTrue($container->hasDefinition(HotReloadTwigExtension::class));
+        self::assertTrue($container->hasDefinition(HotReloadDataCollector::class));
         self::assertSame('nowo_hot_reload', $extension->getAlias());
     }
 

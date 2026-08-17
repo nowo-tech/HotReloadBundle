@@ -22,7 +22,7 @@
     },
     "authors": [
         {
-            "name": "Héctor Franco Aceituno",
+            "name": "H\u00e9ctor Franco Aceituno",
             "email": "hectorfranco@nowo.tech",
             "homepage": "https://github.com/HecFranco",
             "role": "Developer"
@@ -65,7 +65,10 @@
         }
     },
     "archive": {
-        "exclude": ["/demo", "/.cursor"]
+        "exclude": [
+            "/demo",
+            "/.cursor"
+        ]
     },
     "config": {
         "sort-packages": true,
@@ -105,6 +108,7 @@
     },
     "suggest": {
         "twig/twig": "Required for {{ nowo_hot_reload_assets() }} Twig helper",
-        "symfony/flex": "For automatic recipe installation"
+        "symfony/flex": "For automatic recipe installation",
+        "symfony/web-profiler-bundle": "For the Hot Reload Web Debug Toolbar / Profiler panel"
     }
 }

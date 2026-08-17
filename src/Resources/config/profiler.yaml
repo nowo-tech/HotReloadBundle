@@ -1,0 +1,21 @@
+services:
+    Nowo\HotReloadBundle\DataCollector\HotReloadDataCollector:
+        arguments:
+            $assets: '@Nowo\HotReloadBundle\HotReloadAssets'
+            $autoInject: '%nowo.hot_reload.auto_inject%'
+            $idiomorph: '%nowo.hot_reload.idiomorph%'
+            $idiomorphScriptUrl: '%nowo.hot_reload.idiomorph_script_url%'
+            $hotReloadScriptUrl: '%nowo.hot_reload.hot_reload_script_url%'
+            $preserveSelectors: '%nowo.hot_reload.preserve_selectors%'
+            $preserveObserve: '%nowo.hot_reload.preserve_observe%'
+            $cspNonceRequestAttribute: '%nowo.hot_reload.csp_nonce_request_attribute%'
+            $cspAugmentScriptSrc: '%nowo.hot_reload.csp_augment_script_src%'
+            $cspScriptSrcHosts: '%nowo.hot_reload.csp_script_src_hosts%'
+            $requireFrankenphpEnv: '%nowo.hot_reload.require_frankenphp_env%'
+            $enabled: '%nowo.hot_reload.enabled%'
+        tags:
+            -
+                name: data_collector
+                template: '@NowoHotReloadBundle/Collector/hot_reload.html.twig'
+                id: 'nowo_hot_reload'
+                priority: 250

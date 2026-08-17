@@ -16,6 +16,7 @@ This bundle is **FrankenPHP worker mode friendly** (pair with `worker { …; wat
 - **Twig helper** — `{{ nowo_hot_reload_assets() }}` for manual layouts when `auto_inject` is off.
 - **Env-aware** — Renders only when `enabled` and (`mercure_url` or `FRANKENPHP_HOT_RELOAD` is set, or `require_frankenphp_env: false`).
 - **Idiomorph** — Optional DOM morphing instead of a full page reload (on by default).
+- **Web Debug Toolbar** — Profiler panel (`nowo_hot_reload`) with status, Mercure URL, and CSP/preserve settings.
 - **Preserve selectors** — Marks Symfony Web Debug Toolbar (`[id^="sfwdt"]`, `.sf-toolbar`, `.sf-minitoolbar`) with `data-frankenphp-hot-reload-preserve` (optional `MutationObserver`).
 - **CSP-aware** — Optional request-attribute nonce on the preserve boot script; can augment existing `Content-Security-Policy` `script-src` for jsDelivr (see [docs/CSP.md](docs/CSP.md)).
 

@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "/var/hot-reload-bundle",
-                "reference": "03bef4ee66a311c78cbc7cf050759e10bbb02c9c"
+                "reference": "72475d0fd49310e30f891a49575df3006672afc2"
             },
             "require": {
                 "php": ">=8.1 <8.6",
@@ -35,6 +35,7 @@
             },
             "suggest": {
                 "symfony/flex": "For automatic recipe installation",
+                "symfony/web-profiler-bundle": "For the Hot Reload Web Debug Toolbar / Profiler panel",
                 "twig/twig": "Required for {{ nowo_hot_reload_assets() }} Twig helper"
             },
             "type": "symfony-bundle",

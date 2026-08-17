@@ -1,0 +1,194 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+    {% set status = collector.status %}
+    {% set status_color = status == 'active' ? 'green' : (status == 'ready' ? 'yellow' : '') %}
+    {% set status_label = {
+        'active': 'on',
+        'ready': 'ready',
+        'idle': 'idle',
+        'disabled': 'off'
+    }[status]|default(status) %}
+
+    {% set icon %}
+        <span class="icon">{{ source('@NowoHotReloadBundle/Icon/hot-reload.svg') }}</span>
+        <span class="sf-toolbar-value">{{ status_label }}</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+            <b>Status</b>
+            <span>{{ status }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Injected</b>
+            <span>{{ collector.injected ? 'yes' : 'no' }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Should render</b>
+            <span>{{ collector.shouldRender ? 'yes' : 'no' }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Auto-inject</b>
+            <span>{{ collector.autoInject ? 'yes' : 'no' }}</span>
+        </div>
+        {% if collector.mercureUrl %}
+            <div class="sf-toolbar-info-piece">
+                <b>Mercure</b>
+                <span class="sf-toolbar-status sf-toolbar-status-{{ collector.injected ? 'green' : 'normal' }}">{{ collector.mercureUrl }}</span>
+            </div>
+        {% endif %}
+        <div class="sf-toolbar-info-piece">
+            <b>Idiomorph</b>
+            <span>{{ collector.idiomorph ? 'on' : 'off' }}</span>
+        </div>
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: true, status: status_color }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label{{ collector.status == 'active' ? '' : ' disabled' }}">
+        <span class="icon">{{ source('@NowoHotReloadBundle/Icon/hot-reload.svg') }}</span>
+        <strong>Hot Reload</strong>
+        <span class="count">
+            <span>{{ collector.status }}</span>
+        </span>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    <h2>FrankenPHP Hot Reload</h2>
+    <p>
+        Dev-only client injection for
+        <a href="https://frankenphp.dev/docs/hot-reload/" rel="noopener noreferrer" target="_blank">FrankenPHP Hot Reload</a>
+        via <code>nowo-tech/hot-reload-bundle</code>.
+    </p>
+
+    <div class="metrics">
+        <div class="metric">
+            <span class="value">{{ collector.status }}</span>
+            <span class="label">Status</span>
+        </div>
+        <div class="metric">
+            <span class="value">{{ collector.injected ? 'yes' : 'no' }}</span>
+            <span class="label">Injected this request</span>
+        </div>
+        <div class="metric">
+            <span class="value">{{ collector.shouldRender ? 'yes' : 'no' }}</span>
+            <span class="label">Render gate open</span>
+        </div>
+    </div>
+
+    <h3>Runtime</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>enabled</th>
+                <td>{{ collector.enabled ? 'true' : 'false' }}</td>
+            </tr>
+            <tr>
+                <th>auto_inject</th>
+                <td>{{ collector.autoInject ? 'true' : 'false' }}</td>
+            </tr>
+            <tr>
+                <th>require_frankenphp_env</th>
+                <td>{{ collector.requireFrankenphpEnv ? 'true' : 'false' }}</td>
+            </tr>
+            <tr>
+                <th>FRANKENPHP_HOT_RELOAD</th>
+                <td>{{ collector.frankenphpHotReloadEnv|default('—') }}</td>
+            </tr>
+            <tr>
+                <th>Resolved Mercure URL</th>
+                <td>{{ collector.mercureUrl|default('—') }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>Client assets</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>idiomorph</th>
+                <td>{{ collector.idiomorph ? 'true' : 'false' }}</td>
+            </tr>
+            <tr>
+                <th>idiomorph_script_url</th>
+                <td><code>{{ collector.idiomorphScriptUrl }}</code></td>
+            </tr>
+            <tr>
+                <th>hot_reload_script_url</th>
+                <td><code>{{ collector.hotReloadScriptUrl }}</code></td>
+            </tr>
+            <tr>
+                <th>preserve_observe</th>
+                <td>{{ collector.preserveObserve ? 'true' : 'false' }}</td>
+            </tr>
+            <tr>
+                <th>preserve_selectors</th>
+                <td>
+                    {% if collector.preserveSelectors is empty %}
+                        <em>none</em>
+                    {% else %}
+                        <ul>
+                            {% for selector in collector.preserveSelectors %}
+                                <li><code>{{ selector }}</code></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>CSP</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>csp_nonce_request_attribute</th>
+                <td>{{ collector.cspNonceRequestAttribute|default('—') }}</td>
+            </tr>
+            <tr>
+                <th>csp_augment_script_src</th>
+                <td>{{ collector.cspAugmentScriptSrc ? 'true' : 'false' }}</td>
+            </tr>
+            <tr>
+                <th>csp_script_src_hosts</th>
+                <td>
+                    {% if collector.cspScriptSrcHosts is empty %}
+                        <em>derive from script URLs</em>
+                    {% else %}
+                        <ul>
+                            {% for host in collector.cspScriptSrcHosts %}
+                                <li><code>{{ host }}</code></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p class="help">
+        See <code>docs/CSP.md</code> and <code>docs/USAGE.md</code> in the bundle for Caddyfile / Mercure setup.
+    </p>
+{% endblock %}

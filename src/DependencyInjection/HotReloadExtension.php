@@ -9,6 +9,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Twig\Extension\AbstractExtension;
 
 use function is_string;
@@ -55,6 +56,10 @@ final class HotReloadExtension extends Extension
 
         if (class_exists(AbstractExtension::class)) {
             $loader->load('twig.yaml');
+        }
+
+        if (interface_exists(DataCollectorInterface::class) && class_exists(AbstractExtension::class)) {
+            $loader->load('profiler.yaml');
         }
     }
 

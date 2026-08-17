@@ -17,6 +17,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 final class HotReloadResponseSubscriber implements EventSubscriberInterface
 {
+    public const string REQUEST_ATTR_INJECTED = '_nowo_hot_reload_injected';
+
     /**
      * @param list<string> $cspScriptSrcHosts
      */
@@ -54,6 +56,8 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         }
 
         if ($this->hasInjectedAssets($content)) {
+            $event->getRequest()->attributes->set(self::REQUEST_ATTR_INJECTED, true);
+
             return;
         }
 
@@ -74,6 +78,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         }
 
         $response->setContent($content);
+        $event->getRequest()->attributes->set(self::REQUEST_ATTR_INJECTED, true);
         $this->augmentContentSecurityPolicy($response);
     }
 

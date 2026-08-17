@@ -36,3 +36,8 @@ See [CSP.md](CSP.md) for nonce + CDN / self-host guidance.
 `HotReloadResponseSubscriber` treats a response as HTML when `Content-Type` contains `text/html` or `application/xhtml+xml`, **or** when `Content-Type` is missing/empty and the body starts with markup containing `<html`.
 
 Performance implications (one HTML rewrite when the gate is open; zero body work when not) are described in [Performance](PERFORMANCE.md).
+
+## Web Debug Toolbar
+
+When Twig is available, `HotReloadDataCollector` registers as profiler id `nowo_hot_reload`. No extra configuration is required. The panel reports whether assets were injected on the request (`lateCollect` reads `_nowo_hot_reload_injected`).
+

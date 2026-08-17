@@ -2,8 +2,23 @@
 
 ## Table of contents
 
+- [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.1.0 → 1.2.0
+
+Adds a Symfony Web Debug Toolbar / Profiler panel for Hot Reload.
+
+```bash
+composer require nowo-tech/hot-reload-bundle:^1.2 --dev
+```
+
+### Checklist
+
+1. Ensure `symfony/web-profiler-bundle` is enabled in `dev` (usual for Symfony apps).
+2. Open any HTML page with the toolbar — look for the **Hot Reload** block (`on` / `ready` / `idle` / `off`).
+3. No config changes required; collector registers automatically when Twig is available.
 
 ## From 1.0.0 → 1.1.0
 

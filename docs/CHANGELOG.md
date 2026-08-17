@@ -8,10 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.2.0] - 2026-08-17](#120---2026-08-17)
 - [[1.1.0] - 2026-08-17](#110---2026-08-17)
 - [[1.0.0] - 2026-08-17](#100---2026-08-17)
 
 ## [Unreleased]
+
+## [1.2.0] - 2026-08-17
+
+### Added
+
+- **Web Debug Toolbar / Profiler** — `HotReloadDataCollector` (`nowo_hot_reload`) shows status (active/ready/idle/disabled), Mercure URL, injection flag, preserve selectors, and CSP settings. Template: `@NowoHotReloadBundle/Collector/hot_reload.html.twig`.
 
 ## [1.1.0] - 2026-08-17
 
@@ -51,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documented as **development-only**; do not enable FrankenPHP `hot_reload` or register this bundle in production. See [SECURITY.md](SECURITY.md).
 
+[1.2.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.0.0
-[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.2.0...HEAD

@@ -126,9 +126,24 @@ final class HotReloadResponseSubscriberTest extends TestCase
 
         $html     = '<html><head><meta data-nowo-hot-reload></head><body>ok</body></html>';
         $response = new Response($html, 200, ['Content-Type' => 'text/html']);
-        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+        $event    = $this->createEvent($response);
+        $this->createSubscriber()->onKernelResponse($event);
 
         self::assertSame($html, $response->getContent());
+        self::assertTrue($event->getRequest()->attributes->getBoolean(HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED));
+    }
+
+    #[Test]
+    public function itMarksRequestWhenInjecting(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, ['Content-Type' => 'text/html']);
+        $event    = $this->createEvent($response);
+        $this->createSubscriber()->onKernelResponse($event);
+
+        self::assertTrue($event->getRequest()->attributes->getBoolean(HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED));
+        self::assertStringContainsString('frankenphp-hot-reload:url', (string) $response->getContent());
     }
 
     #[Test]
