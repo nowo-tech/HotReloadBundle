@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6dd0a61a3e3486ed0a896e3d3cfde0fb",
+    "content-hash": "75c4e0deb509e59812ca0559fd1381f4",
     "packages": [
         {
             "name": "nowo-tech/hot-reload-bundle",
@@ -12,14 +12,16 @@
             "dist": {
                 "type": "path",
                 "url": "/var/hot-reload-bundle",
-                "reference": "2c62eda0f9c8c990e778836728e04ea49b7c3808"
+                "reference": "045ef03c078a30012af889931e04f9a480162707"
             },
             "require": {
                 "php": ">=8.1 <8.6",
                 "symfony/config": "^7.4 || ^8.0",
                 "symfony/dependency-injection": "^7.4 || ^8.0",
                 "symfony/http-foundation": "^7.4 || ^8.0",
-                "symfony/http-kernel": "^7.4 || ^8.0"
+                "symfony/http-kernel": "^7.4 || ^8.0",
+                "twig/extra-bundle": "^3.12",
+                "twig/string-extra": "^3.12"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.0",

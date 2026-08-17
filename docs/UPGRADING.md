@@ -2,11 +2,25 @@
 
 ## Table of contents
 
+- [From 1.3.0 → 1.3.1](#from-130--131)
 - [From 1.2.1 → 1.3.0](#from-121--130)
 - [From 1.2.0 → 1.2.1](#from-120--121)
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.3.0 → 1.3.1
+
+Adds Twig Extra as a runtime dependency (REQ-TWIG-004).
+
+```bash
+composer require nowo-tech/hot-reload-bundle:^1.3.1 --dev
+```
+
+### Checklist
+
+1. Hosts that render `@NowoHotReloadBundle/...` templates (profiler panel or `{{ nowo_hot_reload_assets() }}`) must have `twig/extra-bundle` and `twig/string-extra` installed and `Twig\Extra\TwigExtraBundle\TwigExtraBundle` enabled (Flex usually does this).
+2. No config changes.
 
 ## From 1.2.1 → 1.3.0
 
