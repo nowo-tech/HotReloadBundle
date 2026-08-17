@@ -22,7 +22,16 @@ up:
 	@if [ ! -f .env ]; then cp .env.example .env 2>/dev/null || true; fi
 	$(COMPOSE) build
 	@echo "Installing Composer dependencies (before FrankenPHP worker boot)..."
-	$(COMPOSE) run --rm --no-deps -e COMPOSER_MEMORY_LIMIT=-1 --entrypoint composer php install --no-interaction
+	@n=0; \
+	until $(COMPOSE) run --rm --no-deps \
+		-e COMPOSER_MEMORY_LIMIT=-1 \
+		-e COMPOSER_AUTH \
+		--entrypoint composer php install --no-interaction --no-dev; do \
+		n=$$((n+1)); \
+		if [ $$n -ge 5 ]; then echo "composer install failed after $$n attempts"; exit 1; fi; \
+		echo "composer install failed (attempt $$n/5), retrying..."; \
+		sleep 20; \
+	done
 	$(COMPOSE) up -d
 	@echo "Waiting for container to be ready..."
 	@sleep 5

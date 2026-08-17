@@ -2,12 +2,21 @@
 
 ## Table of contents
 
+- [From 1.3.1 → 1.3.2](#from-131--132)
 - [From 1.3.0 → 1.3.1](#from-130--131)
 - [From 1.2.1 → 1.3.0](#from-121--130)
 - [From 1.2.0 → 1.2.1](#from-120--121)
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.3.1 → 1.3.2
+
+Demo smoke Composer install is more resilient (retries, `--no-dev`, GitHub token in CI). No application or config changes.
+
+```bash
+composer require nowo-tech/hot-reload-bundle:^1.3.2 --dev
+```
 
 ## From 1.3.0 → 1.3.1
 
