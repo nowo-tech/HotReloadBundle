@@ -1,0 +1,6 @@
+services:
+    Nowo\HotReloadBundle\Twig\HotReloadTwigExtension:
+        arguments:
+            $assets: '@Nowo\HotReloadBundle\HotReloadAssets'
+        tags:
+            - { name: twig.extension }

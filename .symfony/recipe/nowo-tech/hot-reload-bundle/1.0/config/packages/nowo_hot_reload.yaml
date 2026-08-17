@@ -1,0 +1,9 @@
+# FrankenPHP Hot Reload — development only (do not enable in production).
+nowo_hot_reload:
+    enabled: true
+    auto_inject: true
+    require_frankenphp_env: true
+    idiomorph: true
+    preserve_selectors:
+        - '#sfwdt'
+        - '.sf-toolbar'

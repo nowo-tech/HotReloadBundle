@@ -1,0 +1,22 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Nowo\HotReloadBundle\HotReloadAssets:
+        arguments:
+            $enabled: '%nowo.hot_reload.enabled%'
+            $requireFrankenphpEnv: '%nowo.hot_reload.require_frankenphp_env%'
+            $mercureUrl: '%nowo.hot_reload.mercure_url%'
+            $idiomorph: '%nowo.hot_reload.idiomorph%'
+            $idiomorphScriptUrl: '%nowo.hot_reload.idiomorph_script_url%'
+            $hotReloadScriptUrl: '%nowo.hot_reload.hot_reload_script_url%'
+            $preserveSelectors: '%nowo.hot_reload.preserve_selectors%'
+
+    Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber:
+        arguments:
+            $assets: '@Nowo\HotReloadBundle\HotReloadAssets'
+            $autoInject: '%nowo.hot_reload.auto_inject%'
+        tags:
+            - { name: kernel.event_subscriber }
