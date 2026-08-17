@@ -33,7 +33,7 @@ up:
 		-e COMPOSER_AUTH \
 		-e COMPOSER_MAX_PARALLEL_HTTP=$${COMPOSER_MAX_PARALLEL_HTTP:-1} \
 		$$cache_vol \
-		--entrypoint composer php install --no-interaction --no-dev --prefer-install=auto; do \
+		--entrypoint composer php install --no-interaction --no-scripts --prefer-install=auto; do \
 		n=$$((n+1)); \
 		if [ $$n -ge 8 ]; then echo "composer install failed after $$n attempts"; exit 1; fi; \
 		sleep_s=$$((15 * n)); \
