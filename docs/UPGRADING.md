@@ -2,7 +2,25 @@
 
 ## Table of contents
 
+- [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.0.0 → 1.1.0
+
+CSP-aware Hot Reload client injection, safer prod defaults, and pinned CDN URLs.
+
+```bash
+composer require nowo-tech/hot-reload-bundle:^1.1 --dev
+```
+
+### Checklist
+
+1. **Bundle envs** — ensure `config/bundles.php` registers `NowoHotReloadBundle` for **`dev` / `test` only** (Flex recipe now does this; older installs with `all` should narrow it).
+2. **CSP (recommended)** — set `csp_nonce_request_attribute` to your host nonce request attribute, or rely on `csp_augment_script_src` when the response already has a CSP header. See [CSP.md](CSP.md).
+3. **Optional config** — review new defaults (`preserve_selectors`, pinned `idiomorph_script_url` / `hot_reload_script_url`, `preserve_observe`, `allow_production: false`).
+4. **Listeners** — optional: subscribe to `Nowo\HotReloadBundle\Event\HotReloadInjectEvent`.
+
+No Doctrine migrations. No production runtime impact when the bundle stays out of `prod`.
 
 ## From nothing → 1.0.0
 

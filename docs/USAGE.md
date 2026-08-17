@@ -107,13 +107,14 @@ nowo_hot_reload:
 
 ## Preserve toolbar / custom DOM
 
-Default `preserve_selectors` (`#sfwdt`, `.sf-toolbar`) mark the Symfony Web Debug Toolbar with `data-frankenphp-hot-reload-preserve` so morphing keeps it. Add more selectors as needed:
+Default `preserve_selectors` (`[id^="sfwdt"]`, `.sf-toolbar`, `.sf-minitoolbar`) mark the Symfony Web Debug Toolbar with `data-frankenphp-hot-reload-preserve` so morphing keeps it. Add more selectors as needed:
 
 ```yaml
 nowo_hot_reload:
     preserve_selectors:
-        - '#sfwdt'
+        - '[id^="sfwdt"]'
         - '.sf-toolbar'
+        - '.sf-minitoolbar'
         - '#my-sticky-widget'
 ```
 

@@ -70,7 +70,12 @@ cache-clear: ensure-up
 	$(COMPOSE) exec -T php php bin/console cache:clear
 
 update-bundle: ensure-up
-	$(COMPOSE) exec -T php composer update nowo-tech/hot-reload-bundle --no-interaction
+	@if [ ! -f composer.lock ]; then \
+		echo "No composer.lock — running full composer update..."; \
+		$(COMPOSE) exec -T -e COMPOSER_MEMORY_LIMIT=-1 php composer update --no-interaction; \
+	else \
+		$(COMPOSE) exec -T php composer update nowo-tech/hot-reload-bundle --no-interaction; \
+	fi
 	$(COMPOSE) exec -T php php bin/console cache:clear --env=dev
 
 verify: ensure-up

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Nowo\HotReloadBundle\Tests\Unit\EventSubscriber;
 
+use Nowo\HotReloadBundle\Event\HotReloadInjectEvent;
 use Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber;
 use Nowo\HotReloadBundle\HotReloadAssets;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -85,6 +87,17 @@ final class HotReloadResponseSubscriberTest extends TestCase
     }
 
     #[Test]
+    public function itSniffsHtmlWhenContentTypeMissing(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertStringContainsString('frankenphp-hot-reload:url', (string) $response->getContent());
+    }
+
+    #[Test]
     public function itSkipsWhenAutoInjectDisabled(): void
     {
         $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
@@ -129,19 +142,156 @@ final class HotReloadResponseSubscriberTest extends TestCase
         self::assertSame('', $response->getContent());
     }
 
-    private function createSubscriber(bool $autoInject = true): HotReloadResponseSubscriber
+    #[Test]
+    public function itDispatchesInjectEventAndAllowsSnippetOverride(): void
     {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(HotReloadInjectEvent::class, static function (HotReloadInjectEvent $event): void {
+            self::assertSame('/', $event->getRequest()->getPathInfo());
+            self::assertInstanceOf(Response::class, $event->getResponse());
+            $event->setSnippet('<!--custom-hot-reload-->');
+        });
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, ['Content-Type' => 'text/html']);
+        $this->createSubscriber(eventDispatcher: $dispatcher)->onKernelResponse($this->createEvent($response));
+
+        self::assertStringContainsString('<!--custom-hot-reload-->', (string) $response->getContent());
+        self::assertStringNotContainsString('frankenphp-hot-reload:url', (string) $response->getContent());
+    }
+
+    #[Test]
+    public function itAugmentsExistingCspScriptSrc(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, [
+            'Content-Type'            => 'text/html',
+            'Content-Security-Policy' => "default-src 'self'; script-src 'self' 'nonce-abc'",
+        ]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        $csp = (string) $response->headers->get('Content-Security-Policy');
+        self::assertStringContainsString('https://cdn.jsdelivr.net', $csp);
+        self::assertStringContainsString("script-src 'self' 'nonce-abc' https://cdn.jsdelivr.net", $csp);
+    }
+
+    #[Test]
+    public function itAppendsScriptSrcWhenCspHasNoScriptSrc(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, [
+            'Content-Type'            => 'text/html',
+            'Content-Security-Policy' => "default-src 'self'",
+        ]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        $csp = (string) $response->headers->get('Content-Security-Policy');
+        self::assertStringContainsString("default-src 'self'; script-src https://cdn.jsdelivr.net", $csp);
+    }
+
+    #[Test]
+    public function itSkipsCspAugmentWhenDisabled(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, [
+            'Content-Type'            => 'text/html',
+            'Content-Security-Policy' => "script-src 'self'",
+        ]);
+        $this->createSubscriber(cspAugmentScriptSrc: false)->onKernelResponse($this->createEvent($response));
+
+        self::assertSame("script-src 'self'", $response->headers->get('Content-Security-Policy'));
+    }
+
+    #[Test]
+    public function itDerivesCspHostsFromScriptUrlsWhenConfigEmpty(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
         $assets = new HotReloadAssets(
             enabled: true,
             requireFrankenphpEnv: true,
             mercureUrl: null,
             idiomorph: true,
-            idiomorphScriptUrl: 'https://cdn.jsdelivr.net/npm/idiomorph',
-            hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm',
+            idiomorphScriptUrl: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4',
+            hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm',
+            preserveSelectors: [],
+        );
+        $subscriber = new HotReloadResponseSubscriber($assets, true, null, true, []);
+        $response   = new Response('<html><head></head><body>ok</body></html>', 200, [
+            'Content-Type'            => 'text/html',
+            'Content-Security-Policy' => "default-src 'self'",
+        ]);
+        $subscriber->onKernelResponse($this->createEvent($response));
+
+        self::assertStringContainsString('https://cdn.jsdelivr.net', (string) $response->headers->get('Content-Security-Policy'));
+    }
+
+    #[Test]
+    public function itSkipsCspAugmentWhenNoHostsCanBeDerived(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $assets = new HotReloadAssets(
+            enabled: true,
+            requireFrankenphpEnv: true,
+            mercureUrl: null,
+            idiomorph: false,
+            idiomorphScriptUrl: '/local/idiomorph.js',
+            hotReloadScriptUrl: '/local/hot-reload.js',
+            preserveSelectors: [],
+        );
+        $subscriber = new HotReloadResponseSubscriber($assets, true, null, true, []);
+        $csp        = "script-src 'self'";
+        $response   = new Response('<html><head></head><body>ok</body></html>', 200, [
+            'Content-Type'            => 'text/html',
+            'Content-Security-Policy' => $csp,
+        ]);
+        $subscriber->onKernelResponse($this->createEvent($response));
+
+        self::assertSame($csp, $response->headers->get('Content-Security-Policy'));
+    }
+
+    #[Test]
+    public function itLeavesCspUnchangedWhenHostAlreadyPresent(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $csp      = "script-src 'self' https://cdn.jsdelivr.net";
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, [
+            'Content-Type'            => 'text/html',
+            'Content-Security-Policy' => $csp,
+        ]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame($csp, $response->headers->get('Content-Security-Policy'));
+    }
+
+    private function createSubscriber(
+        bool $autoInject = true,
+        ?EventDispatcher $eventDispatcher = null,
+        bool $cspAugmentScriptSrc = true,
+    ): HotReloadResponseSubscriber {
+        $assets = new HotReloadAssets(
+            enabled: true,
+            requireFrankenphpEnv: true,
+            mercureUrl: null,
+            idiomorph: true,
+            idiomorphScriptUrl: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4',
+            hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm',
             preserveSelectors: [],
         );
 
-        return new HotReloadResponseSubscriber($assets, $autoInject);
+        return new HotReloadResponseSubscriber(
+            $assets,
+            $autoInject,
+            $eventDispatcher,
+            $cspAugmentScriptSrc,
+            ['https://cdn.jsdelivr.net'],
+        );
     }
 
     private function createEvent(Response $response, bool $main = true): ResponseEvent

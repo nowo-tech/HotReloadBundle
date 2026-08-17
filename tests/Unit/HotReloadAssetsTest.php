@@ -7,6 +7,8 @@ namespace Nowo\HotReloadBundle\Tests\Unit;
 use Nowo\HotReloadBundle\HotReloadAssets;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 final class HotReloadAssetsTest extends TestCase
 {
@@ -48,10 +50,11 @@ final class HotReloadAssetsTest extends TestCase
         self::assertStringContainsString('name="frankenphp-hot-reload:url"', $html);
         self::assertStringContainsString('content="https://hub.test/.well-known/mercure"', $html);
         self::assertStringContainsString('data-nowo-hot-reload', $html);
-        self::assertStringContainsString('idiomorph', $html);
-        self::assertStringContainsString('frankenphp-hot-reload/+esm', $html);
+        self::assertStringContainsString('idiomorph@0.7.4', $html);
+        self::assertStringContainsString('frankenphp-hot-reload@1.0.1/+esm', $html);
         self::assertStringContainsString('type="module"', $html);
-        self::assertStringContainsString('#sfwdt', $html);
+        self::assertStringContainsString('[id^=\\"sfwdt\\"]', $html);
+        self::assertStringContainsString('MutationObserver', $html);
     }
 
     #[Test]
@@ -77,7 +80,7 @@ final class HotReloadAssetsTest extends TestCase
 
         self::assertStringNotContainsString('idiomorph', $html);
         self::assertStringNotContainsString('data-nowo-hot-reload-preserve-boot', $html);
-        self::assertStringContainsString('frankenphp-hot-reload/+esm', $html);
+        self::assertStringContainsString('frankenphp-hot-reload@1.0.1/+esm', $html);
     }
 
     #[Test]
@@ -91,6 +94,106 @@ final class HotReloadAssetsTest extends TestCase
         self::assertStringContainsString('content=""', $html);
     }
 
+    #[Test]
+    public function itAppliesCspNonceFromRequestAttribute(): void
+    {
+        $request = Request::create('/');
+        $request->attributes->set('_csp_nonce', 'abc123');
+        $stack = new RequestStack([$request]);
+
+        $assets = $this->createAssets(
+            mercureUrl: 'https://hub.test',
+            cspNonceRequestAttribute: '_csp_nonce',
+            requestStack: $stack,
+        );
+        $html = $assets->renderHtml();
+
+        self::assertStringContainsString('nonce="abc123"', $html);
+        self::assertStringContainsString('data-nowo-hot-reload-preserve-boot', $html);
+    }
+
+    #[Test]
+    public function itPrefersExplicitCspNonceArgument(): void
+    {
+        $assets = $this->createAssets(mercureUrl: 'https://hub.test');
+        $html   = $assets->renderHtml('explicit-nonce');
+
+        self::assertStringContainsString('nonce="explicit-nonce"', $html);
+    }
+
+    #[Test]
+    public function itCanDisablePreserveObserve(): void
+    {
+        $assets = $this->createAssets(mercureUrl: 'https://hub.test', preserveObserve: false);
+        $html   = $assets->renderHtml();
+
+        self::assertStringContainsString('var observe = false;', $html);
+        self::assertStringNotContainsString('var observe = true;', $html);
+    }
+
+    #[Test]
+    public function itReturnsCspScriptSrcHostsHintFromScriptUrls(): void
+    {
+        $assets = $this->createAssets(mercureUrl: 'https://hub.test');
+
+        self::assertSame(['https://cdn.jsdelivr.net'], $assets->getCspScriptSrcHostsHint());
+    }
+
+    #[Test]
+    public function itReturnsNullNonceWhenRequestStackHasNoRequest(): void
+    {
+        $assets = $this->createAssets(
+            mercureUrl: 'https://hub.test',
+            cspNonceRequestAttribute: '_csp_nonce',
+            requestStack: new RequestStack(),
+        );
+        $html = $assets->renderHtml();
+
+        self::assertStringNotContainsString('nonce="', $html);
+    }
+
+    #[Test]
+    public function itIgnoresNonStringNonceAttributeValues(): void
+    {
+        $request = Request::create('/');
+        $request->attributes->set('_csp_nonce', 123);
+        $stack  = new RequestStack([$request]);
+        $assets = $this->createAssets(
+            mercureUrl: 'https://hub.test',
+            cspNonceRequestAttribute: '_csp_nonce',
+            requestStack: $stack,
+        );
+
+        self::assertStringNotContainsString('nonce="', $assets->renderHtml());
+    }
+
+    #[Test]
+    public function itBuildsOriginsWithPortsAndSkipsInvalidUrls(): void
+    {
+        $assets = new HotReloadAssets(
+            enabled: true,
+            requireFrankenphpEnv: false,
+            mercureUrl: null,
+            idiomorph: true,
+            idiomorphScriptUrl: 'https://cdn.example:8443/idiomorph.js',
+            hotReloadScriptUrl: 'ftp://bad.example/module.js',
+            preserveSelectors: [],
+        );
+
+        self::assertSame(['https://cdn.example:8443'], $assets->getCspScriptSrcHostsHint());
+
+        $empty = new HotReloadAssets(
+            enabled: true,
+            requireFrankenphpEnv: false,
+            mercureUrl: null,
+            idiomorph: true,
+            idiomorphScriptUrl: '   ',
+            hotReloadScriptUrl: 'http://:',
+            preserveSelectors: [],
+        );
+        self::assertSame([], $empty->getCspScriptSrcHostsHint());
+    }
+
     /**
      * @param list<string> $preserveSelectors
      */
@@ -99,16 +202,22 @@ final class HotReloadAssetsTest extends TestCase
         bool $requireFrankenphpEnv = true,
         ?string $mercureUrl = null,
         bool $idiomorph = true,
-        array $preserveSelectors = ['#sfwdt', '.sf-toolbar'],
+        array $preserveSelectors = ['[id^="sfwdt"]', '.sf-toolbar', '.sf-minitoolbar'],
+        bool $preserveObserve = true,
+        ?string $cspNonceRequestAttribute = null,
+        ?RequestStack $requestStack = null,
     ): HotReloadAssets {
         return new HotReloadAssets(
             enabled: $enabled,
             requireFrankenphpEnv: $requireFrankenphpEnv,
             mercureUrl: $mercureUrl,
             idiomorph: $idiomorph,
-            idiomorphScriptUrl: 'https://cdn.jsdelivr.net/npm/idiomorph',
-            hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm',
+            idiomorphScriptUrl: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4',
+            hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm',
             preserveSelectors: $preserveSelectors,
+            preserveObserve: $preserveObserve,
+            cspNonceRequestAttribute: $cspNonceRequestAttribute,
+            requestStack: $requestStack,
         );
     }
 }

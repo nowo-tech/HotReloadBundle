@@ -1,9 +1,4 @@
 services:
-    _defaults:
-        autowire: true
-        autoconfigure: true
-        public: false
-
     Nowo\HotReloadBundle\HotReloadAssets:
         arguments:
             $enabled: '%nowo.hot_reload.enabled%'
@@ -13,10 +8,16 @@ services:
             $idiomorphScriptUrl: '%nowo.hot_reload.idiomorph_script_url%'
             $hotReloadScriptUrl: '%nowo.hot_reload.hot_reload_script_url%'
             $preserveSelectors: '%nowo.hot_reload.preserve_selectors%'
+            $preserveObserve: '%nowo.hot_reload.preserve_observe%'
+            $cspNonceRequestAttribute: '%nowo.hot_reload.csp_nonce_request_attribute%'
+            $requestStack: '@?request_stack'
 
     Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber:
         arguments:
             $assets: '@Nowo\HotReloadBundle\HotReloadAssets'
             $autoInject: '%nowo.hot_reload.auto_inject%'
+            $eventDispatcher: '@?event_dispatcher'
+            $cspAugmentScriptSrc: '%nowo.hot_reload.csp_augment_script_src%'
+            $cspScriptSrcHosts: '%nowo.hot_reload.csp_script_src_hosts%'
         tags:
             - { name: kernel.event_subscriber }

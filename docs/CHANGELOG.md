@@ -8,9 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.1.0] - 2026-08-17](#110---2026-08-17)
 - [[1.0.0] - 2026-08-17](#100---2026-08-17)
 
 ## [Unreleased]
+
+## [1.1.0] - 2026-08-17
+
+### Added
+
+- **CSP support** — `csp_nonce_request_attribute` stamps the host CSP nonce on the inline preserve boot script; `csp_augment_script_src` / `csp_script_src_hosts` can append CDN origins to an existing response `Content-Security-Policy` `script-src`. Docs: [CSP.md](CSP.md).
+- **`HotReloadInjectEvent`** — dispatched before HTML injection so hosts can mutate the snippet or headers.
+- **`preserve_observe`** (default `true`) — preserve boot uses `MutationObserver` for late-injected Web Debug Toolbar nodes.
+- **`allow_production`** (default `false`) — rejects `enabled: true` when `kernel.environment` is `prod`.
+- HTML sniffing when `Content-Type` is missing/empty (body contains `<html>`).
+
+### Changed
+
+- Default CDN URLs are **version-pinned**: Idiomorph `@0.7.4`, frankenphp-hot-reload `@1.0.1/+esm`.
+- Default `preserve_selectors`: `[id^="sfwdt"]`, `.sf-toolbar`, `.sf-minitoolbar`.
+- Flex recipe registers the bundle for **`dev` / `test` only** (was `all`).
+
+### Security
+
+- Production enablement blocked by default (`allow_production: false`). See [SECURITY.md](SECURITY.md) and [CSP.md](CSP.md).
 
 ## [1.0.0] - 2026-08-17
 
@@ -30,5 +51,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documented as **development-only**; do not enable FrankenPHP `hot_reload` or register this bundle in production. See [SECURITY.md](SECURITY.md).
 
+[1.1.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.0.0
-[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.1.0...HEAD

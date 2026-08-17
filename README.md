@@ -16,7 +16,8 @@ This bundle is **FrankenPHP worker mode friendly** (pair with `worker { …; wat
 - **Twig helper** — `{{ nowo_hot_reload_assets() }}` for manual layouts when `auto_inject` is off.
 - **Env-aware** — Renders only when `enabled` and (`mercure_url` or `FRANKENPHP_HOT_RELOAD` is set, or `require_frankenphp_env: false`).
 - **Idiomorph** — Optional DOM morphing instead of a full page reload (on by default).
-- **Preserve selectors** — Marks Symfony Web Debug Toolbar (`#sfwdt`, `.sf-toolbar`) with `data-frankenphp-hot-reload-preserve` by default.
+- **Preserve selectors** — Marks Symfony Web Debug Toolbar (`[id^="sfwdt"]`, `.sf-toolbar`, `.sf-minitoolbar`) with `data-frankenphp-hot-reload-preserve` (optional `MutationObserver`).
+- **CSP-aware** — Optional request-attribute nonce on the preserve boot script; can augment existing `Content-Security-Policy` `script-src` for jsDelivr (see [docs/CSP.md](docs/CSP.md)).
 
 ## Installation
 
@@ -51,13 +52,17 @@ nowo_hot_reload:
   enabled: true
   auto_inject: true
   require_frankenphp_env: true
+  allow_production: false
   # mercure_url: null  # defaults to $_SERVER['FRANKENPHP_HOT_RELOAD']
   idiomorph: true
-  # idiomorph_script_url: 'https://cdn.jsdelivr.net/npm/idiomorph'
-  # hot_reload_script_url: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm'
+  # idiomorph_script_url: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4'
+  # hot_reload_script_url: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm'
   preserve_selectors:
-    - '#sfwdt'
+    - '[id^="sfwdt"]'
     - '.sf-toolbar'
+    - '.sf-minitoolbar'
+  # csp_nonce_request_attribute: '_csp_nonce'
+  csp_augment_script_src: true
 ```
 
 ## Usage
@@ -98,6 +103,7 @@ make release-check
 
 - [Installation](docs/INSTALLATION.md)
 - [Configuration](docs/CONFIGURATION.md)
+- [CSP](docs/CSP.md)
 - [Usage](docs/USAGE.md)
 - [Contributing](docs/CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)

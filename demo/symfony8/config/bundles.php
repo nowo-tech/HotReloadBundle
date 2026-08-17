@@ -11,4 +11,5 @@ return [
     Nowo\TwigInspectorBundle\NowoTwigInspectorBundle::class => ['dev' => true, 'test' => true],
     Nowo\PasswordToggleBundle\NowoPasswordToggleBundle::class => ['all' => true],
     Nowo\HotReloadBundle\NowoHotReloadBundle::class => ['all' => true],
+    Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
 ];

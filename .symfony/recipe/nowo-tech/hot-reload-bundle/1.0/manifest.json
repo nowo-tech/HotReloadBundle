@@ -1,6 +1,6 @@
 {
     "bundles": {
-        "Nowo\\HotReloadBundle\\NowoHotReloadBundle": ["all"]
+        "Nowo\\HotReloadBundle\\NowoHotReloadBundle": ["dev", "test"]
     },
     "copy-from-recipe": {
         "config/": "%CONFIG_DIR%/"

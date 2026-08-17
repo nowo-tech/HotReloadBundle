@@ -1,13 +1,21 @@
 # FrankenPHP Hot Reload (Dunglas) — development only.
 # Server side: enable Mercure + hot_reload in your Caddyfile (see docs/USAGE.md).
+# CSP: see docs/CSP.md (nonce + jsDelivr / self-host).
 nowo_hot_reload:
     enabled: true
     auto_inject: true
     require_frankenphp_env: true
+    allow_production: false
     # mercure_url: null  # defaults to $_SERVER['FRANKENPHP_HOT_RELOAD']
     idiomorph: true
-    # idiomorph_script_url: 'https://cdn.jsdelivr.net/npm/idiomorph'
-    # hot_reload_script_url: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm'
+    # idiomorph_script_url: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4'
+    # hot_reload_script_url: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm'
     preserve_selectors:
-        - '#sfwdt'
+        - '[id^="sfwdt"]'
         - '.sf-toolbar'
+        - '.sf-minitoolbar'
+    preserve_observe: true
+    # csp_nonce_request_attribute: '_csp_nonce'
+    csp_augment_script_src: true
+    csp_script_src_hosts:
+        - 'https://cdn.jsdelivr.net'

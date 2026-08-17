@@ -1,9 +1,21 @@
 # FrankenPHP Hot Reload — development only (do not enable in production).
+# Register the bundle for dev/test only. See docs/SECURITY.md and docs/CSP.md.
 nowo_hot_reload:
     enabled: true
     auto_inject: true
     require_frankenphp_env: true
+    allow_production: false
     idiomorph: true
+    # Pin CDN scripts (defaults). Override to self-host under CSP script-src 'self'.
+    # idiomorph_script_url: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4'
+    # hot_reload_script_url: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm'
     preserve_selectors:
-        - '#sfwdt'
+        - '[id^="sfwdt"]'
         - '.sf-toolbar'
+        - '.sf-minitoolbar'
+    preserve_observe: true
+    # Host CSP nonce request attribute, e.g. '_csp_nonce' or '_beacon_csp_nonce'
+    # csp_nonce_request_attribute: null
+    csp_augment_script_src: true
+    csp_script_src_hosts:
+        - 'https://cdn.jsdelivr.net'

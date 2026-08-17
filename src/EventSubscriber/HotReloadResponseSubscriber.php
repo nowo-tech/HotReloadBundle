@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Nowo\HotReloadBundle\EventSubscriber;
 
+use Nowo\HotReloadBundle\Event\HotReloadInjectEvent;
 use Nowo\HotReloadBundle\HotReloadAssets;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -14,9 +17,15 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 final class HotReloadResponseSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @param list<string> $cspScriptSrcHosts
+     */
     public function __construct(
         private readonly HotReloadAssets $assets,
         private readonly bool $autoInject,
+        private readonly ?EventDispatcherInterface $eventDispatcher = null,
+        private readonly bool $cspAugmentScriptSrc = true,
+        private readonly array $cspScriptSrcHosts = [],
     ) {
     }
 
@@ -40,7 +49,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if (!$this->isHtmlResponse($response->headers->get('Content-Type', ''))) {
+        if (!$this->isHtmlResponse($response, $content)) {
             return;
         }
 
@@ -49,6 +58,12 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         }
 
         $snippet = $this->assets->renderHtml();
+
+        if ($this->eventDispatcher instanceof EventDispatcherInterface) {
+            $injectEvent = new HotReloadInjectEvent($event->getRequest(), $response, $snippet);
+            $this->eventDispatcher->dispatch($injectEvent);
+            $snippet = $injectEvent->getSnippet();
+        }
 
         if (preg_match('/<\/head>/i', $content) === 1) {
             $content = preg_replace('/<\/head>/i', $snippet . '</head>', $content, 1) ?? $content;
@@ -59,12 +74,24 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         }
 
         $response->setContent($content);
+        $this->augmentContentSecurityPolicy($response);
     }
 
-    private function isHtmlResponse(string $contentType): bool
+    private function isHtmlResponse(Response $response, string $content): bool
     {
-        return str_contains(strtolower($contentType), 'text/html')
-            || str_contains(strtolower($contentType), 'application/xhtml+xml');
+        $contentType = strtolower((string) $response->headers->get('Content-Type', ''));
+        if (str_contains($contentType, 'text/html')
+            || str_contains($contentType, 'application/xhtml+xml')
+        ) {
+            return true;
+        }
+
+        // Explicit non-HTML Content-Type → skip. Empty/missing → sniff body (Symfony often omits CT).
+        if ($contentType !== '') {
+            return false;
+        }
+
+        return str_contains(substr($content, 0, 512), '<html');
     }
 
     private function hasInjectedAssets(string $content): bool
@@ -73,5 +100,55 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             '/<(?:meta|script)\b[^>]*\b' . preg_quote(HotReloadAssets::MARKER, '/') . '\b/i',
             $content,
         ) === 1;
+    }
+
+    private function augmentContentSecurityPolicy(Response $response): void
+    {
+        if (!$this->cspAugmentScriptSrc) {
+            return;
+        }
+
+        $hosts = $this->cspScriptSrcHosts;
+        if ($hosts === []) {
+            $hosts = $this->assets->getCspScriptSrcHostsHint();
+        }
+        if ($hosts === []) {
+            return;
+        }
+
+        $csp = $response->headers->get('Content-Security-Policy');
+        if ($csp === null || $csp === '') {
+            return;
+        }
+
+        $updated = $this->mergeScriptSrcHosts($csp, $hosts);
+        if ($updated !== $csp) {
+            $response->headers->set('Content-Security-Policy', $updated);
+        }
+    }
+
+    /**
+     * @param list<string> $hosts
+     */
+    private function mergeScriptSrcHosts(string $csp, array $hosts): string
+    {
+        if (preg_match('/script-src([^;]*)/i', $csp, $matches) === 1) {
+            $directive = $matches[1];
+            $missing   = [];
+            foreach ($hosts as $host) {
+                if (!str_contains($directive, $host)) {
+                    $missing[] = $host;
+                }
+            }
+            if ($missing === []) {
+                return $csp;
+            }
+
+            $replacement = 'script-src' . rtrim($directive) . ' ' . implode(' ', $missing);
+
+            return preg_replace('/script-src[^;]*/i', $replacement, $csp, 1) ?? $csp;
+        }
+
+        return rtrim($csp, '; ') . '; script-src ' . implode(' ', $hosts);
     }
 }

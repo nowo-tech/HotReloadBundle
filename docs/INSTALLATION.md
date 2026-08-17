@@ -41,8 +41,9 @@ nowo_hot_reload:
     require_frankenphp_env: true
     idiomorph: true
     preserve_selectors:
-        - '#sfwdt'
+        - '[id^="sfwdt"]'
         - '.sf-toolbar'
+        - '.sf-minitoolbar'
 ```
 
 3. Configure the FrankenPHP / Caddyfile for Mercure + `hot_reload` (and `worker { …; watch }` in worker mode). See [Usage](USAGE.md).
