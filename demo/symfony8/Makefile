@@ -23,14 +23,23 @@ up:
 	$(COMPOSE) build
 	@echo "Installing Composer dependencies (before FrankenPHP worker boot)..."
 	@n=0; \
+	cache_vol=""; \
+	if [ -n "$$COMPOSER_CACHE_DIR" ]; then \
+		mkdir -p "$$COMPOSER_CACHE_DIR"; \
+		cache_vol="-v $$COMPOSER_CACHE_DIR:/root/.composer/cache"; \
+	fi; \
 	until $(COMPOSE) run --rm --no-deps \
 		-e COMPOSER_MEMORY_LIMIT=-1 \
 		-e COMPOSER_AUTH \
-		--entrypoint composer php install --no-interaction --no-dev; do \
+		-e COMPOSER_MAX_PARALLEL_HTTP=$${COMPOSER_MAX_PARALLEL_HTTP:-1} \
+		$$cache_vol \
+		--entrypoint composer php install --no-interaction --no-dev --prefer-install=auto; do \
 		n=$$((n+1)); \
-		if [ $$n -ge 5 ]; then echo "composer install failed after $$n attempts"; exit 1; fi; \
-		echo "composer install failed (attempt $$n/5), retrying..."; \
-		sleep 20; \
+		if [ $$n -ge 8 ]; then echo "composer install failed after $$n attempts"; exit 1; fi; \
+		sleep_s=$$((15 * n)); \
+		if [ $$sleep_s -gt 120 ]; then sleep_s=120; fi; \
+		echo "composer install failed (attempt $$n/8), retrying in $${sleep_s}s..."; \
+		sleep $$sleep_s; \
 	done
 	$(COMPOSE) up -d
 	@echo "Waiting for container to be ready..."

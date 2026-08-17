@@ -22,7 +22,19 @@ jobs:
       - name: Set up Docker Compose
         run: docker compose version
 
+      - name: Cache Composer packages for the demo
+        uses: actions/cache@v6
+        with:
+          path: /tmp/hot-reload-composer-cache
+          key: ${{ runner.os }}-demo-composer-${{ hashFiles('demo/symfony8/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-demo-composer-
+
       - name: Run demo smoke (REQ-TEST-011)
         env:
           COMPOSER_AUTH: '{"github-oauth":{"github.com":"${{ secrets.GITHUB_TOKEN }}"}}'
-        run: make demo-smoke
+          COMPOSER_CACHE_DIR: /tmp/hot-reload-composer-cache
+          COMPOSER_MAX_PARALLEL_HTTP: 1
+        run: |
+          mkdir -p "$COMPOSER_CACHE_DIR"
+          make demo-smoke

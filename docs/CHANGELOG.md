@@ -18,6 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- CI: GitHub token for Composer/`setup-php`, Composer cache on coverage and code-style jobs, matrix `max-parallel: 4`, and retries so GitHub 429/503 on action and zipball downloads do not fail the pipeline.
+- Demo smoke: GitHub Actions Composer cache, serialized downloads, `--prefer-install=auto` source fallback, and exponential backoff after GitHub zipball 429.
+
 ## [1.3.2] - 2026-08-17
 
 ### Fixed
