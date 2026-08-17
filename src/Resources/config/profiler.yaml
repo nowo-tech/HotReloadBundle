@@ -16,6 +16,6 @@ services:
         tags:
             -
                 name: data_collector
-                template: '@NowoHotReloadBundle/Collector/hot_reload.html.twig'
+                template: '@NowoHotReload/Collector/hot_reload.html.twig'
                 id: 'nowo_hot_reload'
                 priority: 250

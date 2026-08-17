@@ -2,9 +2,20 @@
 
 ## Table of contents
 
+- [From 1.2.0 → 1.2.1](#from-120--121)
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.2.0 → 1.2.1
+
+Fixes the Web Profiler template path (`@NowoHotReload/…`).
+
+```bash
+composer require nowo-tech/hot-reload-bundle:^1.2.1 --dev
+```
+
+No config changes.
 
 ## From 1.1.0 → 1.2.0
 
