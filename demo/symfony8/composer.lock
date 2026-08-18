@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "/var/hot-reload-bundle",
-                "reference": "c06233790f7cd3e5f2f67a8cf2b85a4c04c40543"
+                "reference": "8c65ae0f3b06bf06564cac08bedad395c9d2afb5"
             },
             "require": {
                 "php": ">=8.1 <8.6",
@@ -863,16 +863,16 @@
         },
         {
             "name": "symfony/config",
-            "version": "v8.1.4",
+            "version": "8.2.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "cb84364d9b47030c6979422d6911f9ea6603f5a2"
+                "reference": "e6b0200479a73640b5ba4dc8e3d642af67a6304b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/cb84364d9b47030c6979422d6911f9ea6603f5a2",
-                "reference": "cb84364d9b47030c6979422d6911f9ea6603f5a2",
+                "url": "https://api.github.com/repos/symfony/config/zipball/e6b0200479a73640b5ba4dc8e3d642af67a6304b",
+                "reference": "e6b0200479a73640b5ba4dc8e3d642af67a6304b",
                 "shasum": ""
             },
             "require": {
@@ -891,6 +891,7 @@
                 "symfony/service-contracts": "^2.5|^3",
                 "symfony/yaml": "^7.4|^8.0"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -917,7 +918,7 @@
             "description": "Helps you find, load, combine, autofill and validate configuration values of any kind",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/config/tree/v8.1.4"
+                "source": "https://github.com/symfony/config/tree/8.2"
             },
             "funding": [
                 {
@@ -937,7 +938,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-31T12:43:13+00:00"
+            "time": "2026-08-17T19:03:40+00:00"
         },
         {
             "name": "symfony/console",
@@ -1830,12 +1831,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/framework-bundle.git",
-                "reference": "79804d6937e10b3d274e6b4b240c52a2151bf4db"
+                "reference": "5f970921a0f6785c527e2b25f75e6d18c9a0c5c0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/framework-bundle/zipball/79804d6937e10b3d274e6b4b240c52a2151bf4db",
-                "reference": "79804d6937e10b3d274e6b4b240c52a2151bf4db",
+                "url": "https://api.github.com/repos/symfony/framework-bundle/zipball/5f970921a0f6785c527e2b25f75e6d18c9a0c5c0",
+                "reference": "5f970921a0f6785c527e2b25f75e6d18c9a0c5c0",
                 "shasum": ""
             },
             "require": {
@@ -1843,7 +1844,7 @@
                 "ext-xml": "*",
                 "php": ">=8.4.1",
                 "symfony/cache": "^8.2",
-                "symfony/config": "^7.4.4|^8.0.4",
+                "symfony/config": "^8.2",
                 "symfony/dependency-injection": "^8.1.2",
                 "symfony/deprecation-contracts": "^2.5|^3",
                 "symfony/error-handler": "^7.4|^8.0",
@@ -1967,7 +1968,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-18T06:37:58+00:00"
+            "time": "2026-08-18T07:22:50+00:00"
         },
         {
             "name": "symfony/http-client",
@@ -3329,12 +3330,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/security-bundle.git",
-                "reference": "dd14c8d16bc9420cdd9d372bd416b0866dc0e2f1"
+                "reference": "97c3469a9ce54b0c0f8f216d894546eddc9ff448"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/security-bundle/zipball/dd14c8d16bc9420cdd9d372bd416b0866dc0e2f1",
-                "reference": "dd14c8d16bc9420cdd9d372bd416b0866dc0e2f1",
+                "url": "https://api.github.com/repos/symfony/security-bundle/zipball/97c3469a9ce54b0c0f8f216d894546eddc9ff448",
+                "reference": "97c3469a9ce54b0c0f8f216d894546eddc9ff448",
                 "shasum": ""
             },
             "require": {
@@ -3342,7 +3343,7 @@
                 "ext-xml": "*",
                 "php": ">=8.4.1",
                 "symfony/clock": "^7.4|^8.0",
-                "symfony/config": "^7.4|^8.0",
+                "symfony/config": "^8.2",
                 "symfony/dependency-injection": "^7.4|^8.0",
                 "symfony/deprecation-contracts": "^2.5|^3",
                 "symfony/event-dispatcher": "^7.4|^8.0",
@@ -3427,7 +3428,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-18T06:37:58+00:00"
+            "time": "2026-08-18T07:22:50+00:00"
         },
         {
             "name": "symfony/security-core",

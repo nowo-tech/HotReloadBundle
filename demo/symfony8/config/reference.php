@@ -481,8 +481,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         enabled?: bool|Param, // Default: true
  *         max_host_connections?: int|Param, // The maximum number of connections to a single host.
  *         default_options?: array{
- *             headers?: array<string, mixed>,
  *             vars?: array<string, mixed>,
+ *             headers?: array<string, mixed>,
  *             max_redirects?: int|Param, // The maximum number of redirects to follow.
  *             http_version?: scalar|Param|null, // The default HTTP version, typically 1.1 or 2.0, leave to null for the best version.
  *             resolve?: array<string, scalar|Param|null>,
@@ -499,7 +499,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             local_cert?: scalar|Param|null, // A PEM formatted certificate file.
  *             local_pk?: scalar|Param|null, // A private key file.
  *             passphrase?: scalar|Param|null, // The passphrase used to encrypt the "local_pk" file.
- *             ciphers?: scalar|Param|null, // A list of TLS ciphers separated by colons, commas or spaces (e.g. "RC3-SHA:TLS13-AES-128-GCM-SHA256"...)
+ *             ciphers?: scalar|Param|null, // A list of TLS ciphers separated by colons, commas or spaces (e.g. "RC3-SHA:TLS13-AES-128-GCM-SHA256"...).
  *             peer_fingerprint?: array{ // Associative array: hashing algorithm => hash(es).
  *                 sha1?: mixed,
  *                 pin-sha256?: mixed,
@@ -537,6 +537,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             auth_bearer?: scalar|Param|null, // A token enabling HTTP Bearer authorization.
  *             auth_ntlm?: scalar|Param|null, // A "username:password" pair to use Microsoft NTLM authentication (requires the cURL extension).
  *             query?: array<string, scalar|Param|null>,
+ *             mock_response_factory?: scalar|Param|null, // `true` to always return empty 200 responses, `false` to disable mocking, or the id of the service to use to generate mock responses (invokable or iterable).
  *             headers?: array<string, mixed>,
  *             max_redirects?: int|Param, // The maximum number of redirects to follow.
  *             http_version?: scalar|Param|null, // The default HTTP version, typically 1.1 or 2.0, leave to null for the best version.
@@ -561,7 +562,6 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *                 md5?: mixed,
  *             },
  *             crypto_method?: scalar|Param|null, // The minimum version of TLS to accept; must be one of STREAM_CRYPTO_METHOD_TLSv*_CLIENT constants.
- *             mock_response_factory?: scalar|Param|null, // `true` to always return empty 200 responses, `false` to disable mocking, or the id of the service to use to generate mock responses (invokable or iterable).
  *             extra?: array<string, mixed>,
  *             rate_limiter?: scalar|Param|null, // Rate limiter name to use for throttling requests. // Default: null
  *             caching?: bool|array{ // Caching configuration.
