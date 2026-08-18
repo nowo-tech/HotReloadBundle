@@ -1,18 +1,34 @@
 # Usage
 
-This bundle injects FrankenPHP Hot Reload **client** assets into HTML. The **server** side must enable Mercure and `hot_reload` in the Caddyfile. Official docs: [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-reload/) · [dunglas/frankenphp-hot-reload](https://github.com/dunglas/frankenphp-hot-reload).
+This bundle injects FrankenPHP Hot Reload **client** assets into HTML. The **server** side must enable Mercure and `hot_reload` in the Caddyfile — start with **[Environment setup](ENVIRONMENT.md)** (checklist, Docker, `FRANKENPHP_HOT_RELOAD`, troubleshooting). Official docs: [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-reload/) · [dunglas/frankenphp-hot-reload](https://github.com/dunglas/frankenphp-hot-reload).
 
 **Dev only.** Do not enable `hot_reload` or this bundle in production. See [Security](SECURITY.md).
 
 ## Table of contents
 
+- [Diagnose setup](#diagnose-setup-nowohot-reloadcheck)
 - [Auto-inject (default)](#auto-inject-default)
 - [Twig manual inject](#twig-manual-inject)
-- [Caddyfile — classic (`php_server` + hot reload)](#caddyfile--classic-php_server--hot-reload)
-- [Caddyfile — worker mode + watch](#caddyfile--worker-mode--watch)
+- [Caddyfile](#caddyfile)
 - [Optional: explicit Mercure URL](#optional-explicit-mercure-url)
 - [Preserve toolbar / custom DOM](#preserve-toolbar--custom-dom)
 - [Overriding templates (REQ-TWIG-001)](#overriding-templates-req-twig-001)
+
+## Diagnose setup (`nowo:hot-reload:check`)
+
+The bundle validates FrankenPHP / Caddy / YAML setup in two places:
+
+```bash
+php bin/console nowo:hot-reload:check
+php bin/console nowo:hot-reload:check --caddyfile=docker/frankenphp/Caddyfile
+php bin/console nowo:hot-reload:check --json --strict
+```
+
+Each row is **pass / fail / warn / info / skip**, with a “what to do” line when something is missing (for example `php_server { hot_reload }`, `mercure { anonymous }`, `mercure_url`, or `{{ nowo_hot_reload_assets() }}`).
+
+`FRANKENPHP_HOT_RELOAD` is injected by FrankenPHP on **HTTP** requests only. A **warn** on that row from the CLI is expected. Confirm the same checklist on the Web Debug Toolbar **Hot Reload** profiler panel after loading an HTML page.
+
+Exit code `1` when any check **fails**. `--strict` also fails on warnings. How to fix each row: [Environment setup](ENVIRONMENT.md#troubleshooting).
 
 ## Auto-inject (default)
 
@@ -52,59 +68,18 @@ nowo_hot_reload:
 
 The Twig function returns the same HTML as auto-inject (or an empty string when the render gate fails).
 
-## Caddyfile — classic (`php_server` + hot reload)
+## Caddyfile
 
-```caddyfile
-{
-	frankenphp
-	order mercure after encode
-}
+Copy-paste classic and worker Caddyfiles, Docker rules, and `FRANKENPHP_HOT_RELOAD` behaviour are in **[Environment setup](ENVIRONMENT.md)**.
 
-:80 {
-	root * /app/public
-	encode zstd br gzip
+Minimum directives:
 
-	mercure {
-		anonymous
-	}
+- `order mercure after encode` (global options)
+- `mercure { anonymous }`
+- `php_server { hot_reload }`
+- Worker mode: `worker { file …; watch }`
 
-	php_server {
-		hot_reload
-	}
-}
-```
-
-FrankenPHP sets `FRANKENPHP_HOT_RELOAD` for PHP when `hot_reload` is enabled; the bundle reads that by default.
-
-## Caddyfile — worker mode + watch
-
-In worker mode, add a `worker` block with `watch` so file changes trigger reloads:
-
-```caddyfile
-{
-	frankenphp
-	order mercure after encode
-}
-
-:80 {
-	root * /app/public
-	encode zstd br gzip
-
-	mercure {
-		anonymous
-	}
-
-	php_server {
-		hot_reload
-		worker {
-			file ./public/index.php
-			watch
-		}
-	}
-}
-```
-
-Adjust `file` / `watch` paths to your project layout. See the [official Hot Reload guide](https://frankenphp.dev/docs/hot-reload/) for current directives.
+Do **not** put `FRANKENPHP_HOT_RELOAD` in `.env`. FrankenPHP sets it on HTTP requests when `hot_reload` is enabled.
 
 ## Optional: explicit Mercure URL
 

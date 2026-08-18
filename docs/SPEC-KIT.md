@@ -132,6 +132,7 @@ Repository root/
     ├── SPEC-DRIVEN-DEVELOPMENT.md   # Product behavior + REQ-* traceability
     ├── SPEC-KIT.md                  # This manual
     ├── USAGE.md                     # Integrator usage
+    ├── ENVIRONMENT.md               # Caddy / FrankenPHP / Docker setup
     └── CONFIGURATION.md             # Integrator configuration
 ```
 
@@ -153,7 +154,7 @@ flowchart TB
     subgraph docs [docs/]
         SDD[SPEC-DRIVEN-DEVELOPMENT.md]
         SK[SPEC-KIT.md]
-        USAGE[USAGE.md / CONFIGURATION.md]
+        USAGE[USAGE.md / ENVIRONMENT.md / CONFIGURATION.md]
     end
     subgraph speckit [Spec Kit artifacts]
         SPECIFY[.specify/]
@@ -177,7 +178,7 @@ When you change **product behavior**:
 
 1. Update `specs/001-baseline/spec.md` (or the relevant `00N-feature/` spec).
 2. Update `specs/001-baseline/code-inventory.md` if files were added or removed under `src/`.
-3. Update `docs/USAGE.md` / `docs/CONFIGURATION.md` when integrators must act.
+3. Update `docs/USAGE.md` / `docs/ENVIRONMENT.md` / `docs/CONFIGURATION.md` when integrators must act.
 4. Add or adjust **tests** — specs alone are not sufficient proof.
 
 ---
@@ -201,7 +202,7 @@ find src -type f ! -path '*/assets/dist/*' ! -name '*.test.ts' | wc -l
 
 The **Total production sources** row in `code-inventory.md` must match this count.
 
-In **HotReloadBundle**, the baseline inventory covers **12/12** production files under `src/` (plus root `NowoHotReloadBundle.php` in the inventory) — see [`specs/001-baseline/code-inventory.md`](../specs/001-baseline/code-inventory.md).
+In **HotReloadBundle**, the baseline inventory covers **17/17** production files under `src/` (plus root `NowoHotReloadBundle.php` in the inventory) — see [`specs/001-baseline/code-inventory.md`](../specs/001-baseline/code-inventory.md).
 
 ---
 
@@ -286,7 +287,7 @@ Before merging a PR that changes production code:
 - [ ] `specs/001-baseline/code-inventory.md` includes every new/changed production file under `src/`
 - [ ] `specs/001-baseline/spec.md` (or feature spec) describes behavior with `FR-*` / `SC-*` IDs
 - [ ] `docs/SPEC-DRIVEN-DEVELOPMENT.md` still accurate for user stories and scope
-- [ ] `docs/USAGE.md` / `docs/CONFIGURATION.md` updated if integrators are affected
+- [ ] `docs/USAGE.md` / `docs/ENVIRONMENT.md` / `docs/CONFIGURATION.md` updated if integrators are affected
 - [ ] Tests and static analysis pass (`composer qa`, etc.)
 - [ ] `.specify/memory/constitution.md` updated if principles changed
 

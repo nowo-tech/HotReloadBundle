@@ -6,12 +6,14 @@ namespace Nowo\HotReloadBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Twig\Extension\AbstractExtension;
 
+use function class_exists;
 use function is_string;
 
 /**
@@ -60,6 +62,10 @@ final class HotReloadExtension extends Extension
 
         if (interface_exists(DataCollectorInterface::class) && class_exists(AbstractExtension::class)) {
             $loader->load('profiler.yaml');
+        }
+
+        if (class_exists(Command::class)) {
+            $loader->load('commands.yaml');
         }
     }
 

@@ -22,7 +22,7 @@ HotReloadBundle injects FrankenPHP Hot Reload **client** scripts and a Mercure h
 - **Injected scripts** — Idiomorph (optional), frankenphp-hot-reload ESM, and a small preserve-selector helper, marked with `data-nowo-hot-reload`.
 - **Meta tag** — `frankenphp-hot-reload:url` with the Mercure hub URL from config or `FRANKENPHP_HOT_RELOAD`.
 - **Configuration** (`nowo_hot_reload.*`) and CDN script URLs in the host application.
-- **Server side** (outside this package) — Mercure `anonymous` and `php_server { hot_reload }` in the Caddyfile.
+- **Server side** (outside this package) — Mercure `anonymous` and `php_server { hot_reload }` in the Caddyfile. Setup: [ENVIRONMENT.md](ENVIRONMENT.md).
 
 ## Threats and mitigations
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Nowo\HotReloadBundle\DataCollector;
 
+use Nowo\HotReloadBundle\Diagnostics\HotReloadCheck;
+use Nowo\HotReloadBundle\Diagnostics\HotReloadDiagnostics;
 use Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber;
 use Nowo\HotReloadBundle\HotReloadAssets;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,6 +16,9 @@ use Throwable;
 
 use function is_array;
 use function is_string;
+use function strlen;
+use function strpos;
+use function substr;
 
 /**
  * Web Debug Toolbar / Profiler panel for FrankenPHP Hot Reload.
@@ -24,6 +29,9 @@ use function is_string;
 final class HotReloadDataCollector implements DataCollectorInterface, LateDataCollectorInterface
 {
     public const NAME = 'nowo_hot_reload';
+
+    /** Max characters for Mercure URL in the Web Debug Toolbar popover. */
+    public const MERCURE_URL_TOOLBAR_MAX = 40;
 
     /** @var array<string, mixed> */
     private array $data = [];
@@ -47,6 +55,7 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
         private readonly array $cspScriptSrcHosts,
         private readonly bool $requireFrankenphpEnv,
         private readonly bool $enabled,
+        private readonly HotReloadDiagnostics $diagnostics,
     ) {
     }
 
@@ -90,7 +99,12 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
             'csp_nonce_request_attribute' => $this->cspNonceRequestAttribute,
             'csp_augment_script_src'      => $this->cspAugmentScriptSrc,
             'csp_script_src_hosts'        => $this->cspScriptSrcHosts,
+            'checks'                      => [],
+            'diagnostic_status'           => HotReloadCheck::STATUS_INFO,
+            'diagnostic_summary'          => '',
         ];
+
+        $this->storeDiagnosticReport(false);
     }
 
     public function lateCollect(): void
@@ -99,9 +113,20 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
             $this->data['injected'] = $this->request->attributes->getBoolean(
                 HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED,
             );
+            $this->storeDiagnosticReport((bool) $this->data['injected']);
         }
 
         $this->request = null;
+    }
+
+    private function storeDiagnosticReport(bool $injected): void
+    {
+        $report                           = $this->diagnostics->evaluate($this->request, $injected);
+        $this->data['checks']             = $report->toArray()['checks'];
+        $this->data['diagnostic_status']  = $report->getOverallStatus();
+        $this->data['diagnostic_summary'] = $report->getSummary();
+        $this->data['should_render']      = $report->shouldRender();
+        $this->data['environment']        = $report->getEnvironment();
     }
 
     public function reset(): void
@@ -158,6 +183,14 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
         $url = $this->data['mercure_url'] ?? null;
 
         return is_string($url) && $url !== '' ? $url : null;
+    }
+
+    /**
+     * Truncated Mercure URL for the toolbar popover (full value stays in {@see getMercureUrl()} / title).
+     */
+    public function getMercureUrlShort(): ?string
+    {
+        return $this->shortenUrl($this->getMercureUrl(), self::MERCURE_URL_TOOLBAR_MAX);
     }
 
     public function getFrankenphpHotReloadEnv(): ?string
@@ -224,11 +257,81 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
         return (bool) ($this->data['require_frankenphp_env'] ?? false);
     }
 
+    public function getEnvironment(): string
+    {
+        return (string) ($this->data['environment'] ?? '');
+    }
+
+    public function getDiagnosticStatus(): string
+    {
+        $status = $this->data['diagnostic_status'] ?? HotReloadCheck::STATUS_INFO;
+
+        return is_string($status) ? $status : HotReloadCheck::STATUS_INFO;
+    }
+
+    public function getDiagnosticSummary(): string
+    {
+        return (string) ($this->data['diagnostic_summary'] ?? '');
+    }
+
+    /**
+     * @return list<array{id: string, label: string, status: string, detail: string, fix: string|null}>
+     */
+    public function getChecks(): array
+    {
+        $checks = $this->data['checks'] ?? [];
+        if (!is_array($checks)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($checks as $check) {
+            if (!is_array($check)) {
+                continue;
+            }
+            $out[] = HotReloadCheck::fromArray($check)->toArray();
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return list<array{id: string, label: string, status: string, detail: string, fix: string|null}>
+     */
+    public function getActionableChecks(): array
+    {
+        $out = [];
+        foreach ($this->getChecks() as $check) {
+            if ($check['status'] === HotReloadCheck::STATUS_FAIL || $check['status'] === HotReloadCheck::STATUS_WARN) {
+                $out[] = $check;
+            }
+        }
+
+        return $out;
+    }
+
     /**
      * @return array<string, mixed>
      */
     public function getData(): array
     {
         return $this->data;
+    }
+
+    private function shortenUrl(?string $url, int $maxLength): ?string
+    {
+        if ($url === null) {
+            return null;
+        }
+        if (strlen($url) <= $maxLength) {
+            return $url;
+        }
+
+        $queryPos = strpos($url, '?');
+        if ($queryPos !== false && $queryPos >= 8 && $queryPos < $maxLength - 3) {
+            return substr($url, 0, $queryPos + 1) . '...';
+        }
+
+        return substr($url, 0, $maxLength - 3) . '...';
     }
 }

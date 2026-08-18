@@ -21,3 +21,17 @@ services:
             $cspScriptSrcHosts: '%nowo.hot_reload.csp_script_src_hosts%'
         tags:
             - { name: kernel.event_subscriber }
+
+    Nowo\HotReloadBundle\Diagnostics\HotReloadDiagnostics:
+        arguments:
+            $assets: '@Nowo\HotReloadBundle\HotReloadAssets'
+            $enabled: '%nowo.hot_reload.enabled%'
+            $autoInject: '%nowo.hot_reload.auto_inject%'
+            $requireFrankenphpEnv: '%nowo.hot_reload.require_frankenphp_env%'
+            $allowProduction: '%nowo.hot_reload.allow_production%'
+            $mercureUrl: '%nowo.hot_reload.mercure_url%'
+            $environment: '%kernel.environment%'
+            $idiomorph: '%nowo.hot_reload.idiomorph%'
+            $cspNonceRequestAttribute: '%nowo.hot_reload.csp_nonce_request_attribute%'
+            $cspAugmentScriptSrc: '%nowo.hot_reload.csp_augment_script_src%'
+            $projectDir: '%kernel.project_dir%'

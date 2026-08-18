@@ -27,6 +27,8 @@ Assets are rendered only when **all** of the following hold:
 
 Injected markup is marked with `data-nowo-hot-reload` so the subscriber does not inject twice.
 
+How to open that gate in FrankenPHP / Caddy (Caddyfile, Docker, `FRANKENPHP_HOT_RELOAD`): [Environment setup](ENVIRONMENT.md).
+
 ## CSP
 
 See [CSP.md](CSP.md) for nonce + CDN / self-host guidance.
@@ -39,5 +41,5 @@ Performance implications (one HTML rewrite when the gate is open; zero body work
 
 ## Web Debug Toolbar
 
-When Twig is available, `HotReloadDataCollector` registers as profiler id `nowo_hot_reload`. No extra configuration is required. The panel reports whether assets were injected on the request (`lateCollect` reads `_nowo_hot_reload_injected`). Templates use `@NowoHotReloadBundle/...`; overrides live under `templates/bundles/NowoHotReloadBundle/` — see [USAGE.md](USAGE.md#overriding-templates-req-twig-001).
+When Twig is available, `HotReloadDataCollector` registers as profiler id `nowo_hot_reload`. No extra configuration is required. The panel reports whether assets were injected on the request (`lateCollect` reads `_nowo_hot_reload_injected`) and an **Environment checks** table (pass / fail / warn) with the same diagnostics as `php bin/console nowo:hot-reload:check`. How to interpret those checks and fix Caddy/env: [Environment setup](ENVIRONMENT.md#validate-the-setup). Templates use `@NowoHotReloadBundle/...`; overrides live under `templates/bundles/NowoHotReloadBundle/` — see [USAGE.md](USAGE.md#overriding-templates-req-twig-001).
 

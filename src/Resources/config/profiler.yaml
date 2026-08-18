@@ -13,6 +13,7 @@ services:
             $cspScriptSrcHosts: '%nowo.hot_reload.csp_script_src_hosts%'
             $requireFrankenphpEnv: '%nowo.hot_reload.require_frankenphp_env%'
             $enabled: '%nowo.hot_reload.enabled%'
+            $diagnostics: '@Nowo\HotReloadBundle\Diagnostics\HotReloadDiagnostics'
         tags:
             -
                 name: data_collector

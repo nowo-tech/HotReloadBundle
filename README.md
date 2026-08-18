@@ -19,8 +19,9 @@ Pair with `worker { …; watch }` in your Caddyfile.
 - **Auto-inject** — `HotReloadResponseSubscriber` inserts assets before `</head>` (else `</body>`) on HTML responses.
 - **Twig helper** — `{{ nowo_hot_reload_assets() }}` for manual layouts when `auto_inject` is off.
 - **Env-aware** — Renders only when `enabled` and (`mercure_url` or `FRANKENPHP_HOT_RELOAD` is set, or `require_frankenphp_env: false`).
+- **Doctor command** — `php bin/console nowo:hot-reload:check` lists what is configured vs missing (Caddy `mercure` / `hot_reload`, env gate, auto-inject). The same checklist is on the profiler panel.
 - **Idiomorph** — Optional DOM morphing instead of a full page reload (on by default).
-- **Web Debug Toolbar** — Profiler panel (`nowo_hot_reload`) with status, Mercure URL, and CSP/preserve settings.
+- **Web Debug Toolbar** — Profiler panel (`nowo_hot_reload`) with status, truncated Mercure URL (full value on hover), environment checks, and CSP/preserve settings.
 - **Preserve selectors** — Marks Symfony Web Debug Toolbar (`[id^="sfwdt"]`, `.sf-toolbar`, `.sf-minitoolbar`) with `data-frankenphp-hot-reload-preserve` (optional `MutationObserver`).
 - **CSP-aware** — Optional request-attribute nonce on the preserve boot script; can augment existing `Content-Security-Policy` `script-src` for jsDelivr (see [docs/CSP.md](docs/CSP.md)).
 
@@ -41,7 +42,24 @@ return [
 ];
 ```
 
-Server side: enable Mercure (`anonymous`) and `php_server { hot_reload }` in your Caddyfile. For worker mode, add `worker { file …; watch }`. See [Usage](docs/USAGE.md).
+Server side: enable Mercure (`anonymous`) and `php_server { hot_reload }` in your Caddyfile. For worker mode, add `worker { file …; watch }`. **Full environment guide:** [Configure the environment](docs/ENVIRONMENT.md).
+
+## Environment setup
+
+Hot Reload needs **FrankenPHP + Caddy**, not only Symfony YAML. `FRANKENPHP_HOT_RELOAD` is injected by FrankenPHP on **HTTP** requests — do not put it in `.env`.
+
+1. Register the bundle for `dev` / `test` only.
+2. Keep `nowo_hot_reload.enabled: true` and `auto_inject: true` (or call `{{ nowo_hot_reload_assets() }}`).
+3. Caddyfile: `order mercure after encode`, `mercure { anonymous }`, `php_server { hot_reload }` (worker: also `worker { …; watch }`).
+4. Recreate the FrankenPHP process/container after Caddy or Compose env changes.
+5. Validate:
+
+```bash
+php bin/console nowo:hot-reload:check
+php bin/console nowo:hot-reload:check --caddyfile=path/to/Caddyfile
+```
+
+Then load an HTML page and open the Web Debug Toolbar **Hot Reload** panel (same checklist). Step-by-step Caddyfile, Docker notes, and troubleshooting: [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 
 ## Requirements
 
@@ -107,6 +125,7 @@ make release-check
 ## Documentation
 
 - [Installation](docs/INSTALLATION.md)
+- [**Environment setup (Caddy / FrankenPHP)**](docs/ENVIRONMENT.md)
 - [Configuration](docs/CONFIGURATION.md)
 - [CSP](docs/CSP.md)
 - [Usage](docs/USAGE.md)

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.4.0] - 2026-08-18](#140---2026-08-18)
 - [[1.3.2] - 2026-08-17](#132---2026-08-17)
 - [[1.3.1] - 2026-08-17](#131---2026-08-17)
 - [[1.3.0] - 2026-08-17](#130---2026-08-17)
@@ -18,8 +19,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-08-18
+
+### Added
+
+- **`nowo:hot-reload:check`** — validates bundle config and the FrankenPHP environment (env gate, Mercure URL, Caddy `mercure` / `hot_reload` / worker `watch`, auto-inject, CSP). Prints pass/fail/warn with “what to do”. `--json` and `--strict` supported. CLI cannot see `FRANKENPHP_HOT_RELOAD` (HTTP-only); the same checklist is on the profiler panel.
+- **Profiler environment checks** — `HotReloadDataCollector` shows what is fulfilled vs missing, plus fixes, next to the existing runtime dump.
+- **Toolbar Mercure URL** — long hub URLs are truncated (`/.well-known/mercure?...`) with the full value in the hover `title`; the profiler panel wraps long URLs.
+- **Environment docs** — [docs/ENVIRONMENT.md](ENVIRONMENT.md) is the canonical Caddy / FrankenPHP / Docker / troubleshooting guide.
+
 ### Fixed
 
+- Demo: drop deprecated `framework.profiler.collect_serializer_data` (Symfony 8.1; removed in 9.0) from `web_profiler.yaml`.
+- Demo Caddyfiles: add `order mercure after encode` so Mercure is registered in the HTTP chain.
 - CI: GitHub token for Composer/`setup-php`, Composer cache on coverage and code-style jobs, matrix `max-parallel: 4`, and retries so GitHub 429/503 on action and zipball downloads do not fail the pipeline.
 - Demo smoke: GitHub Actions Composer cache, serialized downloads, `--prefer-install=auto` source fallback, and exponential backoff after GitHub zipball 429. Install includes dev bundles (`DebugBundle` / profiler) and skips auto-scripts during `composer install` so `APP_ENV=dev` can boot.
 
@@ -101,6 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documented as **development-only**; do not enable FrankenPHP `hot_reload` or register this bundle in production. See [SECURITY.md](SECURITY.md).
 
+[1.4.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.4.0
 [1.3.2]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.3.2
 [1.3.1]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.3.1
 [1.3.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.3.0
@@ -108,4 +121,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.0.0
-[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.3.2...HEAD
+[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.4.0...HEAD

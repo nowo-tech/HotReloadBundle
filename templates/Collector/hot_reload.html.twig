@@ -2,7 +2,7 @@
 
 {% block toolbar %}
     {% set status = collector.status %}
-    {% set status_color = status == 'active' ? 'green' : (status == 'ready' ? 'yellow' : '') %}
+    {% set status_color = status == 'active' ? 'green' : (status == 'ready' ? 'yellow' : (collector.diagnosticStatus == 'fail' ? 'red' : '')) %}
     {% set status_label = {
         'active': 'on',
         'ready': 'ready',
@@ -35,12 +35,24 @@
         {% if collector.mercureUrl %}
             <div class="sf-toolbar-info-piece">
                 <b>Mercure</b>
-                <span class="sf-toolbar-status sf-toolbar-status-{{ collector.injected ? 'green' : 'normal' }}">{{ collector.mercureUrl }}</span>
+                <span
+                    class="sf-toolbar-status sf-toolbar-status-{{ collector.injected ? 'green' : 'normal' }}"
+                    title="{{ collector.mercureUrl }}"
+                    style="display:inline-block;max-width:16rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;"
+                >{{ collector.mercureUrlShort }}</span>
             </div>
         {% endif %}
         <div class="sf-toolbar-info-piece">
             <b>Idiomorph</b>
             <span>{{ collector.idiomorph ? 'on' : 'off' }}</span>
+        </div>
+        <div class="sf-toolbar-info-piece">
+            <b>Checks</b>
+            <span
+                class="sf-toolbar-status sf-toolbar-status-{{ collector.diagnosticStatus == 'fail' ? 'red' : (collector.diagnosticStatus == 'warn' ? 'yellow' : 'green') }}"
+                title="{{ collector.diagnosticSummary }}"
+                style="display:inline-block;max-width:16rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;"
+            >{{ collector.diagnosticSummary }}</span>
         </div>
     {% endset %}
 
@@ -48,7 +60,7 @@
 {% endblock %}
 
 {% block menu %}
-    <span class="label{{ collector.status == 'active' ? '' : ' disabled' }}">
+    <span class="label{{ collector.status == 'active' and collector.diagnosticStatus != 'fail' ? '' : ' disabled' }}">
         <span class="icon">{{ source('@NowoHotReloadBundle/Icon/hot-reload.svg') }}</span>
         <strong>Hot Reload</strong>
         <span class="count">
@@ -78,9 +90,72 @@
             <span class="value">{{ collector.shouldRender ? 'yes' : 'no' }}</span>
             <span class="label">Render gate open</span>
         </div>
+        <div class="metric">
+            <span class="value">{{ collector.diagnosticStatus }}</span>
+            <span class="label">Checks</span>
+        </div>
     </div>
 
+    <h3>Environment checks</h3>
+    <p class="help">{{ collector.diagnosticSummary }}{% if collector.environment %} · kernel.environment=<code>{{ collector.environment }}</code>{% endif %}</p>
+    {% if collector.actionableChecks is not empty %}
+        <div class="empty">
+            <p><strong>What is missing / what to do</strong></p>
+            <ul>
+                {% for check in collector.actionableChecks %}
+                    <li>
+                        <span class="label status-{{ check.status == 'fail' ? 'error' : 'warning' }}">{{ check.status }}</span>
+                        <strong>{{ check.label }}</strong>
+                        — {{ check.fix|default(check.detail) }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    <table>
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Check</th>
+                <th>Detail</th>
+                <th>What to do</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for check in collector.checks %}
+                <tr>
+                    <td>
+                        {% set check_status_class = {
+                            'pass': 'success',
+                            'fail': 'error',
+                            'warn': 'warning',
+                            'info': '',
+                            'skip': ''
+                        }[check.status]|default('') %}
+                        <span class="label{{ check_status_class ? ' status-' ~ check_status_class : '' }}">{{ check.status }}</span>
+                    </td>
+                    <th>{{ check.label }}</th>
+                    <td class="nowo-hr-break">{{ check.detail }}</td>
+                    <td>
+                        {% if check.fix %}
+                            {{ check.fix }}
+                        {% else %}
+                            <em>—</em>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4"><em>No checks recorded for this profile.</em></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
     <h3>Runtime</h3>
+    <style>
+        .nowo-hr-break { overflow-wrap: anywhere; word-break: break-all; }
+    </style>
     <table>
         <thead>
             <tr>
@@ -89,6 +164,10 @@
             </tr>
         </thead>
         <tbody>
+            <tr>
+                <th>kernel.environment</th>
+                <td>{{ collector.environment|default('—') }}</td>
+            </tr>
             <tr>
                 <th>enabled</th>
                 <td>{{ collector.enabled ? 'true' : 'false' }}</td>
@@ -103,11 +182,11 @@
             </tr>
             <tr>
                 <th>FRANKENPHP_HOT_RELOAD</th>
-                <td>{{ collector.frankenphpHotReloadEnv|default('—') }}</td>
+                <td class="nowo-hr-break"><code title="{{ collector.frankenphpHotReloadEnv|default('') }}">{{ collector.frankenphpHotReloadEnv|default('—') }}</code></td>
             </tr>
             <tr>
                 <th>Resolved Mercure URL</th>
-                <td>{{ collector.mercureUrl|default('—') }}</td>
+                <td class="nowo-hr-break"><code title="{{ collector.mercureUrl|default('') }}">{{ collector.mercureUrl|default('—') }}</code></td>
             </tr>
         </tbody>
     </table>
@@ -127,11 +206,11 @@
             </tr>
             <tr>
                 <th>idiomorph_script_url</th>
-                <td><code>{{ collector.idiomorphScriptUrl }}</code></td>
+                <td class="nowo-hr-break"><code>{{ collector.idiomorphScriptUrl }}</code></td>
             </tr>
             <tr>
                 <th>hot_reload_script_url</th>
-                <td><code>{{ collector.hotReloadScriptUrl }}</code></td>
+                <td class="nowo-hr-break"><code>{{ collector.hotReloadScriptUrl }}</code></td>
             </tr>
             <tr>
                 <th>preserve_observe</th>
@@ -189,6 +268,8 @@
     </table>
 
     <p class="help">
-        See <code>docs/CSP.md</code> and <code>docs/USAGE.md</code> in the bundle for Caddyfile / Mercure setup.
+        CLI equivalent: <code>php bin/console nowo:hot-reload:check</code>.
+        Caddy / FrankenPHP setup: <code>docs/ENVIRONMENT.md</code>.
+        Also <code>docs/CSP.md</code> and <code>docs/USAGE.md</code>.
     </p>
 {% endblock %}

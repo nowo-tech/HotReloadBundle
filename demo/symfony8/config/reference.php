@@ -136,7 +136,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     http_method_override?: bool|Param, // Set true to enable support for the '_method' request parameter to determine the intended HTTP method on POST requests. // Default: false
  *     allowed_http_method_override?: null|list<string|Param>,
  *     trust_x_sendfile_type_header?: scalar|Param|null, // Set true to enable support for xsendfile in binary file responses. // Default: "%env(bool:default::SYMFONY_TRUST_X_SENDFILE_TYPE_HEADER)%"
- *     ide?: scalar|Param|null, // Default: "%env(default::SYMFONY_IDE)%"
+ *     ide?: scalar|Param|null, // Deprecated: Setting the "framework.ide.ide" configuration option is deprecated, use the "SYMFONY_IDE" env var instead. // Default: "%env(default::SYMFONY_IDE)%"
  *     test?: bool|Param,
  *     default_locale?: scalar|Param|null, // Default: "en"
  *     set_locale_from_accept_language?: bool|Param, // Whether to use the Accept-Language HTTP header to set the Request locale (only when the "_locale" request attribute is not passed). // Default: false
@@ -184,8 +184,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     fragments?: bool|array{ // Fragments configuration
  *         enabled?: bool|Param, // Default: false
- *         hinclude_default_template?: scalar|Param|null, // Default: null
+ *         hinclude_default_template?: scalar|Param|null, // Deprecated: Setting the "framework.fragments.hinclude_default_template.hinclude_default_template" configuration option is deprecated. It will be removed in version 9.0. // Default: null
  *         path?: scalar|Param|null, // Default: "/_fragment"
+ *     },
+ *     uri_signer?: array{ // URI signer configuration
+ *         expiration?: int|Param, // Default expiration of signed URIs, in seconds. // Default: null
  *     },
  *     profiler?: bool|array{ // Profiler configuration
  *         enabled?: bool|Param, // Default: false
@@ -297,6 +300,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         importmap_path?: scalar|Param|null, // The path of the importmap.php file. // Default: "%kernel.project_dir%/importmap.php"
  *         importmap_polyfill?: scalar|Param|null, // The importmap name that will be used to load the polyfill. Set to false to disable. // Default: "es-module-shims"
  *         importmap_script_attributes?: array<string, scalar|Param|null>,
+ *         importmap_integrity_algorithms?: list<"sha256"|"sha384"|"sha512"|Param>,
  *         vendor_dir?: scalar|Param|null, // The directory to store JavaScript vendors. // Default: "%kernel.project_dir%/assets/vendor"
  *         precompress?: bool|array{ // Precompress assets with Brotli, Zstandard and gzip.
  *             enabled?: bool|Param, // Default: false
@@ -322,7 +326,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *         providers?: array<string, array{ // Default: []
  *             dsn?: scalar|Param|null,
- *             domains?: list<scalar|Param|null>,
+ *             domains?: array<string, scalar|Param|null>,
  *             locales?: list<scalar|Param|null>,
  *         }>,
  *         globals?: array<string, Param|string|array{ // Default: []
@@ -386,9 +390,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     cache?: array{ // Cache configuration
  *         prefix_seed?: scalar|Param|null, // Used to namespace cache keys when using several apps with the same shared backend. // Default: "_%kernel.project_dir%.%kernel.container_class%"
- *         app?: scalar|Param|null, // App related cache pools configuration. // Default: "cache.adapter.filesystem"
+ *         app?: scalar|Param|null, // App related cache pools configuration. Cannot be combined with "default_provider". // Default: "cache.adapter.filesystem"
  *         system?: scalar|Param|null, // System related cache pools configuration. // Default: "cache.adapter.system"
  *         directory?: scalar|Param|null, // Default: "%kernel.share_dir%/pools/app"
+ *         default_provider?: scalar|Param|null, // DSN of the backend to use for "cache.app"; the adapter is deduced from it. Replaces "app", which cannot be set alongside it.
  *         default_psr6_provider?: scalar|Param|null,
  *         default_redis_provider?: scalar|Param|null, // Default: "redis://localhost"
  *         default_valkey_provider?: scalar|Param|null, // Default: "valkey://localhost"
@@ -420,7 +425,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     lock?: Param|bool|string|array{ // Lock configuration
  *         enabled?: bool|Param, // Default: false
- *         resources?: Param|string|array<string, Param|string|list<scalar|Param|null>>,
+ *         resources?: Param|string|array<string, Param|string|list<mixed>>,
  *     },
  *     semaphore?: Param|bool|string|array{ // Semaphore configuration
  *         enabled?: bool|Param, // Default: false
@@ -450,9 +455,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *                 jitter?: float|Param, // Randomness to apply to the delay (between 0 and 1). // Default: 0.1
  *             },
  *             rate_limiter?: scalar|Param|null, // Rate limiter name to use when processing messages. // Default: null
+ *             priority?: int|Param, // Order in which "messenger:consume --all" consumes this transport, higher comes first. // Default: 0
  *         }>,
  *         failure_transport?: scalar|Param|null, // Transport name to send failed messages to (after all retries have failed). // Default: null
  *         stop_worker_on_signals?: Param|int|string|list<scalar|Param|null>,
+ *         reject_redelivered_messages?: bool|Param, // Whether redeliveries should be rejected and retried through a new message instead of being handled directly. This mostly makes sense for AMQP, which redelivers messages that were neither acknowledged nor rejected. Disabling it avoids losing a message when the retry or the failure transport is unreachable, at the risk of a redelivery loop that blocks the queue. // Default: true
  *         default_bus?: scalar|Param|null, // Default: null
  *         buses?: array<string, array{ // Default: {"messenger.bus.default":{"default_middleware":{"enabled":true,"allow_no_handlers":false,"allow_no_senders":true},"middleware":[]}}
  *             default_middleware?: Param|bool|string|array{
@@ -483,6 +490,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             no_proxy?: scalar|Param|null, // A comma separated list of hosts that do not require a proxy to be reached.
  *             timeout?: float|Param, // The idle timeout, defaults to the "default_socket_timeout" ini parameter.
  *             max_duration?: float|Param, // The maximum execution time for the request+response as a whole.
+ *             max_connect_duration?: float|Param, // The maximum duration allowed for DNS + TCP + TLS connection; a value lower than or equal to 0 means unlimited.
  *             bindto?: scalar|Param|null, // A network interface name, IP address, a host name or a UNIX socket to bind to.
  *             verify_peer?: bool|Param, // Indicates if the peer should be verified in a TLS context.
  *             verify_host?: bool|Param, // Indicates if the host should exist as a certificate common name.
@@ -508,6 +516,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             },
  *             retry_failed?: bool|array{
  *                 enabled?: bool|Param, // Default: false
+ *                 base_uris?: Param|string|list<string|Param>,
  *                 retry_strategy?: scalar|Param|null, // service id to override the retry strategy. // Default: null
  *                 http_codes?: Param|int|string|array<string, array{ // Default: []
  *                     code?: int|Param,
@@ -536,6 +545,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             no_proxy?: scalar|Param|null, // A comma separated list of hosts that do not require a proxy to be reached.
  *             timeout?: float|Param, // The idle timeout, defaults to the "default_socket_timeout" ini parameter.
  *             max_duration?: float|Param, // The maximum execution time for the request+response as a whole.
+ *             max_connect_duration?: float|Param, // The maximum duration allowed for DNS + TCP + TLS connection; a value lower than or equal to 0 means unlimited.
  *             bindto?: scalar|Param|null, // A network interface name, IP address, a host name or a UNIX socket to bind to.
  *             verify_peer?: bool|Param, // Indicates if the peer should be verified in a TLS context.
  *             verify_host?: bool|Param, // Indicates if the host should exist as a certificate common name.
@@ -562,6 +572,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             },
  *             retry_failed?: bool|array{
  *                 enabled?: bool|Param, // Default: false
+ *                 base_uris?: Param|string|list<string|Param>,
  *                 retry_strategy?: scalar|Param|null, // service id to override the retry strategy. // Default: null
  *                 http_codes?: Param|int|string|array<string, array{ // Default: []
  *                     code?: int|Param,
@@ -579,7 +590,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         enabled?: bool|Param, // Default: false
  *         message_bus?: scalar|Param|null, // The message bus to use. Defaults to the default bus if the Messenger component is installed. // Default: null
  *         dsn?: scalar|Param|null, // Default: null
- *         transports?: array<string, scalar|Param|null>,
+ *         transports?: array<string, Param|string|array{ // Default: []
+ *             dsn?: scalar|Param|null,
+ *             rate_limiter?: scalar|Param|null, // Rate limiter name used to limit the number of messages sent through this transport; when the limit is exceeded, sending fails with a RateLimitExceededException. // Default: null
+ *         }>,
  *         envelope?: array{ // Mailer Envelope configuration
  *             sender?: scalar|Param|null,
  *             recipients?: Param|string|list<scalar|Param|null>,
@@ -683,8 +697,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         message_bus?: scalar|Param|null, // The message bus to use. // Default: "messenger.default_bus"
  *         event_header_name?: scalar|Param|null, // Default: "Webhook-Event"
  *         id_header_name?: scalar|Param|null, // Default: "Webhook-Id"
+ *         timestamp_header_name?: scalar|Param|null, // Default: "Webhook-Timestamp"
  *         signature_header_name?: scalar|Param|null, // Default: "Webhook-Signature"
  *         signing_algorithm?: scalar|Param|null, // Default: "sha256"
+ *         signature_format?: "legacy"|"standard"|"transitional"|Param, // The signature scheme to emit and to require: "legacy" (default) for Symfony's historical "<algo>=<hex>" over the event name, the id and the body; "standard" for the Standard Webhooks "v1,<base64>" over the id, the timestamp and the body, which moves the event name from the "Webhook-Event" header to the payload's "type" key; "transitional" for both at once, during a migration. // Default: "legacy"
+ *         timestamp_tolerance?: int|Param, // How far, in seconds, an incoming Standard Webhooks timestamp may be from the current time before the request is rejected as a replay. Set to 0 to accept any timestamp. Legacy signatures carry no timestamp and are never bounded. // Default: 300
  *         routing?: array<string, array{ // Default: []
  *             service?: scalar|Param|null,
  *             secret?: scalar|Param|null, // Default: ""
@@ -819,6 +836,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             parameter?: scalar|Param|null, // Default: "_switch_user"
  *             role?: scalar|Param|null, // Default: "ROLE_ALLOWED_TO_SWITCH"
  *             target_route?: scalar|Param|null, // Default: null
+ *             path?: scalar|Param|null, // Restrict user switching to this path (a path or route name). Declaring the route POST-only is up to the application. The parameter is no longer read from the request headers in this mode. // Default: null
+ *             enable_csrf?: bool|Param|null, // Default: null
+ *             csrf_token_id?: scalar|Param|null, // Default: "switch_user"
+ *             csrf_parameter?: scalar|Param|null, // Default: "_csrf_token"
+ *             csrf_token_manager?: scalar|Param|null,
  *         },
  *         required_badges?: list<scalar|Param|null>,
  *         custom_authenticators?: list<scalar|Param|null>,
@@ -862,7 +884,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *         form_login?: array{
  *             provider?: scalar|Param|null,
- *             remember_me?: bool|Param, // Default: true
+ *             remember_me?: bool|Param, // Deprecated: Setting the "security.firewalls..form_login.remember_me.remember_me" configuration option has no effect and is deprecated. It will be removed in Symfony 9.0. // Default: true
  *             success_handler?: scalar|Param|null,
  *             failure_handler?: scalar|Param|null,
  *             check_path?: scalar|Param|null, // Default: "/login_check"
@@ -885,7 +907,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *         form_login_ldap?: array{
  *             provider?: scalar|Param|null,
- *             remember_me?: bool|Param, // Default: true
+ *             remember_me?: bool|Param, // Deprecated: Setting the "security.firewalls..form_login_ldap.remember_me.remember_me" configuration option has no effect and is deprecated. It will be removed in Symfony 9.0. // Default: true
  *             success_handler?: scalar|Param|null,
  *             failure_handler?: scalar|Param|null,
  *             check_path?: scalar|Param|null, // Default: "/login_check"
@@ -910,10 +932,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             query_string?: scalar|Param|null,
  *             search_dn?: scalar|Param|null, // Default: ""
  *             search_password?: scalar|Param|null, // Default: ""
+ *             ldap_users_only?: bool|Param, // Only bind users of class "Symfony\Component\Ldap\Security\LdapUser" against the LDAP server, and leave any other user to the regular password checker. // Default: false
  *         },
  *         json_login?: array{
  *             provider?: scalar|Param|null,
- *             remember_me?: bool|Param, // Default: true
+ *             remember_me?: bool|Param, // Deprecated: Setting the "security.firewalls..json_login.remember_me.remember_me" configuration option has no effect and is deprecated. It will be removed in Symfony 9.0. // Default: true
  *             success_handler?: scalar|Param|null,
  *             failure_handler?: scalar|Param|null,
  *             check_path?: scalar|Param|null, // Default: "/login_check"
@@ -924,7 +947,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         },
  *         json_login_ldap?: array{
  *             provider?: scalar|Param|null,
- *             remember_me?: bool|Param, // Default: true
+ *             remember_me?: bool|Param, // Deprecated: Setting the "security.firewalls..json_login_ldap.remember_me.remember_me" configuration option has no effect and is deprecated. It will be removed in Symfony 9.0. // Default: true
  *             success_handler?: scalar|Param|null,
  *             failure_handler?: scalar|Param|null,
  *             check_path?: scalar|Param|null, // Default: "/login_check"
@@ -937,10 +960,11 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             query_string?: scalar|Param|null,
  *             search_dn?: scalar|Param|null, // Default: ""
  *             search_password?: scalar|Param|null, // Default: ""
+ *             ldap_users_only?: bool|Param, // Only bind users of class "Symfony\Component\Ldap\Security\LdapUser" against the LDAP server, and leave any other user to the regular password checker. // Default: false
  *         },
  *         access_token?: array{
  *             provider?: scalar|Param|null,
- *             remember_me?: bool|Param, // Default: true
+ *             remember_me?: bool|Param, // Deprecated: Setting the "security.firewalls..access_token.remember_me.remember_me" configuration option has no effect and is deprecated. It will be removed in Symfony 9.0. // Default: true
  *             success_handler?: scalar|Param|null,
  *             failure_handler?: scalar|Param|null,
  *             realm?: scalar|Param|null, // Default: null
@@ -976,6 +1000,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *                         algorithms?: list<scalar|Param|null>,
  *                         keyset?: scalar|Param|null, // JSON-encoded JWKSet used to decrypt the token (must contain a list of valid private keys).
  *                     },
+ *                     allowed_time_drift?: int|Param, // Allowed time drift in seconds for token validation (iat, nbf, exp claims). // Default: 0
  *                 },
  *                 cas?: array{
  *                     validation_url?: scalar|Param|null, // CAS server validation URL
@@ -997,6 +1022,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             query_string?: scalar|Param|null,
  *             search_dn?: scalar|Param|null, // Default: ""
  *             search_password?: scalar|Param|null, // Default: ""
+ *             ldap_users_only?: bool|Param, // Only bind users of class "Symfony\Component\Ldap\Security\LdapUser" against the LDAP server, and leave any other user to the regular password checker. // Default: false
  *         },
  *         remember_me?: array{
  *             secret?: scalar|Param|null, // Default: "%kernel.secret%"

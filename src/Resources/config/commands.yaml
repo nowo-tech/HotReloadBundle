@@ -1,0 +1,6 @@
+services:
+    Nowo\HotReloadBundle\Command\HotReloadCheckCommand:
+        arguments:
+            $diagnostics: '@Nowo\HotReloadBundle\Diagnostics\HotReloadDiagnostics'
+        tags:
+            - { name: console.command }

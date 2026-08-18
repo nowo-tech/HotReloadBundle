@@ -3,7 +3,7 @@
 In this repository, **spec-driven development** has three layers that stay in sync:
 
 1. **GitHub Spec Kit baseline** — [`specs/001-baseline/`](../specs/001-baseline/) ([`spec.md`](../specs/001-baseline/spec.md), [`code-inventory.md`](../specs/001-baseline/code-inventory.md)), initialized with [GitHub Spec Kit](https://github.com/github/spec-kit) (`.specify/`, **Cursor Agent** skills in `.cursor/skills/speckit-*`). The inventory maps **100%** of production code in `src/`. **How to install, initialize, and use Spec Kit:** [`SPEC-KIT.md`](SPEC-KIT.md).
-2. **Product behavior** — what **HotReloadBundle** guarantees to applications that integrate it (see [`USAGE.md`](USAGE.md), [`CONFIGURATION.md`](CONFIGURATION.md), [`INSTALLATION.md`](INSTALLATION.md)). **PHPUnit** and **PHPStan** enforce contracts in CI where applicable.
+2. **Product behavior** — what **HotReloadBundle** guarantees to applications that integrate it (see [`USAGE.md`](USAGE.md), [`ENVIRONMENT.md`](ENVIRONMENT.md), [`CONFIGURATION.md`](CONFIGURATION.md), [`INSTALLATION.md`](INSTALLATION.md)). **PHPUnit** and **PHPStan** enforce contracts in CI where applicable.
 3. **Traceability anchors** — stable **`REQ-*`** identifiers in Makefiles and demos (when present) so changes to scripts, ports, and demo workflows stay discoverable from issues and PRs.
 
 There is no separate executable spec language (for example Gherkin); Spec Kit specs, tests, and static analysis are the mechanical proof alongside this document.
@@ -33,8 +33,10 @@ The sections below state **behavior**; this subsection states **intent** in back
 | US-04 | **As a** developer using FrankenPHP, **I want** injection only when `FRANKENPHP_HOT_RELOAD` / `mercure_url` is available (unless `require_frankenphp_env` is false) **so that** non-FrankenPHP processes stay untouched. |
 | US-05 | **As a** maintainer, **I want** behavior changes covered by automated tests **so that** regressions are caught in CI. |
 | US-06 | **As a** contributor, **I want** `REQ-*` anchors on scripted flows **so that** PRs and issues cite the same identifiers as this document. |
+| US-07 | **As a** developer, **I want** `php bin/console nowo:hot-reload:check` **so that** I can see which FrankenPHP / Caddy / YAML pieces are present vs missing. |
+| US-08 | **As a** developer, **I want** the same environment checks on the Web Debug Toolbar **Hot Reload** panel **so that** I can diagnose live reload while browsing (including HTTP-only `FRANKENPHP_HOT_RELOAD`). |
 
-**Out of scope for these stories:** shipping Hot Reload in production; replacing FrankenPHP/Caddy server configuration; guaranteeing third-party CDN availability.
+**Out of scope for these stories:** shipping Hot Reload in production; writing FrankenPHP/Caddy server configuration (the check command inspects it); guaranteeing third-party CDN availability.
 
 ---
 
@@ -45,8 +47,9 @@ The sections below state **behavior**; this subsection states **intent** in back
 **In scope**
 
 - Documented integration (see root `README.md` and `docs/`).
-- Configuration and runtime behavior described in [`CONFIGURATION.md`](CONFIGURATION.md) and [`USAGE.md`](USAGE.md).
+- Configuration and runtime behavior described in [`CONFIGURATION.md`](CONFIGURATION.md), [`ENVIRONMENT.md`](ENVIRONMENT.md), and [`USAGE.md`](USAGE.md).
 - Auto-inject via `HotReloadResponseSubscriber` and Twig helper `nowo_hot_reload_assets()`.
+- Diagnostics: `nowo:hot-reload:check` and profiler **Environment checks** (see [`ENVIRONMENT.md`](ENVIRONMENT.md)).
 - Consumer-facing change notes in [`CHANGELOG.md`](CHANGELOG.md) and [`UPGRADING.md`](UPGRADING.md) when applicable.
 
 **Explicit non-goals**
@@ -82,7 +85,7 @@ When you change scripted behavior, **update the existing `REQ-*` comment** if th
 1. **Clarify behavior** in an issue or draft PR: acceptance criteria for the **product** and, if relevant, **Makefiles/demos** (`REQ-*`).
 2. **Implement** with tests and static analysis.
 3. **Anchor scripts and demos** when dev UX changes: add or adjust `REQ-*` comments and this table.
-4. **Ship integrator docs** when behavior or configuration changes: [`USAGE.md`](USAGE.md), [`CONFIGURATION.md`](CONFIGURATION.md), [`CHANGELOG.md`](CHANGELOG.md), and [`UPGRADING.md`](UPGRADING.md) when consumers must change code or config.
+4. **Ship integrator docs** when behavior or configuration changes: [`USAGE.md`](USAGE.md), [`ENVIRONMENT.md`](ENVIRONMENT.md), [`CONFIGURATION.md`](CONFIGURATION.md), [`CHANGELOG.md`](CHANGELOG.md), and [`UPGRADING.md`](UPGRADING.md) when consumers must change code or config.
 5. **Keep Spec Kit artifacts in sync** when production code under `src/` changes:
    - Update [`specs/001-baseline/spec.md`](../specs/001-baseline/spec.md) and [`code-inventory.md`](../specs/001-baseline/code-inventory.md).
    - Follow the maintainer checklist in [`SPEC-KIT.md`](SPEC-KIT.md).
@@ -125,6 +128,7 @@ In Cursor Agent, start a new feature with `/speckit-specify <description>`. For 
 - [`SPEC-KIT.md`](SPEC-KIT.md) — GitHub Spec Kit manual (install, structure, usage)
 - [`specs/001-baseline/spec.md`](../specs/001-baseline/spec.md)
 - [`USAGE.md`](USAGE.md)
+- [`ENVIRONMENT.md`](ENVIRONMENT.md)
 - [`CONFIGURATION.md`](CONFIGURATION.md)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md)
 - [`RELEASE.md`](RELEASE.md)

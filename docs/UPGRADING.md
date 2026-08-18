@@ -2,6 +2,7 @@
 
 ## Table of contents
 
+- [From 1.3.2 → 1.4.0](#from-132--140)
 - [From 1.3.1 → 1.3.2](#from-131--132)
 - [From 1.3.0 → 1.3.1](#from-130--131)
 - [From 1.2.1 → 1.3.0](#from-121--130)
@@ -9,6 +10,22 @@
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.3.2 → 1.4.0
+
+Adds a doctor command and profiler environment checks. No required config changes.
+
+```bash
+composer require nowo-tech/hot-reload-bundle:^1.4 --dev
+```
+
+### Checklist
+
+1. Run `php bin/console nowo:hot-reload:check` (optional `--caddyfile=…`, `--json`, `--strict`). A **warn** on `FRANKENPHP_HOT_RELOAD` in CLI is expected — that variable is HTTP-only; confirm it on the Web Debug Toolbar **Hot Reload** panel.
+2. The profiler panel now includes an **Environment checks** table (same diagnostics as the command). Long Mercure URLs are truncated in the toolbar; hover for the full value.
+3. Canonical Caddy / FrankenPHP / Docker setup: [Environment setup](ENVIRONMENT.md).
+4. Demo hosts that copied `web_profiler.yaml`: drop `framework.profiler.collect_serializer_data` (deprecated in Symfony 8.1, removed in 9.0). Use `profiler: true` in `dev`.
+5. No `nowo_hot_reload` YAML keys changed.
 
 ## From 1.3.1 → 1.3.2
 
@@ -103,8 +120,8 @@ composer require nowo-tech/hot-reload-bundle --dev
 
 1. Register the bundle for **`dev` / `test` only** (never `prod`).
 2. Add `config/packages/dev/nowo_hot_reload.yaml` (or rely on the Flex recipe).
-3. Enable Mercure (`anonymous`) and `php_server { hot_reload }` in the Caddyfile.
+3. Enable Mercure (`anonymous`) and `php_server { hot_reload }` in the Caddyfile (see [Environment setup](ENVIRONMENT.md)).
 4. In FrankenPHP **worker** mode, add `worker { file …; watch }` so PHP code changes reload the worker.
-5. Confirm `FRANKENPHP_HOT_RELOAD` is set (or configure `mercure_url`) and that HTML responses include `data-nowo-hot-reload`.
+5. Confirm `FRANKENPHP_HOT_RELOAD` on an **HTTP** page (not in `.env`) or configure `mercure_url`, then run `php bin/console nowo:hot-reload:check`.
 
-See [Installation](INSTALLATION.md), [Configuration](CONFIGURATION.md), and [Usage](USAGE.md).
+See [Installation](INSTALLATION.md), [Environment setup](ENVIRONMENT.md), [Configuration](CONFIGURATION.md), and [Usage](USAGE.md).
