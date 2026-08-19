@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.4.1] - 2026-08-19](#141---2026-08-19)
 - [[1.4.0] - 2026-08-18](#140---2026-08-18)
 - [[1.3.2] - 2026-08-17](#132---2026-08-17)
 - [[1.3.1] - 2026-08-17](#131---2026-08-17)
@@ -18,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.0.0] - 2026-08-17](#100---2026-08-17)
 
 ## [Unreleased]
+
+## [1.4.1] - 2026-08-19
+
+### Security
+
+- **CI:** run `composer audit --locked` after dependency install (REQ-SEC / P3).
+
+### Changed
+
+- **Demos:** sync Symfony 8 lock after v1.4.0.
 
 ## [1.4.0] - 2026-08-18
 
