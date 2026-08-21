@@ -127,6 +127,7 @@ make release-check
 - [Installation](docs/INSTALLATION.md)
 - [**Environment setup (Caddy / FrankenPHP)**](docs/ENVIRONMENT.md)
 - [Configuration](docs/CONFIGURATION.md)
+- [PSR evaluation (REQ-CS-007)](docs/PSR.md)
 - [CSP](docs/CSP.md)
 - [Usage](docs/USAGE.md)
 - [Contributing](docs/CONTRIBUTING.md)
