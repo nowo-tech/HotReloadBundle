@@ -2,6 +2,8 @@
 
 ## Table of contents
 
+
+- [From 1.4.1 to 1.4.2](#from-141-to-142)
 - [From 1.4.0 → 1.4.1](#from-140--141)
 - [From 1.3.2 → 1.4.0](#from-132--140)
 - [From 1.3.1 → 1.3.2](#from-131--132)
@@ -11,6 +13,22 @@
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.4.1 to 1.4.2
+
+No breaking changes. **No application upgrade steps.**
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
+
+## From 1.4.1 to 1.4.2
+
+No breaking changes. **No application upgrade steps.**
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
 
 ## From 1.4.0 → 1.4.1
 
