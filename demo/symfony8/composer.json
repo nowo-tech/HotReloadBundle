@@ -8,7 +8,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "nowo-tech/hot-reload-bundle": "@dev",
-        "nowo-tech/password-toggle-bundle": "^2.1.1",
+        "nowo-tech/password-toggle-bundle": "^2.1.4",
         "pentatrion/vite-bundle": "^8.2.4",
         "symfony/asset": "8.1.*",
         "symfony/console": "8.1.*",
