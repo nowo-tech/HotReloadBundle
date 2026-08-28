@@ -4,6 +4,8 @@ nowo_hot_reload:
     enabled: true
     auto_inject: true
         # client_mode: shared_worker  # cdn|visibility|shared_worker|always
+    # ignore_path_prefixes defaults to ['/_wdt', '/_profiler'] (WDT fragment safety).
+    # ignore_path_prefixes: []
     require_frankenphp_env: true
     allow_production: false
     idiomorph: true

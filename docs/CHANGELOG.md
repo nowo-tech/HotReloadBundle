@@ -23,6 +23,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.5.2] - 2026-08-29
+
+### Fixed
+
+- **Web Debug Toolbar:** auto-inject no longer writes hot-reload scripts into Symfony `/_wdt` (and `/_profiler`) HTML fragments. The WDT client `eval`s fragment scripts; the JSON config script previously caused `SyntaxError: Unexpected token ':'`.
+
+### Added
+
+- **`ignore_path_prefixes`** (default `['/_wdt', '/_profiler']`) — path prefixes skipped by `HotReloadResponseSubscriber`. Set to `[]` to disable path-based skipping. Listeners can still cancel inject via `HotReloadInjectEvent::setSnippet('')`.
+
+[1.5.2]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.5.2
+
 ## [1.5.1] - 2026-08-28
 
 ### Changed

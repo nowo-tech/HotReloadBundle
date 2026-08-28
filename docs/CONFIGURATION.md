@@ -6,6 +6,7 @@ All options live under `nowo_hot_reload`:
 | --- | --- | --- |
 | `enabled` | `true` | Master switch. When `false`, nothing is injected even if `FRANKENPHP_HOT_RELOAD` is set. |
 | `auto_inject` | `true` | When `true`, `HotReloadResponseSubscriber` injects assets into HTML responses. |
+| `ignore_path_prefixes` | `['/_wdt', '/_profiler']` | Request path prefixes that skip auto-inject (Symfony Web Debug Toolbar / profiler fragments). Set to `[]` to disable. |
 | `client_mode` | `cdn` | Mercure browser client: `cdn` (upstream ESM), `visibility` (SSE while tab visible), `shared_worker` (one SSE for all tabs), `always` (SSE per tab). |
 | `require_frankenphp_env` | `true` | When `true`, inject only if `mercure_url` is set or `$_SERVER['FRANKENPHP_HOT_RELOAD']` is present. When `false`, assets may render with an empty Mercure URL. |
 | `allow_production` | `false` | When `false`, `enabled: true` in the `prod` environment raises `InvalidConfigurationException`. |
@@ -37,6 +38,8 @@ See [CSP.md](CSP.md) for nonce + CDN / self-host guidance.
 ## HTML detection
 
 `HotReloadResponseSubscriber` treats a response as HTML when `Content-Type` contains `text/html` or `application/xhtml+xml`, **or** when `Content-Type` is missing/empty and the body starts with markup containing `<html`.
+
+By default it also **skips** paths under `ignore_path_prefixes` (`/_wdt`, `/_profiler`) so toolbar/profiler HTML fragments are not rewritten. The WDT client evals every `<script>` in those fragments; injecting the hot-reload JSON config script would throw `SyntaxError`. Set `ignore_path_prefixes: []` if you need injection on those paths.
 
 Performance implications (one HTML rewrite when the gate is open; zero body work when not) are described in [Performance](PERFORMANCE.md).
 

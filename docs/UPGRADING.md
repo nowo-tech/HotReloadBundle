@@ -3,6 +3,7 @@
 ## Table of contents
 
 
+- [From 1.5.1 to 1.5.2](#from-151-to-152)
 - [From 1.5.0 to 1.5.1](#from-150-to-151)
 - [From 1.4.2 to 1.5.0](#from-142-to-150)
 - [From 1.4.1 to 1.4.2](#from-141-to-142)
@@ -15,6 +16,20 @@
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.5.1 to 1.5.2
+
+Auto-inject skips Symfony WDT/profiler paths by default. **No required host changes.**
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
+
+### Notes
+
+1. New option `ignore_path_prefixes` defaults to `['/_wdt', '/_profiler']`.
+2. Host workarounds that clear the inject snippet on `/_wdt` are redundant and can be removed.
+3. To inject on those paths again: `ignore_path_prefixes: []`.
 
 ## From 1.5.0 to 1.5.1
 

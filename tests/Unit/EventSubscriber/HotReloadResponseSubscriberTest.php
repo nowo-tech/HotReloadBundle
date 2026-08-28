@@ -177,6 +177,61 @@ final class HotReloadResponseSubscriberTest extends TestCase
     }
 
     #[Test]
+    public function itSkipsInjectionWhenInjectEventClearsSnippet(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(HotReloadInjectEvent::class, static function (HotReloadInjectEvent $event): void {
+            $event->setSnippet('');
+        });
+
+        $html     = '<html><head></head><body>ok</body></html>';
+        $response = new Response($html, 200, ['Content-Type' => 'text/html']);
+        $event    = $this->createEvent($response);
+        $this->createSubscriber(eventDispatcher: $dispatcher)->onKernelResponse($event);
+
+        self::assertSame($html, $response->getContent());
+        self::assertFalse($event->getRequest()->attributes->getBoolean(HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED));
+    }
+
+    #[Test]
+    public function itSkipsWebDebugToolbarPathByDefault(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $html     = '<div id="sfwdt123">toolbar fragment</div>';
+        $response = new Response($html, 200, ['Content-Type' => 'text/html']);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response, path: '/_wdt/abcdef'));
+
+        self::assertSame($html, $response->getContent());
+    }
+
+    #[Test]
+    public function itSkipsProfilerPathByDefault(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $html     = '<html><head></head><body>profiler</body></html>';
+        $response = new Response($html, 200, ['Content-Type' => 'text/html']);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response, path: '/_profiler/abcdef'));
+
+        self::assertSame($html, $response->getContent());
+    }
+
+    #[Test]
+    public function itInjectsOnWdtPathWhenIgnorePrefixesEmpty(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, ['Content-Type' => 'text/html']);
+        $this->createSubscriber(ignorePathPrefixes: [])
+            ->onKernelResponse($this->createEvent($response, path: '/_wdt/abcdef'));
+
+        self::assertStringContainsString('frankenphp-hot-reload:url', (string) $response->getContent());
+    }
+
+    #[Test]
     public function itAugmentsExistingCspScriptSrc(): void
     {
         $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
@@ -235,7 +290,7 @@ final class HotReloadResponseSubscriberTest extends TestCase
             hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm',
             preserveSelectors: [],
         );
-        $subscriber = new HotReloadResponseSubscriber($assets, true, null, true, []);
+        $subscriber = new HotReloadResponseSubscriber($assets, true, null, true, [], []);
         $response   = new Response('<html><head></head><body>ok</body></html>', 200, [
             'Content-Type'            => 'text/html',
             'Content-Security-Policy' => "default-src 'self'",
@@ -259,7 +314,7 @@ final class HotReloadResponseSubscriberTest extends TestCase
             hotReloadScriptUrl: '/local/hot-reload.js',
             preserveSelectors: [],
         );
-        $subscriber = new HotReloadResponseSubscriber($assets, true, null, true, []);
+        $subscriber = new HotReloadResponseSubscriber($assets, true, null, true, [], []);
         $csp        = "script-src 'self'";
         $response   = new Response('<html><head></head><body>ok</body></html>', 200, [
             'Content-Type'            => 'text/html',
@@ -285,10 +340,14 @@ final class HotReloadResponseSubscriberTest extends TestCase
         self::assertSame($csp, $response->headers->get('Content-Security-Policy'));
     }
 
+    /**
+     * @param list<string> $ignorePathPrefixes
+     */
     private function createSubscriber(
         bool $autoInject = true,
         ?EventDispatcher $eventDispatcher = null,
         bool $cspAugmentScriptSrc = true,
+        array $ignorePathPrefixes = ['/_wdt', '/_profiler'],
     ): HotReloadResponseSubscriber {
         $assets = new HotReloadAssets(
             enabled: true,
@@ -306,16 +365,17 @@ final class HotReloadResponseSubscriberTest extends TestCase
             $eventDispatcher,
             $cspAugmentScriptSrc,
             ['https://cdn.jsdelivr.net'],
+            $ignorePathPrefixes,
         );
     }
 
-    private function createEvent(Response $response, bool $main = true): ResponseEvent
+    private function createEvent(Response $response, bool $main = true, string $path = '/'): ResponseEvent
     {
         $kernel = $this->createMock(KernelInterface::class);
 
         return new ResponseEvent(
             $kernel,
-            Request::create('/'),
+            Request::create($path),
             $main ? HttpKernelInterface::MAIN_REQUEST : HttpKernelInterface::SUB_REQUEST,
             $response,
         );

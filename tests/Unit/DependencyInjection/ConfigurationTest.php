@@ -23,6 +23,7 @@ final class ConfigurationTest extends TestCase
 
         self::assertTrue($config['enabled']);
         self::assertTrue($config['auto_inject']);
+        self::assertSame(Configuration::DEFAULT_IGNORE_PATH_PREFIXES, $config['ignore_path_prefixes']);
         self::assertSame('cdn', $config['client_mode']);
         self::assertTrue($config['require_frankenphp_env']);
         self::assertFalse($config['allow_production']);
@@ -44,6 +45,7 @@ final class ConfigurationTest extends TestCase
         $config    = $processor->processConfiguration(new Configuration(), [[
             'enabled'                     => false,
             'auto_inject'                 => false,
+            'ignore_path_prefixes'        => [],
             'client_mode'                 => 'shared_worker',
             'require_frankenphp_env'      => false,
             'allow_production'            => true,
@@ -58,6 +60,7 @@ final class ConfigurationTest extends TestCase
 
         self::assertFalse($config['enabled']);
         self::assertFalse($config['auto_inject']);
+        self::assertSame([], $config['ignore_path_prefixes']);
         self::assertSame('shared_worker', $config['client_mode']);
         self::assertFalse($config['require_frankenphp_env']);
         self::assertTrue($config['allow_production']);

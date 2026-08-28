@@ -30,6 +30,13 @@ final class Configuration implements ConfigurationInterface
     /** @var list<string> */
     public const DEFAULT_CSP_SCRIPT_SRC_HOSTS = ['https://cdn.jsdelivr.net'];
 
+    /**
+     * Path prefixes skipped by auto-inject (Symfony Web Debug Toolbar / profiler fragments).
+     *
+     * @var list<string>
+     */
+    public const DEFAULT_IGNORE_PATH_PREFIXES = ['/_wdt', '/_profiler'];
+
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder(self::ALIAS);
@@ -44,6 +51,11 @@ final class Configuration implements ConfigurationInterface
                 ->booleanNode('auto_inject')
                     ->info('When true, HotReloadResponseSubscriber injects assets into HTML responses.')
                     ->defaultTrue()
+                ->end()
+                ->arrayNode('ignore_path_prefixes')
+                    ->info('Request path prefixes that skip auto-inject (e.g. Symfony Web Debug Toolbar /_wdt fragments). Empty list disables path-based skipping.')
+                    ->scalarPrototype()->end()
+                    ->defaultValue(self::DEFAULT_IGNORE_PATH_PREFIXES)
                 ->end()
                 ->enumNode('client_mode')
                     ->values(['cdn', 'visibility', 'shared_worker', 'always'])

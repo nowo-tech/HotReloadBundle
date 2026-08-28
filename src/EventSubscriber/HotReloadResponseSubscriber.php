@@ -8,6 +8,7 @@ use Nowo\HotReloadBundle\Event\HotReloadInjectEvent;
 use Nowo\HotReloadBundle\HotReloadAssets;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -21,6 +22,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
 
     /**
      * @param list<string> $cspScriptSrcHosts
+     * @param list<string> $ignorePathPrefixes
      */
     public function __construct(
         private readonly HotReloadAssets $assets,
@@ -28,6 +30,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         private readonly ?EventDispatcherInterface $eventDispatcher = null,
         private readonly bool $cspAugmentScriptSrc = true,
         private readonly array $cspScriptSrcHosts = [],
+        private readonly array $ignorePathPrefixes = [],
     ) {
     }
 
@@ -41,6 +44,11 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (!$this->autoInject || !$event->isMainRequest() || !$this->assets->shouldRender()) {
+            return;
+        }
+
+        $request = $event->getRequest();
+        if ($this->shouldSkipRequest($request)) {
             return;
         }
 
@@ -64,9 +72,14 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         $snippet = $this->assets->renderHtml();
 
         if ($this->eventDispatcher instanceof EventDispatcherInterface) {
-            $injectEvent = new HotReloadInjectEvent($event->getRequest(), $response, $snippet);
+            $injectEvent = new HotReloadInjectEvent($request, $response, $snippet);
             $this->eventDispatcher->dispatch($injectEvent);
             $snippet = $injectEvent->getSnippet();
+        }
+
+        // Empty snippet = host listener cancelled injection (e.g. HotReloadInjectEvent::setSnippet('')).
+        if ($snippet === '') {
+            return;
         }
 
         if (preg_match('/<\/head>/i', $content) === 1) {
@@ -80,6 +93,26 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         $response->setContent($content);
         $event->getRequest()->attributes->set(self::REQUEST_ATTR_INJECTED, true);
         $this->augmentContentSecurityPolicy($response);
+    }
+
+    /**
+     * Skip Symfony Web Debug Toolbar / profiler HTML fragments.
+     *
+     * WDT evals every &lt;script&gt; in the fragment; injecting the hot-reload JSON
+     * config script causes SyntaxError: Unexpected token ':'.
+     *
+     * Set ignore_path_prefixes to [] to disable this skip.
+     */
+    private function shouldSkipRequest(Request $request): bool
+    {
+        $path = $request->getPathInfo();
+        foreach ($this->ignorePathPrefixes as $prefix) {
+            if ($prefix !== '' && str_starts_with($path, $prefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function isHtmlResponse(Response $response, string $content): bool

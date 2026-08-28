@@ -4,6 +4,8 @@
 nowo_hot_reload:
     enabled: true
     auto_inject: true
+    # Skip Symfony WDT / profiler HTML fragments (avoids WDT SyntaxError on eval).
+    # ignore_path_prefixes: []  # disable path-based skip
     require_frankenphp_env: true
     allow_production: false
     # mercure_url: null  # defaults to $_SERVER['FRANKENPHP_HOT_RELOAD']

@@ -33,6 +33,7 @@ final class HotReloadExtensionIntegrationTest extends TestCase
 
         self::assertTrue($container->getParameter('nowo.hot_reload.enabled'));
         self::assertSame('https://hub.test', $container->getParameter('nowo.hot_reload.mercure_url'));
+        self::assertSame(['/_wdt', '/_profiler'], $container->getParameter('nowo.hot_reload.ignore_path_prefixes'));
         self::assertTrue($container->hasDefinition(HotReloadAssets::class));
         self::assertTrue($container->hasDefinition(HotReloadResponseSubscriber::class));
         self::assertTrue($container->hasDefinition(HotReloadTwigExtension::class));

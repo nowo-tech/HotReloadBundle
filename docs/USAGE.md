@@ -39,7 +39,7 @@ With `auto_inject: true` and a successful render gate (`enabled` + Mercure URL /
 2. Else before `</body>`
 3. Else appends to the body
 
-It skips non-HTML responses, empty bodies, and pages that already contain `data-nowo-hot-reload`.
+It skips non-HTML responses, empty bodies, pages that already contain `data-nowo-hot-reload`, and paths matching `ignore_path_prefixes` (default `/_wdt` and `/_profiler`, so the Web Debug Toolbar fragment is not rewritten).
 
 Injected content (when Idiomorph is on):
 
