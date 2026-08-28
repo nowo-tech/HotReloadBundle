@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Nowo\HotReloadBundle\DataCollector;
 
+use Nowo\HotReloadBundle\Client\ClientMode;
+use Nowo\HotReloadBundle\Client\ClientModeGuide;
+use Nowo\HotReloadBundle\DependencyInjection\Configuration;
 use Nowo\HotReloadBundle\Diagnostics\HotReloadCheck;
 use Nowo\HotReloadBundle\Diagnostics\HotReloadDiagnostics;
 use Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber;
@@ -56,6 +59,7 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
         private readonly bool $requireFrankenphpEnv,
         private readonly bool $enabled,
         private readonly HotReloadDiagnostics $diagnostics,
+        private readonly string $clientMode = Configuration::DEFAULT_CLIENT_MODE,
     ) {
     }
 
@@ -102,6 +106,11 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
             'checks'                      => [],
             'diagnostic_status'           => HotReloadCheck::STATUS_INFO,
             'diagnostic_summary'          => '',
+            'client_mode'                 => ClientMode::tryFromConfig($this->clientMode)->value,
+            'client_mode_label'           => ClientMode::tryFromConfig($this->clientMode)->label(),
+            'approaches'                  => ClientModeGuide::getApproaches(),
+            'active_mode_requirements'    => ClientModeGuide::requirementsForMode(ClientMode::tryFromConfig($this->clientMode)),
+            'compare_table'               => ClientModeGuide::compareTableRows(),
         ];
 
         $this->storeDiagnosticReport(false);
@@ -308,6 +317,49 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
         }
 
         return $out;
+    }
+
+    public function getClientMode(): string
+    {
+        return (string) ($this->data['client_mode'] ?? Configuration::DEFAULT_CLIENT_MODE);
+    }
+
+    public function getClientModeLabel(): string
+    {
+        return (string) ($this->data['client_mode_label'] ?? '');
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getApproaches(): array
+    {
+        $approaches = $this->data['approaches'] ?? [];
+
+        return is_array($approaches) ? array_values($approaches) : [];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getActiveModeRequirements(): array
+    {
+        $reqs = $this->data['active_mode_requirements'] ?? [];
+        if (!is_array($reqs)) {
+            return [];
+        }
+
+        return array_values(array_map('strval', $reqs));
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getCompareTable(): array
+    {
+        $rows = $this->data['compare_table'] ?? [];
+
+        return is_array($rows) ? array_values($rows) : [];
     }
 
     /**

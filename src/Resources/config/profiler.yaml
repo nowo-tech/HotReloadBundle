@@ -14,6 +14,7 @@ services:
             $requireFrankenphpEnv: '%nowo.hot_reload.require_frankenphp_env%'
             $enabled: '%nowo.hot_reload.enabled%'
             $diagnostics: '@Nowo\HotReloadBundle\Diagnostics\HotReloadDiagnostics'
+            $clientMode: '%nowo.hot_reload.client_mode%'
         tags:
             -
                 name: data_collector

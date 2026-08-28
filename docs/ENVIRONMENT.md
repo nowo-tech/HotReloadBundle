@@ -228,3 +228,14 @@ Then open an HTML page with the Web Debug Toolbar:
 | Toolbar morphs away | Preserve selectors | Defaults cover `#sfwdt` / `.sf-toolbar`; see [Usage](USAGE.md#preserve-toolbar--custom-dom) |
 
 More usage detail (Twig, preserve, template overrides): [Usage](USAGE.md). Demo stack: [Demo (FrankenPHP)](DEMO-FRANKENPHP.md).
+
+## Multi-tab and HTTP/1.1
+
+Plain HTTP (no TLS) is typically **HTTP/1.1**. Many open tabs each holding a Mercure EventSource can exhaust the browser connection pool (~6 per origin).
+
+Mitigations (see `client_mode` in [CONFIGURATION.md](CONFIGURATION.md) / [USAGE.md](USAGE.md)):
+
+1. **`shared_worker`** (recommended) — one SSE for all tabs
+2. **`visibility`** — SSE only on the focused tab
+3. **HTTP/2** — enable local HTTPS so the browser multiplexes; then `cdn` / `always` are safer
+

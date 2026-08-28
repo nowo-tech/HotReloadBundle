@@ -6,6 +6,7 @@ All options live under `nowo_hot_reload`:
 | --- | --- | --- |
 | `enabled` | `true` | Master switch. When `false`, nothing is injected even if `FRANKENPHP_HOT_RELOAD` is set. |
 | `auto_inject` | `true` | When `true`, `HotReloadResponseSubscriber` injects assets into HTML responses. |
+| `client_mode` | `cdn` | Mercure browser client: `cdn` (upstream ESM), `visibility` (SSE while tab visible), `shared_worker` (one SSE for all tabs), `always` (SSE per tab). |
 | `require_frankenphp_env` | `true` | When `true`, inject only if `mercure_url` is set or `$_SERVER['FRANKENPHP_HOT_RELOAD']` is present. When `false`, assets may render with an empty Mercure URL. |
 | `allow_production` | `false` | When `false`, `enabled: true` in the `prod` environment raises `InvalidConfigurationException`. |
 | `mercure_url` | `null` | Optional Mercure hub URL. When `null`, uses `$_SERVER['FRANKENPHP_HOT_RELOAD']` when present. |

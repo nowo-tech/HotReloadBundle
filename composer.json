@@ -112,5 +112,10 @@
         "twig/twig": "Required for {{ nowo_hot_reload_assets() }} Twig helper",
         "symfony/flex": "For automatic recipe installation",
         "symfony/web-profiler-bundle": "For the Hot Reload Web Debug Toolbar / Profiler panel"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.5.x-dev"
+        }
     }
 }

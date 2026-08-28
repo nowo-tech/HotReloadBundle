@@ -41,6 +41,7 @@ final class HotReloadExtension extends Extension
 
         $container->setParameter('nowo.hot_reload.enabled', $config['enabled']);
         $container->setParameter('nowo.hot_reload.auto_inject', $config['auto_inject']);
+        $container->setParameter('nowo.hot_reload.client_mode', $config['client_mode']);
         $container->setParameter('nowo.hot_reload.require_frankenphp_env', $config['require_frankenphp_env']);
         $container->setParameter('nowo.hot_reload.allow_production', $config['allow_production']);
         $container->setParameter('nowo.hot_reload.mercure_url', $config['mercure_url']);

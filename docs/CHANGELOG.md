@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.5.0] - 2026-08-28](#150---2026-08-28)
+- [[1.4.2] - 2026-08-24](#142---2026-08-24)
 - [[1.4.1] - 2026-08-19](#141---2026-08-19)
 - [[1.4.0] - 2026-08-18](#140---2026-08-18)
 - [[1.3.2] - 2026-08-17](#132---2026-08-17)
@@ -20,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-08-28
+
+### Added
+
+- **`client_mode`** (`cdn` | `visibility` | `shared_worker` | `always`): multi-tab Mercure strategies. `shared_worker` keeps a single SSE for all tabs; `visibility` connects only on the focused tab.
+- Bundle-served client/worker at `/_nowo/hot-reload/client.js` and `/_nowo/hot-reload/shared-worker.js`.
+- Profiler **Multi-tab client modes (help)** table comparing approaches (including HTTP/2 infra) with requirements and diagnostics tied to the active mode / request protocol.
+
+### Changed
+
+- Diagnostics / `nowo:hot-reload:check` report `client_mode`, HTTP protocol, and mode-specific environment guidance.
 
 ## [1.4.2] - 2026-08-24
 
@@ -137,6 +150,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documented as **development-only**; do not enable FrankenPHP `hot_reload` or register this bundle in production. See [SECURITY.md](SECURITY.md).
 
+[1.5.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.5.0
+[1.4.2]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.4.2
+[1.4.1]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.4.1
 [1.4.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.4.0
 [1.3.2]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.3.2
 [1.3.1]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.3.1
@@ -145,4 +161,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.0.0
-[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.5.0...HEAD

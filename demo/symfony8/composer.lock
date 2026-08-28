@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "/var/hot-reload-bundle",
-                "reference": "2311313bca7d1c5a65f8322b4b95bae30fab9417"
+                "reference": "85429f04563e083f44056216cc08bac2f42013b6"
             },
             "require": {
                 "php": ">=8.1 <8.6",
@@ -41,6 +41,11 @@
                 "twig/twig": "Required for {{ nowo_hot_reload_assets() }} Twig helper"
             },
             "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.5.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Nowo\\HotReloadBundle\\": "src/"

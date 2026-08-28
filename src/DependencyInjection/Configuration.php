@@ -14,6 +14,12 @@ final class Configuration implements ConfigurationInterface
 {
     public const ALIAS = 'nowo_hot_reload';
 
+    public const ASSET_PATH_CLIENT = '/_nowo/hot-reload/client.js';
+
+    public const ASSET_PATH_SHARED_WORKER = '/_nowo/hot-reload/shared-worker.js';
+
+    public const DEFAULT_CLIENT_MODE = 'cdn';
+
     public const DEFAULT_IDIOMORPH_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4';
 
     public const DEFAULT_HOT_RELOAD_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm';
@@ -38,6 +44,11 @@ final class Configuration implements ConfigurationInterface
                 ->booleanNode('auto_inject')
                     ->info('When true, HotReloadResponseSubscriber injects assets into HTML responses.')
                     ->defaultTrue()
+                ->end()
+                ->enumNode('client_mode')
+                    ->values(['cdn', 'visibility', 'shared_worker', 'always'])
+                    ->defaultValue(self::DEFAULT_CLIENT_MODE)
+                    ->info('Browser Mercure client strategy: cdn (default ESM), visibility (SSE while tab visible), shared_worker (one SSE for all tabs), always (SSE per tab).')
                 ->end()
                 ->booleanNode('require_frankenphp_env')
                     ->info('When true (default), inject only if FRANKENPHP_HOT_RELOAD is set or mercure_url is configured.')

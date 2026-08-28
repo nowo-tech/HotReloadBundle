@@ -23,6 +23,7 @@ final class ConfigurationTest extends TestCase
 
         self::assertTrue($config['enabled']);
         self::assertTrue($config['auto_inject']);
+        self::assertSame('cdn', $config['client_mode']);
         self::assertTrue($config['require_frankenphp_env']);
         self::assertFalse($config['allow_production']);
         self::assertNull($config['mercure_url']);
@@ -43,6 +44,7 @@ final class ConfigurationTest extends TestCase
         $config    = $processor->processConfiguration(new Configuration(), [[
             'enabled'                     => false,
             'auto_inject'                 => false,
+            'client_mode'                 => 'shared_worker',
             'require_frankenphp_env'      => false,
             'allow_production'            => true,
             'mercure_url'                 => 'https://example.test/.well-known/mercure',
@@ -56,6 +58,7 @@ final class ConfigurationTest extends TestCase
 
         self::assertFalse($config['enabled']);
         self::assertFalse($config['auto_inject']);
+        self::assertSame('shared_worker', $config['client_mode']);
         self::assertFalse($config['require_frankenphp_env']);
         self::assertTrue($config['allow_production']);
         self::assertSame('https://example.test/.well-known/mercure', $config['mercure_url']);

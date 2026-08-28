@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace Nowo\HotReloadBundle\Diagnostics;
 
+use Nowo\HotReloadBundle\Client\ClientMode;
+use Nowo\HotReloadBundle\Client\ClientModeGuide;
+use Nowo\HotReloadBundle\DependencyInjection\Configuration;
 use Nowo\HotReloadBundle\HotReloadAssets;
 use Symfony\Component\HttpFoundation\Request;
 
 use function file_get_contents;
+use function implode;
 use function is_file;
 use function is_readable;
 use function is_string;
 use function preg_match;
 use function sprintf;
+use function stripos;
 use function trim;
 
 /**
@@ -32,6 +37,7 @@ final class HotReloadDiagnostics
         private readonly ?string $cspNonceRequestAttribute,
         private readonly bool $cspAugmentScriptSrc,
         private readonly ?string $projectDir = null,
+        private readonly string $clientMode = Configuration::DEFAULT_CLIENT_MODE,
     ) {
     }
 
@@ -42,6 +48,8 @@ final class HotReloadDiagnostics
         $configUrl     = $this->nonEmpty($this->mercureUrl);
         $resolvedUrl   = $this->assets->resolveMercureUrl() ?? $frankenphpEnv;
         $shouldRender  = $this->computeShouldRender($resolvedUrl);
+
+        $mode = ClientMode::tryFromConfig($this->clientMode);
 
         $checks = [
             $this->checkEnabled(),
@@ -54,6 +62,9 @@ final class HotReloadDiagnostics
             $this->checkInjected($httpContext, $injected, $shouldRender),
             $this->checkIdiomorph(),
             $this->checkCsp(),
+            $this->checkClientMode($mode),
+            $this->checkHttpProtocol($request, $mode),
+            $this->checkClientModeEnvironment($mode),
         ];
 
         foreach ($this->inspectCaddyfile($caddyfilePath) as $check) {
@@ -509,5 +520,124 @@ final class HotReloadDiagnostics
     private function nonEmpty(mixed $value): ?string
     {
         return is_string($value) && trim($value) !== '' ? $value : null;
+    }
+
+    private function checkClientMode(ClientMode $mode): HotReloadCheck
+    {
+        $requirements = ClientModeGuide::requirementsForMode($mode);
+        $detail       = sprintf('client_mode is "%s" (%s).', $mode->value, $mode->label());
+        if ($requirements !== []) {
+            $detail .= ' Requirements: ' . implode('; ', $requirements);
+        }
+
+        return new HotReloadCheck(
+            'client_mode',
+            'Client mode',
+            HotReloadCheck::STATUS_PASS,
+            $detail,
+        );
+    }
+
+    private function checkHttpProtocol(?Request $request, ClientMode $mode): HotReloadCheck
+    {
+        if (!$request instanceof Request) {
+            return new HotReloadCheck(
+                'http_protocol',
+                'HTTP protocol',
+                HotReloadCheck::STATUS_INFO,
+                'CLI has no request protocol. Confirm HTTP/1.1 vs HTTP/2 on the profiler after loading a page.',
+                'For many always-on SSE tabs without SharedWorker, serve the app over HTTPS so the browser can use HTTP/2 multiplexing.',
+            );
+        }
+
+        $protocol = (string) $request->server->get('SERVER_PROTOCOL', '');
+        $https    = $request->isSecure();
+        $isHttp2  = stripos($protocol, 'HTTP/2') !== false
+            || (bool) $request->server->get('HTTP2')
+            || $request->server->get('HTTP_VERSION') === '2';
+
+        if ($isHttp2) {
+            return new HotReloadCheck(
+                'http_protocol',
+                'HTTP protocol',
+                HotReloadCheck::STATUS_PASS,
+                sprintf(
+                    'Request protocol looks like HTTP/2 (%s, https=%s). Multiplexing allows multiple SSE streams safely.',
+                    $protocol !== '' ? $protocol : 'HTTP/2',
+                    $https ? 'yes' : 'no',
+                ),
+            );
+        }
+
+        $detail = sprintf(
+            'Request protocol is %s (https=%s). Browsers limit ~6 concurrent HTTP/1.1 connections per origin; each Mercure EventSource holds one slot.',
+            $protocol !== '' ? $protocol : 'HTTP/1.x',
+            $https ? 'yes' : 'no',
+        );
+
+        if ($mode === ClientMode::SharedWorker || $mode === ClientMode::Visibility) {
+            return new HotReloadCheck(
+                'http_protocol',
+                'HTTP protocol',
+                HotReloadCheck::STATUS_PASS,
+                $detail . ' Current client_mode is designed for HTTP/1.1 multi-tab use.',
+            );
+        }
+
+        if ($mode === ClientMode::Always) {
+            return new HotReloadCheck(
+                'http_protocol',
+                'HTTP protocol',
+                HotReloadCheck::STATUS_WARN,
+                $detail,
+                'Set nowo_hot_reload.client_mode: shared_worker (recommended), or enable local HTTPS/HTTP/2, or use visibility mode.',
+            );
+        }
+
+        // cdn (default): informational recommendation — do not fail overall status on HTTP/1.1 alone.
+        return new HotReloadCheck(
+            'http_protocol',
+            'HTTP protocol',
+            HotReloadCheck::STATUS_INFO,
+            $detail,
+            'For multi-tab admin on HTTP/1.1 set nowo_hot_reload.client_mode: shared_worker (or visibility), or enable local HTTPS/HTTP/2.',
+        );
+    }
+
+    private function checkClientModeEnvironment(ClientMode $mode): HotReloadCheck
+    {
+        return match ($mode) {
+            ClientMode::SharedWorker => new HotReloadCheck(
+                'client_mode_env',
+                'SharedWorker environment',
+                HotReloadCheck::STATUS_PASS,
+                sprintf(
+                    'SharedWorker script is served at %s; client at %s. One Mercure SSE is shared by all tabs. Hidden tabs queue morphs until focused. Requires browser SharedWorker support and CSP worker-src \'self\'.',
+                    Configuration::ASSET_PATH_SHARED_WORKER,
+                    Configuration::ASSET_PATH_CLIENT,
+                ),
+                'Open DevTools → Application → Shared workers and confirm the hot-reload worker is connected.',
+            ),
+            ClientMode::Visibility => new HotReloadCheck(
+                'client_mode_env',
+                'Visibility mode environment',
+                HotReloadCheck::STATUS_INFO,
+                'EventSource connects only while the tab is visible. Background tabs disconnect (no live morph until focused). Safe on HTTP/1.1 with many tabs.',
+            ),
+            ClientMode::Always => new HotReloadCheck(
+                'client_mode_env',
+                'Always-on mode environment',
+                HotReloadCheck::STATUS_WARN,
+                'Each open tab keeps a Mercure EventSource. On HTTP/1.1 this can stall navigation when many tabs are open.',
+                'Prefer client_mode: shared_worker, or serve over HTTP/2 (local TLS).',
+            ),
+            ClientMode::Cdn => new HotReloadCheck(
+                'client_mode_env',
+                'CDN mode environment',
+                HotReloadCheck::STATUS_INFO,
+                'Uses the upstream frankenphp-hot-reload ESM module (one EventSource per tab). Same HTTP/1.1 multi-tab limits as always mode.',
+                'For multi-tab admin on HTTP/1.1 set nowo_hot_reload.client_mode: shared_worker.',
+            ),
+        };
     }
 }

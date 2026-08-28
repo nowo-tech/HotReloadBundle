@@ -126,7 +126,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $updated = $this->mergeScriptSrcHosts($csp, $hosts);
+        $updated = $this->mergeScriptSrcHosts($csp, array_values($hosts));
         if ($updated !== $csp) {
             $response->headers->set('Content-Security-Policy', $updated);
         }

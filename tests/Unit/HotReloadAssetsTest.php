@@ -194,6 +194,32 @@ final class HotReloadAssetsTest extends TestCase
         self::assertSame([], $empty->getCspScriptSrcHostsHint());
     }
 
+    #[Test]
+    public function itRendersSharedWorkerClientWithoutCdnModule(): void
+    {
+        $assets = $this->createAssets(mercureUrl: 'https://hub.test', clientMode: 'shared_worker');
+        $html   = $assets->renderHtml();
+
+        self::assertStringContainsString('id="nowo-hot-reload-config"', $html);
+        self::assertStringContainsString('"mode":"shared_worker"', $html);
+        self::assertStringContainsString('/_nowo/hot-reload/client.js', $html);
+        self::assertStringContainsString('/_nowo/hot-reload/shared-worker.js', $html);
+        self::assertStringNotContainsString('frankenphp-hot-reload@1.0.1/+esm', $html);
+        self::assertStringNotContainsString('type="module"', $html);
+        self::assertSame('shared_worker', $assets->getClientMode()->value);
+    }
+
+    #[Test]
+    public function itKeepsCdnModuleForDefaultMode(): void
+    {
+        $assets = $this->createAssets(mercureUrl: 'https://hub.test', clientMode: 'cdn');
+        $html   = $assets->renderHtml();
+
+        self::assertStringContainsString('frankenphp-hot-reload@1.0.1/+esm', $html);
+        self::assertStringContainsString('type="module"', $html);
+        self::assertStringNotContainsString('id="nowo-hot-reload-config"', $html);
+    }
+
     /**
      * @param list<string> $preserveSelectors
      */
@@ -206,6 +232,7 @@ final class HotReloadAssetsTest extends TestCase
         bool $preserveObserve = true,
         ?string $cspNonceRequestAttribute = null,
         ?RequestStack $requestStack = null,
+        string $clientMode = 'cdn',
     ): HotReloadAssets {
         return new HotReloadAssets(
             enabled: $enabled,
@@ -218,6 +245,7 @@ final class HotReloadAssetsTest extends TestCase
             preserveObserve: $preserveObserve,
             cspNonceRequestAttribute: $cspNonceRequestAttribute,
             requestStack: $requestStack,
+            clientMode: $clientMode,
         );
     }
 }

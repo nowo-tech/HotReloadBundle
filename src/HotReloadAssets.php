@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Nowo\HotReloadBundle;
 
+use Nowo\HotReloadBundle\Client\ClientMode;
+use Nowo\HotReloadBundle\DependencyInjection\Configuration;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -44,7 +46,13 @@ final class HotReloadAssets
         private readonly bool $preserveObserve = true,
         private readonly ?string $cspNonceRequestAttribute = null,
         private readonly ?RequestStack $requestStack = null,
+        private readonly string $clientMode = Configuration::DEFAULT_CLIENT_MODE,
     ) {
+    }
+
+    public function getClientMode(): ClientMode
+    {
+        return ClientMode::tryFromConfig($this->clientMode);
     }
 
     /**
@@ -94,6 +102,7 @@ final class HotReloadAssets
         $escapedUrl = htmlspecialchars($url, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $marker     = self::MARKER;
         $nonce      = $this->resolveCspNonce($cspNonce);
+        $mode       = $this->getClientMode();
 
         $parts = [
             sprintf('<meta name="frankenphp-hot-reload:url" content="%s" %s>', $escapedUrl, $marker),
@@ -104,11 +113,29 @@ final class HotReloadAssets
             $parts[]      = sprintf('<script src="%s" %s></script>', $idiomorphUrl, $marker);
         }
 
-        $hotReloadUrl = htmlspecialchars($this->hotReloadScriptUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-        $parts[]      = sprintf('<script src="%s" type="module" %s></script>', $hotReloadUrl, $marker);
+        if ($mode->isBundleClient()) {
+            $config = [
+                'mode'              => $mode->value,
+                'workerUrl'         => Configuration::ASSET_PATH_SHARED_WORKER,
+                'idiomorphUrl'      => $this->idiomorphScriptUrl,
+                'preserveSelectors' => $this->preserveSelectors,
+                'preserveObserve'   => $this->preserveObserve,
+            ];
+            $json    = json_encode($config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $parts[] = sprintf(
+                '<script type="application/json" id="nowo-hot-reload-config" %s>%s</script>',
+                $marker,
+                $json,
+            );
+            $clientSrc = htmlspecialchars(Configuration::ASSET_PATH_CLIENT, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $parts[]   = sprintf('<script src="%s" %s></script>', $clientSrc, $marker);
+        } else {
+            $hotReloadUrl = htmlspecialchars($this->hotReloadScriptUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+            $parts[]      = sprintf('<script src="%s" type="module" %s></script>', $hotReloadUrl, $marker);
 
-        if ($this->preserveSelectors !== []) {
-            $parts[] = $this->buildPreserveScript($nonce);
+            if ($this->preserveSelectors !== []) {
+                $parts[] = $this->buildPreserveScript($nonce);
+            }
         }
 
         return implode("\n", $parts) . "\n";
@@ -120,7 +147,11 @@ final class HotReloadAssets
     public function getCspScriptSrcHostsHint(): array
     {
         $hosts = [];
-        foreach ([$this->idiomorphScriptUrl, $this->hotReloadScriptUrl] as $scriptUrl) {
+        $urls  = [$this->idiomorphScriptUrl];
+        if (!$this->getClientMode()->isBundleClient()) {
+            $urls[] = $this->hotReloadScriptUrl;
+        }
+        foreach ($urls as $scriptUrl) {
             $origin = $this->originOf($scriptUrl);
             if ($origin !== null && !in_array($origin, $hosts, true)) {
                 $hosts[] = $origin;

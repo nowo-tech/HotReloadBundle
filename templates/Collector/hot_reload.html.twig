@@ -201,6 +201,10 @@
         </thead>
         <tbody>
             <tr>
+                <th>client_mode</th>
+                <td><code>{{ collector.clientMode }}</code> — {{ collector.clientModeLabel }}</td>
+            </tr>
+            <tr>
                 <th>idiomorph</th>
                 <td>{{ collector.idiomorph ? 'true' : 'false' }}</td>
             </tr>
@@ -266,6 +270,54 @@
             </tr>
         </tbody>
     </table>
+
+
+    <h3>Multi-tab client modes (help)</h3>
+    <p>
+        Current mode: <strong><code>{{ collector.clientMode }}</code></strong> ({{ collector.clientModeLabel }}).
+        Change with <code>nowo_hot_reload.client_mode</code> in <code>config/packages/dev/nowo_hot_reload.yaml</code>.
+        Active requirements:
+    </p>
+    <ul>
+        {% for req in collector.activeModeRequirements %}
+            <li>{{ req }}</li>
+        {% else %}
+            <li><em>None listed</em></li>
+        {% endfor %}
+    </ul>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Approach</th>
+                <th>Multi-tab live</th>
+                <th>No slowdown</th>
+                <th>Effort</th>
+                <th>What you need</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in collector.compareTable %}
+                <tr{% if row.id == collector.clientMode or (row.id == 'http2' and collector.clientMode in ['cdn', 'always']) %} class="status-{{ collector.diagnosticStatus }}"{% endif %}>
+                    <th>
+                        {{ row.title }}
+                        {% if row.id == collector.clientMode %}<span class="label status-success">active</span>{% endif %}
+                        {% if row.id == 'http2' %}<span class="label">infra</span>{% endif %}
+                    </th>
+                    <td>{{ row.multi_tab_live }}</td>
+                    <td>{{ row.no_slowdown }}</td>
+                    <td>{{ row.effort }}</td>
+                    <td>{{ row.requirements }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% for approach in collector.approaches %}
+        <h4 id="nowo-hr-approach-{{ approach.id }}">{{ approach.title }}</h4>
+        <p>{{ approach.description }}</p>
+        <p><em>When to use:</em> {{ approach.when_to_use }}</p>
+    {% endfor %}
 
     <p class="help">
         CLI equivalent: <code>php bin/console nowo:hot-reload:check</code>.

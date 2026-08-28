@@ -11,6 +11,7 @@ services:
             $preserveObserve: '%nowo.hot_reload.preserve_observe%'
             $cspNonceRequestAttribute: '%nowo.hot_reload.csp_nonce_request_attribute%'
             $requestStack: '@?request_stack'
+            $clientMode: '%nowo.hot_reload.client_mode%'
 
     Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber:
         arguments:
@@ -35,3 +36,8 @@ services:
             $cspNonceRequestAttribute: '%nowo.hot_reload.csp_nonce_request_attribute%'
             $cspAugmentScriptSrc: '%nowo.hot_reload.csp_augment_script_src%'
             $projectDir: '%kernel.project_dir%'
+            $clientMode: '%nowo.hot_reload.client_mode%'
+
+    Nowo\HotReloadBundle\EventSubscriber\HotReloadAssetSubscriber:
+        tags:
+            - { name: kernel.event_subscriber }

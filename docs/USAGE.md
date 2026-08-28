@@ -8,6 +8,7 @@ This bundle injects FrankenPHP Hot Reload **client** assets into HTML. The **ser
 
 - [Diagnose setup](#diagnose-setup-nowohot-reloadcheck)
 - [Auto-inject (default)](#auto-inject-default)
+- [Multi-tab client modes](#multi-tab-client-modes)
 - [Twig manual inject](#twig-manual-inject)
 - [Caddyfile](#caddyfile)
 - [Optional: explicit Mercure URL](#optional-explicit-mercure-url)
@@ -46,6 +47,32 @@ Injected content (when Idiomorph is on):
 - Idiomorph `<script>`
 - frankenphp-hot-reload `<script type="module">`
 - Optional preserve boot script for `preserve_selectors`
+
+
+## Multi-tab client modes
+
+Browsers limit ~6 concurrent **HTTP/1.1** connections per origin. Each Mercure `EventSource` holds one slot, so many admin tabs can stall navigation.
+
+Set `nowo_hot_reload.client_mode`:
+
+| Mode | Multi-tab | Notes |
+| --- | --- | --- |
+| `cdn` (default) | Risky on HTTP/1.1 | Upstream frankenphp-hot-reload ESM (BC default) |
+| `visibility` | Safe | SSE only while the tab is visible |
+| `shared_worker` | **Recommended** | One SharedWorker SSE shared by all tabs; hidden tabs queue morphs |
+| `always` | Risky on HTTP/1.1 | SSE always open per tab |
+
+HTTP/2 (local TLS) is an **infrastructure** alternative that multiplexes streams so `cdn`/`always` stay viable — it is not a `client_mode` value. The Web Debug Toolbar **Hot Reload** panel includes a comparison table and validates the active mode against the request protocol.
+
+```yaml
+# config/packages/dev/nowo_hot_reload.yaml
+when@dev:
+    nowo_hot_reload:
+        enabled: true
+        client_mode: shared_worker
+```
+
+Bundle client / worker scripts are served at `/_nowo/hot-reload/client.js` and `/_nowo/hot-reload/shared-worker.js` (same origin; CSP `worker-src 'self'`).
 
 ## Twig manual inject
 
