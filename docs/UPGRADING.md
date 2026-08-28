@@ -27,7 +27,7 @@ composer require nowo-tech/hot-reload-bundle:^1.5 --dev
 
 1. For HTTP/1.1 multi-tab admin, set `nowo_hot_reload.client_mode: shared_worker` (or `visibility`).
 2. Ensure CSP allows `worker-src 'self'` when using `shared_worker`.
-3. Open the Web Debug Toolbar **Hot Reload** panel → **Multi-tab client modes (help)** to compare approaches.
+3. Open the Web Debug Toolbar **Hot Reload** panel → **Help** tab to compare multi-tab approaches.
 4. Run `php bin/console nowo:hot-reload:check`.
 
 ## From 1.4.1 to 1.4.2

@@ -203,7 +203,7 @@ The command auto-detects `Caddyfile`, `docker/frankenphp/Caddyfile`, and `Caddyf
 Then open an HTML page with the Web Debug Toolbar:
 
 1. Toolbar **Hot Reload** should be **on** (green) when assets were injected.
-2. Panel **Environment checks** lists the same rows as the command.
+2. Panel **Environment checks** tab lists the same rows as the command.
 3. Long Mercure URLs are truncated in the toolbar (`/.well-known/mercure?...`); hover for the full value.
 
 ## Confirm it works in the browser

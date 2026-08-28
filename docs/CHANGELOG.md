@@ -22,6 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Profiler panel uses Symfony `sf-tabs`: **Environment checks**, **Runtime**, **Client assets**, **CSP**, and **Help** (multi-tab modes comparison). Environment checks tab shows a badge when fail/warn rows exist.
+
 ## [1.5.0] - 2026-08-28
 
 ### Added

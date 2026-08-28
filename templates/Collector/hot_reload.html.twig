@@ -96,232 +96,260 @@
         </div>
     </div>
 
-    <h3>Environment checks</h3>
-    <p class="help">{{ collector.diagnosticSummary }}{% if collector.environment %} · kernel.environment=<code>{{ collector.environment }}</code>{% endif %}</p>
-    {% if collector.actionableChecks is not empty %}
-        <div class="empty">
-            <p><strong>What is missing / what to do</strong></p>
-            <ul>
-                {% for check in collector.actionableChecks %}
-                    <li>
-                        <span class="label status-{{ check.status == 'fail' ? 'error' : 'warning' }}">{{ check.status }}</span>
-                        <strong>{{ check.label }}</strong>
-                        — {{ check.fix|default(check.detail) }}
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-    <table>
-        <thead>
-            <tr>
-                <th>Status</th>
-                <th>Check</th>
-                <th>Detail</th>
-                <th>What to do</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for check in collector.checks %}
-                <tr>
-                    <td>
-                        {% set check_status_class = {
-                            'pass': 'success',
-                            'fail': 'error',
-                            'warn': 'warning',
-                            'info': '',
-                            'skip': ''
-                        }[check.status]|default('') %}
-                        <span class="label{{ check_status_class ? ' status-' ~ check_status_class : '' }}">{{ check.status }}</span>
-                    </td>
-                    <th>{{ check.label }}</th>
-                    <td class="nowo-hr-break">{{ check.detail }}</td>
-                    <td>
-                        {% if check.fix %}
-                            {{ check.fix }}
-                        {% else %}
-                            <em>—</em>
-                        {% endif %}
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="4"><em>No checks recorded for this profile.</em></td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h3>Runtime</h3>
     <style>
         .nowo-hr-break { overflow-wrap: anywhere; word-break: break-all; }
     </style>
-    <table>
-        <thead>
-            <tr>
-                <th>Key</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th>kernel.environment</th>
-                <td>{{ collector.environment|default('—') }}</td>
-            </tr>
-            <tr>
-                <th>enabled</th>
-                <td>{{ collector.enabled ? 'true' : 'false' }}</td>
-            </tr>
-            <tr>
-                <th>auto_inject</th>
-                <td>{{ collector.autoInject ? 'true' : 'false' }}</td>
-            </tr>
-            <tr>
-                <th>require_frankenphp_env</th>
-                <td>{{ collector.requireFrankenphpEnv ? 'true' : 'false' }}</td>
-            </tr>
-            <tr>
-                <th>FRANKENPHP_HOT_RELOAD</th>
-                <td class="nowo-hr-break"><code title="{{ collector.frankenphpHotReloadEnv|default('') }}">{{ collector.frankenphpHotReloadEnv|default('—') }}</code></td>
-            </tr>
-            <tr>
-                <th>Resolved Mercure URL</th>
-                <td class="nowo-hr-break"><code title="{{ collector.mercureUrl|default('') }}">{{ collector.mercureUrl|default('—') }}</code></td>
-            </tr>
-        </tbody>
-    </table>
 
-    <h3>Client assets</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Key</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th>client_mode</th>
-                <td><code>{{ collector.clientMode }}</code> — {{ collector.clientModeLabel }}</td>
-            </tr>
-            <tr>
-                <th>idiomorph</th>
-                <td>{{ collector.idiomorph ? 'true' : 'false' }}</td>
-            </tr>
-            <tr>
-                <th>idiomorph_script_url</th>
-                <td class="nowo-hr-break"><code>{{ collector.idiomorphScriptUrl }}</code></td>
-            </tr>
-            <tr>
-                <th>hot_reload_script_url</th>
-                <td class="nowo-hr-break"><code>{{ collector.hotReloadScriptUrl }}</code></td>
-            </tr>
-            <tr>
-                <th>preserve_observe</th>
-                <td>{{ collector.preserveObserve ? 'true' : 'false' }}</td>
-            </tr>
-            <tr>
-                <th>preserve_selectors</th>
-                <td>
-                    {% if collector.preserveSelectors is empty %}
-                        <em>none</em>
-                    {% else %}
+    <div class="sf-tabs">
+        <div class="tab">
+            <h3 class="tab-title">
+                Environment checks
+                {% if collector.actionableChecks is not empty %}
+                    <span class="badge status-{{ collector.diagnosticStatus == 'fail' ? 'error' : 'warning' }}">{{ collector.actionableChecks|length }}</span>
+                {% endif %}
+            </h3>
+            <div class="tab-content">
+                <p class="help">{{ collector.diagnosticSummary }}{% if collector.environment %} · kernel.environment=<code>{{ collector.environment }}</code>{% endif %}</p>
+                {% if collector.actionableChecks is not empty %}
+                    <div class="empty">
+                        <p><strong>What is missing / what to do</strong></p>
                         <ul>
-                            {% for selector in collector.preserveSelectors %}
-                                <li><code>{{ selector }}</code></li>
+                            {% for check in collector.actionableChecks %}
+                                <li>
+                                    <span class="label status-{{ check.status == 'fail' ? 'error' : 'warning' }}">{{ check.status }}</span>
+                                    <strong>{{ check.label }}</strong>
+                                    — {{ check.fix|default(check.detail) }}
+                                </li>
                             {% endfor %}
                         </ul>
-                    {% endif %}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                    </div>
+                {% endif %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Check</th>
+                            <th>Detail</th>
+                            <th>What to do</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for check in collector.checks %}
+                            <tr>
+                                <td>
+                                    {% set check_status_class = {
+                                        'pass': 'success',
+                                        'fail': 'error',
+                                        'warn': 'warning',
+                                        'info': '',
+                                        'skip': ''
+                                    }[check.status]|default('') %}
+                                    <span class="label{{ check_status_class ? ' status-' ~ check_status_class : '' }}">{{ check.status }}</span>
+                                </td>
+                                <th>{{ check.label }}</th>
+                                <td class="nowo-hr-break">{{ check.detail }}</td>
+                                <td>
+                                    {% if check.fix %}
+                                        {{ check.fix }}
+                                    {% else %}
+                                        <em>—</em>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="4"><em>No checks recorded for this profile.</em></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-    <h3>CSP</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Key</th>
-                <th>Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th>csp_nonce_request_attribute</th>
-                <td>{{ collector.cspNonceRequestAttribute|default('—') }}</td>
-            </tr>
-            <tr>
-                <th>csp_augment_script_src</th>
-                <td>{{ collector.cspAugmentScriptSrc ? 'true' : 'false' }}</td>
-            </tr>
-            <tr>
-                <th>csp_script_src_hosts</th>
-                <td>
-                    {% if collector.cspScriptSrcHosts is empty %}
-                        <em>derive from script URLs</em>
+        <div class="tab">
+            <h3 class="tab-title">Runtime</h3>
+            <div class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>kernel.environment</th>
+                            <td>{{ collector.environment|default('—') }}</td>
+                        </tr>
+                        <tr>
+                            <th>enabled</th>
+                            <td>{{ collector.enabled ? 'true' : 'false' }}</td>
+                        </tr>
+                        <tr>
+                            <th>auto_inject</th>
+                            <td>{{ collector.autoInject ? 'true' : 'false' }}</td>
+                        </tr>
+                        <tr>
+                            <th>require_frankenphp_env</th>
+                            <td>{{ collector.requireFrankenphpEnv ? 'true' : 'false' }}</td>
+                        </tr>
+                        <tr>
+                            <th>FRANKENPHP_HOT_RELOAD</th>
+                            <td class="nowo-hr-break"><code title="{{ collector.frankenphpHotReloadEnv|default('') }}">{{ collector.frankenphpHotReloadEnv|default('—') }}</code></td>
+                        </tr>
+                        <tr>
+                            <th>Resolved Mercure URL</th>
+                            <td class="nowo-hr-break"><code title="{{ collector.mercureUrl|default('') }}">{{ collector.mercureUrl|default('—') }}</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab">
+            <h3 class="tab-title">Client assets</h3>
+            <div class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>client_mode</th>
+                            <td><code>{{ collector.clientMode }}</code> — {{ collector.clientModeLabel }}</td>
+                        </tr>
+                        <tr>
+                            <th>idiomorph</th>
+                            <td>{{ collector.idiomorph ? 'true' : 'false' }}</td>
+                        </tr>
+                        <tr>
+                            <th>idiomorph_script_url</th>
+                            <td class="nowo-hr-break"><code>{{ collector.idiomorphScriptUrl }}</code></td>
+                        </tr>
+                        <tr>
+                            <th>hot_reload_script_url</th>
+                            <td class="nowo-hr-break"><code>{{ collector.hotReloadScriptUrl }}</code></td>
+                        </tr>
+                        <tr>
+                            <th>preserve_observe</th>
+                            <td>{{ collector.preserveObserve ? 'true' : 'false' }}</td>
+                        </tr>
+                        <tr>
+                            <th>preserve_selectors</th>
+                            <td>
+                                {% if collector.preserveSelectors is empty %}
+                                    <em>none</em>
+                                {% else %}
+                                    <ul>
+                                        {% for selector in collector.preserveSelectors %}
+                                            <li><code>{{ selector }}</code></li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab">
+            <h3 class="tab-title">CSP</h3>
+            <div class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>csp_nonce_request_attribute</th>
+                            <td>{{ collector.cspNonceRequestAttribute|default('—') }}</td>
+                        </tr>
+                        <tr>
+                            <th>csp_augment_script_src</th>
+                            <td>{{ collector.cspAugmentScriptSrc ? 'true' : 'false' }}</td>
+                        </tr>
+                        <tr>
+                            <th>csp_script_src_hosts</th>
+                            <td>
+                                {% if collector.cspScriptSrcHosts is empty %}
+                                    <em>derive from script URLs</em>
+                                {% else %}
+                                    <ul>
+                                        {% for host in collector.cspScriptSrcHosts %}
+                                            <li><code>{{ host }}</code></li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab">
+            <h3 class="tab-title">Help</h3>
+            <div class="tab-content">
+                <h4>Multi-tab client modes</h4>
+                <p>
+                    Current mode: <strong><code>{{ collector.clientMode }}</code></strong> ({{ collector.clientModeLabel }}).
+                    Change with <code>nowo_hot_reload.client_mode</code> in <code>config/packages/dev/nowo_hot_reload.yaml</code>.
+                    Active requirements:
+                </p>
+                <ul>
+                    {% for req in collector.activeModeRequirements %}
+                        <li>{{ req }}</li>
                     {% else %}
-                        <ul>
-                            {% for host in collector.cspScriptSrcHosts %}
-                                <li><code>{{ host }}</code></li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                        <li><em>None listed</em></li>
+                    {% endfor %}
+                </ul>
 
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Approach</th>
+                            <th>Multi-tab live</th>
+                            <th>No slowdown</th>
+                            <th>Effort</th>
+                            <th>What you need</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in collector.compareTable %}
+                            <tr{% if row.id == collector.clientMode or (row.id == 'http2' and collector.clientMode in ['cdn', 'always']) %} class="status-{{ collector.diagnosticStatus }}"{% endif %}>
+                                <th>
+                                    {{ row.title }}
+                                    {% if row.id == collector.clientMode %}<span class="label status-success">active</span>{% endif %}
+                                    {% if row.id == 'http2' %}<span class="label">infra</span>{% endif %}
+                                </th>
+                                <td>{{ row.multi_tab_live }}</td>
+                                <td>{{ row.no_slowdown }}</td>
+                                <td>{{ row.effort }}</td>
+                                <td>{{ row.requirements }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
 
-    <h3>Multi-tab client modes (help)</h3>
-    <p>
-        Current mode: <strong><code>{{ collector.clientMode }}</code></strong> ({{ collector.clientModeLabel }}).
-        Change with <code>nowo_hot_reload.client_mode</code> in <code>config/packages/dev/nowo_hot_reload.yaml</code>.
-        Active requirements:
-    </p>
-    <ul>
-        {% for req in collector.activeModeRequirements %}
-            <li>{{ req }}</li>
-        {% else %}
-            <li><em>None listed</em></li>
-        {% endfor %}
-    </ul>
+                {% for approach in collector.approaches %}
+                    <h4 id="nowo-hr-approach-{{ approach.id }}">{{ approach.title }}</h4>
+                    <p>{{ approach.description }}</p>
+                    <p><em>When to use:</em> {{ approach.when_to_use }}</p>
+                {% endfor %}
 
-    <table>
-        <thead>
-            <tr>
-                <th>Approach</th>
-                <th>Multi-tab live</th>
-                <th>No slowdown</th>
-                <th>Effort</th>
-                <th>What you need</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in collector.compareTable %}
-                <tr{% if row.id == collector.clientMode or (row.id == 'http2' and collector.clientMode in ['cdn', 'always']) %} class="status-{{ collector.diagnosticStatus }}"{% endif %}>
-                    <th>
-                        {{ row.title }}
-                        {% if row.id == collector.clientMode %}<span class="label status-success">active</span>{% endif %}
-                        {% if row.id == 'http2' %}<span class="label">infra</span>{% endif %}
-                    </th>
-                    <td>{{ row.multi_tab_live }}</td>
-                    <td>{{ row.no_slowdown }}</td>
-                    <td>{{ row.effort }}</td>
-                    <td>{{ row.requirements }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    {% for approach in collector.approaches %}
-        <h4 id="nowo-hr-approach-{{ approach.id }}">{{ approach.title }}</h4>
-        <p>{{ approach.description }}</p>
-        <p><em>When to use:</em> {{ approach.when_to_use }}</p>
-    {% endfor %}
-
-    <p class="help">
-        CLI equivalent: <code>php bin/console nowo:hot-reload:check</code>.
-        Caddy / FrankenPHP setup: <code>docs/ENVIRONMENT.md</code>.
-        Also <code>docs/CSP.md</code> and <code>docs/USAGE.md</code>.
-    </p>
+                <p class="help">
+                    CLI equivalent: <code>php bin/console nowo:hot-reload:check</code>.
+                    Caddy / FrankenPHP setup: <code>docs/ENVIRONMENT.md</code>.
+                    Also <code>docs/CSP.md</code> and <code>docs/USAGE.md</code>.
+                </p>
+            </div>
+        </div>
+    </div>
 {% endblock %}

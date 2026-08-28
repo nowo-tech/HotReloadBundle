@@ -62,7 +62,7 @@ Set `nowo_hot_reload.client_mode`:
 | `shared_worker` | **Recommended** | One SharedWorker SSE shared by all tabs; hidden tabs queue morphs |
 | `always` | Risky on HTTP/1.1 | SSE always open per tab |
 
-HTTP/2 (local TLS) is an **infrastructure** alternative that multiplexes streams so `cdn`/`always` stay viable — it is not a `client_mode` value. The Web Debug Toolbar **Hot Reload** panel includes a comparison table and validates the active mode against the request protocol.
+HTTP/2 (local TLS) is an **infrastructure** alternative that multiplexes streams so `cdn`/`always` stay viable — it is not a `client_mode` value. The Web Debug Toolbar **Hot Reload** panel **Help** tab includes a comparison table and validates the active mode against the request protocol.
 
 ```yaml
 # config/packages/dev/nowo_hot_reload.yaml
