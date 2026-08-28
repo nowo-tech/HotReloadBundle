@@ -35,6 +35,7 @@ The sections below state **behavior**; this subsection states **intent** in back
 | US-06 | **As a** contributor, **I want** `REQ-*` anchors on scripted flows **so that** PRs and issues cite the same identifiers as this document. |
 | US-07 | **As a** developer, **I want** `php bin/console nowo:hot-reload:check` **so that** I can see which FrankenPHP / Caddy / YAML pieces are present vs missing. |
 | US-08 | **As a** developer, **I want** the same environment checks on the Web Debug Toolbar **Hot Reload** panel **so that** I can diagnose live reload while browsing (including HTTP-only `FRANKENPHP_HOT_RELOAD`). |
+| US-09 | **As a** developer with many admin tabs on HTTP/1.1, **I want** `client_mode: shared_worker` (or `visibility`) **so that** Mercure SSE does not exhaust the browser connection pool. |
 
 **Out of scope for these stories:** shipping Hot Reload in production; writing FrankenPHP/Caddy server configuration (the check command inspects it); guaranteeing third-party CDN availability.
 
@@ -49,7 +50,8 @@ The sections below state **behavior**; this subsection states **intent** in back
 - Documented integration (see root `README.md` and `docs/`).
 - Configuration and runtime behavior described in [`CONFIGURATION.md`](CONFIGURATION.md), [`ENVIRONMENT.md`](ENVIRONMENT.md), and [`USAGE.md`](USAGE.md).
 - Auto-inject via `HotReloadResponseSubscriber` and Twig helper `nowo_hot_reload_assets()`.
-- Diagnostics: `nowo:hot-reload:check` and profiler **Environment checks** (see [`ENVIRONMENT.md`](ENVIRONMENT.md)).
+- Diagnostics: `nowo:hot-reload:check` and profiler tabs (**Environment checks**, Runtime, Client assets, CSP, Help) (see [`ENVIRONMENT.md`](ENVIRONMENT.md)).
+- Multi-tab Mercure client modes (`client_mode`) documented in [`USAGE.md`](USAGE.md) / [`CONFIGURATION.md`](CONFIGURATION.md).
 - Consumer-facing change notes in [`CHANGELOG.md`](CHANGELOG.md) and [`UPGRADING.md`](UPGRADING.md) when applicable.
 
 **Explicit non-goals**

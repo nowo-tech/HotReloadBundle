@@ -1,6 +1,6 @@
 # Hot Reload Bundle
 
-[![CI](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/hot-reload-bundle.svg?style=flat)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/hot-reload-bundle.svg)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-7.4%20%7C%208.0%20%7C%208.1%20%7C%208.2-000000?logo=symfony)](https://symfony.com) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/hot-reload-bundle.svg?style=social&label=Star)](https://github.com/nowo-tech/HotReloadBundle) [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](#tests-and-coverage)
+[![CI](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/hot-reload-bundle.svg?style=flat)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/hot-reload-bundle.svg)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-7.4%20%7C%208.0%20%7C%208.1%20%7C%208.2-000000?logo=symfony)](https://symfony.com) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/hot-reload-bundle.svg?style=social&label=Star)](https://github.com/nowo-tech/HotReloadBundle)
 
 > ⭐ **Found this useful?** [Install from Packagist](https://packagist.org/packages/nowo-tech/hot-reload-bundle) · Give it a **star** on [GitHub](https://github.com/nowo-tech/HotReloadBundle) so more developers can find it.
 
@@ -19,9 +19,10 @@ Pair with `worker { …; watch }` in your Caddyfile.
 - **Auto-inject** — `HotReloadResponseSubscriber` inserts assets before `</head>` (else `</body>`) on HTML responses.
 - **Twig helper** — `{{ nowo_hot_reload_assets() }}` for manual layouts when `auto_inject` is off.
 - **Env-aware** — Renders only when `enabled` and (`mercure_url` or `FRANKENPHP_HOT_RELOAD` is set, or `require_frankenphp_env: false`).
-- **Doctor command** — `php bin/console nowo:hot-reload:check` lists what is configured vs missing (Caddy `mercure` / `hot_reload`, env gate, auto-inject). The same checklist is on the profiler panel.
+- **Doctor command** — `php bin/console nowo:hot-reload:check` lists what is configured vs missing (Caddy `mercure` / `hot_reload`, env gate, auto-inject, `client_mode`). The same checklist is on the profiler panel.
+- **Multi-tab client modes** — `client_mode`: `cdn` (default), `visibility`, `shared_worker`, or `always` for HTTP/1.1-friendly Mercure strategies (see [docs/USAGE.md](docs/USAGE.md)).
 - **Idiomorph** — Optional DOM morphing instead of a full page reload (on by default).
-- **Web Debug Toolbar** — Profiler panel (`nowo_hot_reload`) with status, truncated Mercure URL (full value on hover), environment checks, and CSP/preserve settings.
+- **Web Debug Toolbar** — Profiler panel (`nowo_hot_reload`) with tabs: Environment checks, Runtime, Client assets, CSP, Help; truncated Mercure URL in the toolbar (full value on hover).
 - **Preserve selectors** — Marks Symfony Web Debug Toolbar (`[id^="sfwdt"]`, `.sf-toolbar`, `.sf-minitoolbar`) with `data-frankenphp-hot-reload-preserve` (optional `MutationObserver`).
 - **CSP-aware** — Optional request-attribute nonce on the preserve boot script; can augment existing `Content-Security-Policy` `script-src` for jsDelivr (see [docs/CSP.md](docs/CSP.md)).
 
@@ -77,6 +78,7 @@ nowo_hot_reload:
   require_frankenphp_env: true
   allow_production: false
   # mercure_url: null  # defaults to $_SERVER['FRANKENPHP_HOT_RELOAD']
+  # client_mode: shared_worker  # cdn|visibility|shared_worker|always
   idiomorph: true
   # idiomorph_script_url: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4'
   # hot_reload_script_url: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm'
@@ -149,7 +151,7 @@ make release-check
 ## Tests and coverage
 
 - Tests: PHPUnit (PHP)
-- PHP: 100%
+- PHP line coverage: maintained via `make test-coverage` / `make release-check` (see CI)
 
 ## License and author
 

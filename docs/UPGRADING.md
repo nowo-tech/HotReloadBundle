@@ -3,6 +3,7 @@
 ## Table of contents
 
 
+- [From 1.5.0 to 1.5.1](#from-150-to-151)
 - [From 1.4.2 to 1.5.0](#from-142-to-150)
 - [From 1.4.1 to 1.4.2](#from-141-to-142)
 - [From 1.4.0 → 1.4.1](#from-140--141)
@@ -14,6 +15,19 @@
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.5.0 to 1.5.1
+
+Profiler panel UX only (tabs). **No application upgrade steps.**
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
+
+### Notes
+
+1. The Hot Reload profiler panel is split into **Environment checks**, **Runtime**, **Client assets**, **CSP**, and **Help** (`sf-tabs`). Multi-tab mode comparison moved under **Help**.
+2. No `nowo_hot_reload` YAML keys changed.
 
 ## From 1.4.2 to 1.5.0
 
