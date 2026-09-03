@@ -58,4 +58,49 @@ final class HotReloadAssetSubscriberTest extends TestCase
 
         self::assertFalse($event->hasResponse());
     }
+
+    #[Test]
+    public function itSubscribesToKernelRequestBeforeTheRouter(): void
+    {
+        $events = HotReloadAssetSubscriber::getSubscribedEvents();
+
+        self::assertArrayHasKey('kernel.request', $events);
+        self::assertSame(['onKernelRequest', 34], $events['kernel.request']);
+    }
+
+    #[Test]
+    public function itIgnoresSubRequests(): void
+    {
+        $subscriber = new HotReloadAssetSubscriber();
+        $kernel     = $this->createMock(HttpKernelInterface::class);
+        $request    = Request::create(Configuration::ASSET_PATH_CLIENT);
+        $event      = new RequestEvent($kernel, $request, HttpKernelInterface::SUB_REQUEST);
+
+        $subscriber->onKernelRequest($event);
+
+        self::assertFalse($event->hasResponse());
+    }
+
+    #[Test]
+    public function itSkipsWhenMappedAssetFileIsMissing(): void
+    {
+        $publicDir = dirname(__DIR__, 3) . '/src/Resources/public';
+        $clientJs  = $publicDir . '/hot-reload-client.js';
+        self::assertFileExists($clientJs);
+
+        $backup = $clientJs . '.bak-test';
+        rename($clientJs, $backup);
+        try {
+            $subscriber = new HotReloadAssetSubscriber();
+            $kernel     = $this->createMock(HttpKernelInterface::class);
+            $request    = Request::create(Configuration::ASSET_PATH_CLIENT);
+            $event      = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
+
+            $subscriber->onKernelRequest($event);
+
+            self::assertFalse($event->hasResponse());
+        } finally {
+            rename($backup, $clientJs);
+        }
+    }
 }

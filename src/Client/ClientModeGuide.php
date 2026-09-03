@@ -120,7 +120,7 @@ final class ClientModeGuide
             }
         }
 
-        return [];
+        return []; // @codeCoverageIgnore — defensive: every ClientMode id is listed in getApproaches()
     }
 
     /**

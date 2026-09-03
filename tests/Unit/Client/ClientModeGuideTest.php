@@ -48,4 +48,13 @@ final class ClientModeGuideTest extends TestCase
         self::assertTrue(ClientMode::SharedWorker->isBundleClient());
         self::assertFalse(ClientMode::Cdn->isBundleClient());
     }
+
+    #[Test]
+    public function itExposesHumanReadableLabelsForEveryMode(): void
+    {
+        self::assertStringContainsString('CDN', ClientMode::Cdn->label());
+        self::assertStringContainsString('Visibility', ClientMode::Visibility->label());
+        self::assertStringContainsString('SharedWorker', ClientMode::SharedWorker->label());
+        self::assertStringContainsString('Always', ClientMode::Always->label());
+    }
 }

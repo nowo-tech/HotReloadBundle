@@ -195,6 +195,45 @@ final class HotReloadDataCollectorTest extends TestCase
         self::assertFalse($collector->isInjected());
     }
 
+    #[Test]
+    public function clientModeGettersUseDefaultsAndGuardNonArrayPayloads(): void
+    {
+        $collector = $this->createCollector();
+        $collector->__unserialize(['data' => []]);
+
+        self::assertSame('cdn', $collector->getClientMode());
+        self::assertSame('', $collector->getClientModeLabel());
+        self::assertSame([], $collector->getApproaches());
+        self::assertSame([], $collector->getActiveModeRequirements());
+        self::assertSame([], $collector->getCompareTable());
+
+        $collector->__unserialize([
+            'data' => [
+                'client_mode'              => 'shared_worker',
+                'client_mode_label'        => 'SharedWorker (single SSE)',
+                'approaches'               => 'nope',
+                'active_mode_requirements' => 'nope',
+                'compare_table'            => 'nope',
+            ],
+        ]);
+        self::assertSame('shared_worker', $collector->getClientMode());
+        self::assertSame('SharedWorker (single SSE)', $collector->getClientModeLabel());
+        self::assertSame([], $collector->getApproaches());
+        self::assertSame([], $collector->getActiveModeRequirements());
+        self::assertSame([], $collector->getCompareTable());
+
+        $collector->__unserialize([
+            'data' => [
+                'approaches'               => [['id' => 'cdn']],
+                'active_mode_requirements' => ['need-a', 'need-b'],
+                'compare_table'            => [['id' => 'cdn']],
+            ],
+        ]);
+        self::assertSame([['id' => 'cdn']], $collector->getApproaches());
+        self::assertSame(['need-a', 'need-b'], $collector->getActiveModeRequirements());
+        self::assertSame([['id' => 'cdn']], $collector->getCompareTable());
+    }
+
     private function createCollector(bool $enabled = true): HotReloadDataCollector
     {
         $assets = new HotReloadAssets(

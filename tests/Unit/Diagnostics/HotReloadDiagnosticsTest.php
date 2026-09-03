@@ -266,6 +266,49 @@ final class HotReloadDiagnosticsTest extends TestCase
         self::assertTrue($report->shouldRender());
     }
 
+    #[Test]
+    public function itPassesHttpProtocolCheckWhenRequestLooksLikeHttp2(): void
+    {
+        $request = Request::create('/');
+        $request->server->set('FRANKENPHP_HOT_RELOAD', 'https://hub.test/.well-known/mercure');
+        $request->server->set('SERVER_PROTOCOL', 'HTTP/2.0');
+
+        $report = $this->createDiagnostics()->evaluate($request);
+        $byId   = $this->index($report->getChecks());
+
+        self::assertSame(HotReloadCheck::STATUS_PASS, $byId['http_protocol']->getStatus());
+        self::assertStringContainsString('HTTP/2', $byId['http_protocol']->getDetail());
+    }
+
+    #[Test]
+    public function itPassesHttp1ProtocolForSharedWorkerAndVisibilityModes(): void
+    {
+        $request = Request::create('http://localhost/');
+        $request->server->set('FRANKENPHP_HOT_RELOAD', 'https://hub.test/.well-known/mercure');
+        $request->server->set('SERVER_PROTOCOL', 'HTTP/1.1');
+
+        foreach (['shared_worker', 'visibility'] as $mode) {
+            $report = $this->createDiagnostics(clientMode: $mode)->evaluate($request);
+            $byId   = $this->index($report->getChecks());
+            self::assertSame(HotReloadCheck::STATUS_PASS, $byId['http_protocol']->getStatus(), $mode);
+            self::assertStringContainsString('HTTP/1', $byId['http_protocol']->getDetail());
+        }
+    }
+
+    #[Test]
+    public function itWarnsOnHttp1WhenClientModeIsAlways(): void
+    {
+        $request = Request::create('http://localhost/');
+        $request->server->set('FRANKENPHP_HOT_RELOAD', 'https://hub.test/.well-known/mercure');
+        $request->server->set('SERVER_PROTOCOL', 'HTTP/1.1');
+
+        $report = $this->createDiagnostics(clientMode: 'always')->evaluate($request);
+        $byId   = $this->index($report->getChecks());
+
+        self::assertSame(HotReloadCheck::STATUS_WARN, $byId['http_protocol']->getStatus());
+        self::assertNotNull($byId['http_protocol']->getFix());
+    }
+
     /**
      * @param list<HotReloadCheck> $checks
      *
@@ -292,6 +335,7 @@ final class HotReloadDiagnosticsTest extends TestCase
         ?string $cspNonceRequestAttribute = null,
         bool $cspAugmentScriptSrc = true,
         ?string $projectDir = null,
+        string $clientMode = 'cdn',
     ): HotReloadDiagnostics {
         $assets = new HotReloadAssets(
             enabled: $enabled,
@@ -315,6 +359,7 @@ final class HotReloadDiagnosticsTest extends TestCase
             cspNonceRequestAttribute: $cspNonceRequestAttribute,
             cspAugmentScriptSrc: $cspAugmentScriptSrc,
             projectDir: $projectDir,
+            clientMode: $clientMode,
         );
     }
 
