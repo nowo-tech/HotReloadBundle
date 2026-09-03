@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
+use function dirname;
+
 final class HotReloadAssetSubscriberTest extends TestCase
 {
     #[Test]
