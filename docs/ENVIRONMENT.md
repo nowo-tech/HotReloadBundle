@@ -14,6 +14,7 @@ Official references: [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-rel
 - [2. Symfony YAML](#2-symfony-yaml)
 - [3. Caddyfile — classic](#3-caddyfile--classic)
 - [4. Caddyfile — worker + watch](#4-caddyfile--worker--watch)
+- [Worker with `reset_kernel: false`](#worker-with-reset_kernel-false)
 - [5. `FRANKENPHP_HOT_RELOAD` (do not put this in `.env`)](#5-frankenphp_hot_reload-do-not-put-this-in-env)
 - [6. Optional `mercure_url`](#6-optional-mercure_url)
 - [7. Docker / Compose](#7-docker--compose)
@@ -148,6 +149,16 @@ Use this when FrankenPHP keeps a long-lived worker (`FRANKENPHP_MODE=worker`). *
 ```
 
 Adjust `file` to your front controller (Docker images often use `/app/public/index.php`). You can add extra `watch` paths (Twig, assets) — see the [official Hot Reload guide](https://frankenphp.dev/docs/hot-reload/).
+
+### Worker with `reset_kernel: false`
+
+Symfony Runtime / FrankenPHP can keep the **same kernel** across requests (`reset_kernel: false`). This bundle is designed for that mode:
+
+- Runtime services (`HotReloadAssets`, subscribers, diagnostics, Twig) are immutable (`readonly` config only).
+- Mercure URL is read from the **current request** (then `$_SERVER` for CLI).
+- The profiler data collector implements `ResetInterface` and is tagged `kernel.reset`, and also rewrites all state on every `collect()`.
+
+No extra YAML is required. Full audit: [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md).
 
 ## 5. `FRANKENPHP_HOT_RELOAD` (do not put this in `.env`)
 

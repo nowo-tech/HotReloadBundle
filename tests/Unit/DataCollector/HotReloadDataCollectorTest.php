@@ -234,6 +234,48 @@ final class HotReloadDataCollectorTest extends TestCase
         self::assertSame([['id' => 'cdn']], $collector->getCompareTable());
     }
 
+    #[Test]
+    public function itOverwritesStateAcrossRequestsWithoutRelyingOnReset(): void
+    {
+        // FrankenPHP worker + reset_kernel=false: collect() must fully replace prior request data.
+        $collector = $this->createCollector();
+
+        $first = Request::create('/first');
+        $first->server->set('FRANKENPHP_HOT_RELOAD', 'https://first.test');
+        $collector->collect($first, new Response('<html></html>', 200, ['Content-Type' => 'text/html']));
+        $first->attributes->set(HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED, true);
+        $collector->lateCollect();
+
+        self::assertTrue($collector->isInjected());
+        self::assertSame('https://first.test', $collector->getFrankenphpHotReloadEnv());
+
+        $second = Request::create('/second');
+        $second->server->set('FRANKENPHP_HOT_RELOAD', 'https://second.test');
+        $collector->collect($second, new Response('<html></html>', 200, ['Content-Type' => 'text/html']));
+
+        self::assertFalse($collector->isInjected());
+        self::assertSame('https://second.test', $collector->getFrankenphpHotReloadEnv());
+        self::assertSame('ready', $collector->getStatus());
+    }
+
+    #[Test]
+    public function itClearsMutableStateOnReset(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+        $collector                        = $this->createCollector();
+        $request                          = Request::create('/');
+        $request->server->set('FRANKENPHP_HOT_RELOAD', 'https://hub.test');
+        $collector->collect($request, new Response(''));
+
+        self::assertNotSame([], $collector->getData());
+
+        $collector->reset();
+
+        self::assertSame([], $collector->getData());
+        self::assertSame('disabled', $collector->getStatus());
+        self::assertNull($collector->getMercureUrl());
+    }
+
     private function createCollector(bool $enabled = true): HotReloadDataCollector
     {
         $assets = new HotReloadAssets(

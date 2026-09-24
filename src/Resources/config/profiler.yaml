@@ -21,3 +21,5 @@ services:
                 template: '@NowoHotReloadBundle/Collector/hot_reload.html.twig'
                 id: 'nowo_hot_reload'
                 priority: 250
+            # FrankenPHP worker with reset_kernel=false: clear per-request state via services_resetter.
+            - { name: kernel.reset, method: reset }

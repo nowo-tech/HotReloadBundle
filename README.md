@@ -10,9 +10,9 @@
 
 ![FrankenPHP Friendly Worker Mode](docs/images/frankenphp-friendly.png)
 
-This bundle is **FrankenPHP worker mode friendly**.
+This bundle is **FrankenPHP worker mode friendly**, including **`reset_kernel: false`** (long-lived kernel).
 
-Pair with `worker { …; watch }` in your Caddyfile.
+Pair with `worker { …; watch }` in your Caddyfile. Audit: [docs/FRANKENPHP-WORKER-AUDIT.md](docs/FRANKENPHP-WORKER-AUDIT.md).
 
 ## Features
 
@@ -128,6 +128,7 @@ make release-check
 
 - [Installation](docs/INSTALLATION.md)
 - [**Environment setup (Caddy / FrankenPHP)**](docs/ENVIRONMENT.md)
+- [FrankenPHP worker audit (`reset_kernel: false`)](docs/FRANKENPHP-WORKER-AUDIT.md)
 - [Configuration](docs/CONFIGURATION.md)
 - [PSR evaluation (REQ-CS-007)](docs/PSR.md)
 - [CSP](docs/CSP.md)

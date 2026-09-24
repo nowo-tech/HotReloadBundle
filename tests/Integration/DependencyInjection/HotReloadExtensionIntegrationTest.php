@@ -41,6 +41,11 @@ final class HotReloadExtensionIntegrationTest extends TestCase
         self::assertTrue($container->hasDefinition(HotReloadDiagnostics::class));
         self::assertTrue($container->hasDefinition(HotReloadCheckCommand::class));
         self::assertSame('nowo_hot_reload', $extension->getAlias());
+
+        $collectorDef = $container->getDefinition(HotReloadDataCollector::class);
+        $resetTags    = $collectorDef->getTag('kernel.reset');
+        self::assertNotSame([], $resetTags);
+        self::assertSame('reset', $resetTags[0]['method'] ?? null);
     }
 
     #[Test]

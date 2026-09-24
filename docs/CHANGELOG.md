@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.5.3] - 2026-09-24](#153---2026-09-24)
+- [[1.5.2] - 2026-08-29](#152---2026-08-29)
 - [[1.5.1] - 2026-08-28](#151---2026-08-28)
 - [[1.5.0] - 2026-08-28](#150---2026-08-28)
 - [[1.4.2] - 2026-08-24](#142---2026-08-24)
@@ -23,6 +25,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.5.3] - 2026-09-24
+
+### Added
+
+- **FrankenPHP worker / `reset_kernel: false`:** full compatibility audit and hardening. `HotReloadDataCollector` implements `ResetInterface` and is tagged `kernel.reset` so `services_resetter` clears profiler state between requests when the kernel is not rebooted.
+- Spec **FR-11** / **US-09** documenting worker + long-lived kernel guarantees.
+- PHPStan includes `ruleset-hardening.neon` (in addition to classic + worker).
+
+### Changed
+
+- **`HotReloadAssets::resolveMercureUrl()`** prefers `FRANKENPHP_HOT_RELOAD` from the current request (`RequestStack`) before falling back to `$_SERVER` (safer under a long-lived worker process).
+- Docs: [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md), Environment / Usage notes for worker without kernel reboot.
+
+### Notes
+
+- **No required host changes.** Existing Caddy `worker { …; watch }` setups keep working.
+
+[1.5.3]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.5.3
 
 ## [1.5.2] - 2026-08-29
 

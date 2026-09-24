@@ -3,6 +3,7 @@
 ## Table of contents
 
 
+- [From 1.5.2 to 1.5.3](#from-152-to-153)
 - [From 1.5.1 to 1.5.2](#from-151-to-152)
 - [From 1.5.0 to 1.5.1](#from-150-to-151)
 - [From 1.4.2 to 1.5.0](#from-142-to-150)
@@ -16,6 +17,20 @@
 - [From 1.1.0 → 1.2.0](#from-110--120)
 - [From 1.0.0 → 1.1.0](#from-100--110)
 - [From nothing → 1.0.0](#from-nothing--100)
+
+## From 1.5.2 to 1.5.3
+
+Worker / `reset_kernel: false` hardening. **No required host changes.**
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
+
+### Notes
+
+1. Profiler collector now participates in Symfony `services_resetter` (`kernel.reset`).
+2. Mercure URL resolution prefers the current HTTP request over process `$_SERVER`.
+3. Audit write-up: [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md). Keep `worker { …; watch }` in the Caddyfile.
 
 ## From 1.5.1 to 1.5.2
 

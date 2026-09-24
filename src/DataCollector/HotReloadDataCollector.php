@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
+use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
 
 use function is_array;
@@ -29,7 +30,7 @@ use function substr;
  * @author Héctor Franco Aceituno <hectorfranco@nowo.tech>
  * @copyright 2026 Nowo.tech
  */
-final class HotReloadDataCollector implements DataCollectorInterface, LateDataCollectorInterface
+final class HotReloadDataCollector implements DataCollectorInterface, LateDataCollectorInterface, ResetInterface
 {
     public const NAME = 'nowo_hot_reload';
 

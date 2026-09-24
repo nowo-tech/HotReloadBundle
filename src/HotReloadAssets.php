@@ -57,11 +57,23 @@ final class HotReloadAssets
 
     /**
      * Resolves the Mercure hub URL from config or FRANKENPHP_HOT_RELOAD.
+     *
+     * Prefers the current request (RequestStack) so worker mode with a long-lived
+     * kernel does not depend on a process-level $_SERVER value that could be stale.
+     * Falls back to $_SERVER for CLI / early boot when no request is available.
      */
     public function resolveMercureUrl(): ?string
     {
         if (is_string($this->mercureUrl) && $this->mercureUrl !== '') {
             return $this->mercureUrl;
+        }
+
+        $request = $this->requestStack?->getCurrentRequest();
+        if ($request instanceof Request) {
+            $fromRequest = $request->server->get('FRANKENPHP_HOT_RELOAD');
+            if (is_string($fromRequest) && $fromRequest !== '') {
+                return $fromRequest;
+            }
         }
 
         $fromServer = $_SERVER['FRANKENPHP_HOT_RELOAD'] ?? null;

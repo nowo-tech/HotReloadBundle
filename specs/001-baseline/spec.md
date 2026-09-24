@@ -1,27 +1,28 @@
 # Hot Reload Bundle — Baseline product specification
 
 **Package**: `nowo-tech/hot-reload-bundle`  
-**Last audited**: 2026-08-28  
+**Last audited**: 2026-09-24  
 **Inventory**: [`code-inventory.md`](code-inventory.md)
 
 ## Overview
 
-HotReloadBundle injects [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-reload/) client assets (meta Mercure URL, optional Idiomorph, frankenphp-hot-reload ESM or bundle-served multi-tab clients) into Symfony HTML responses in development. Auto-inject via `HotReloadResponseSubscriber` or Twig `{{ nowo_hot_reload_assets() }}`. Supported runtimes: PHP `>=8.1 <8.6`, Symfony **7.4+** and **8.0–8.2**.
+HotReloadBundle injects [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-reload/) client assets (meta Mercure URL, optional Idiomorph, frankenphp-hot-reload ESM or bundle-served multi-tab clients) into Symfony HTML responses in development. Auto-inject via `HotReloadResponseSubscriber` or Twig `{{ nowo_hot_reload_assets() }}`. Supported runtimes: PHP `>=8.1 <8.6`, Symfony **7.4+** and **8.0–8.2**. Compatible with FrankenPHP **worker** mode including **`reset_kernel: false`** (long-lived kernel, no reboot between requests).
 
 ## Functional requirements
 
 | ID | Requirement |
 | --- | --- |
-| FR-01 | Config alias is **`nowo_hot_reload`** with keys: `enabled`, `auto_inject`, `require_frankenphp_env`, `allow_production`, `mercure_url`, `client_mode` (`cdn` \| `visibility` \| `shared_worker` \| `always`), `idiomorph`, `idiomorph_script_url`, `hot_reload_script_url`, `preserve_selectors`, `preserve_observe`, `csp_nonce_request_attribute`, `csp_augment_script_src`, `csp_script_src_hosts`. |
+| FR-01 | Config alias is **`nowo_hot_reload`** with keys: `enabled`, `auto_inject`, `require_frankenphp_env`, `allow_production`, `mercure_url`, `client_mode` (`cdn` \| `visibility` \| `shared_worker` \| `always`), `idiomorph`, `idiomorph_script_url`, `hot_reload_script_url`, `preserve_selectors`, `preserve_observe`, `csp_nonce_request_attribute`, `csp_augment_script_src`, `csp_script_src_hosts`, `ignore_path_prefixes`. |
 | FR-02 | **`HotReloadAssets::shouldRender()`** is true only when `enabled` and (`mercure_url` or `FRANKENPHP_HOT_RELOAD` is non-empty, or `require_frankenphp_env` is false). |
 | FR-03 | **`renderHtml()`** emits meta `frankenphp-hot-reload:url`, optional Idiomorph script, Hot Reload client (`cdn` ESM or bundle client/worker for other modes), and optional preserve boot script; all marked with **`data-nowo-hot-reload`**. |
 | FR-04 | Preserve selectors (default `[id^="sfwdt"]`, `.sf-toolbar`, `.sf-minitoolbar`) receive **`data-frankenphp-hot-reload-preserve`** via the boot script. |
-| FR-05 | With **`auto_inject: true`**, `HotReloadResponseSubscriber` injects the snippet before `</head>`, else `</body>`, else appends; only HTML main responses; skips if marker already present. |
+| FR-05 | With **`auto_inject: true`**, `HotReloadResponseSubscriber` injects the snippet before `</head>`, else `</body>`, else appends; only HTML main responses; skips if marker already present; skips paths under **`ignore_path_prefixes`** (default `/_wdt`, `/_profiler`). |
 | FR-06 | Twig exposes **`{{ nowo_hot_reload_assets() }}`** (HTML-safe) returning the same snippet or empty when the gate fails. |
 | FR-07 | Non-HTML responses are never modified by the subscriber. |
 | FR-08 | **`nowo:hot-reload:check`** reports pass/fail/warn for enabled, kernel environment, env gate, `FRANKENPHP_HOT_RELOAD`, `mercure_url`, render gate, auto-inject, `client_mode` / HTTP protocol guidance, optional Caddyfile (`mercure`, `hot_reload`, worker `watch`), CSP, and prints fixes for failures/warnings. |
 | FR-09 | **`HotReloadDataCollector`** stores the same diagnostic checks (serializable). The profiler panel uses Symfony **`sf-tabs`**: **Environment checks**, **Runtime**, **Client assets**, **CSP**, and **Help** (multi-tab modes comparison). Environment checks lists status, detail, and what to do (badge when fail/warn). The toolbar truncates long Mercure URLs (`/.well-known/mercure?...`) with the full value in the hover `title`. |
 | FR-10 | **`client_mode`** selects the browser Mercure strategy. Non-`cdn` modes serve same-origin scripts at `/_nowo/hot-reload/client.js` and (for `shared_worker`) `/_nowo/hot-reload/shared-worker.js` via `HotReloadAssetSubscriber`. Default remains `cdn`. |
+| FR-11 | **FrankenPHP worker / `reset_kernel: false`:** shared services hold no mutable request state except the profiler collector. `HotReloadAssets` resolves `FRANKENPHP_HOT_RELOAD` from the current `Request` (via `RequestStack`) before falling back to `$_SERVER`. `HotReloadDataCollector` implements `ResetInterface`, is tagged `kernel.reset`, and `collect()` fully replaces prior request data so no leak occurs even if reset is skipped. |
 
 ## User scenarios
 
@@ -72,6 +73,12 @@ HotReloadBundle injects [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-
 **Given** several admin tabs open on HTTP/1.1 and `client_mode: shared_worker`  
 **When** Hot Reload assets render  
 **Then** a SharedWorker holds a single Mercure EventSource and fans out updates; the doctor / profiler report the active mode and requirements.
+
+### US-09 — Worker mode without kernel reboot
+
+**Given** FrankenPHP worker mode with `reset_kernel: false` (same kernel for many requests)  
+**When** two consecutive HTML requests run with different `FRANKENPHP_HOT_RELOAD` values  
+**Then** inject / profiler state for request N+1 does not retain request N data; Mercure URL resolution uses the current request.
 
 ## Out of scope
 

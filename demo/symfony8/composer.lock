@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "/var/hot-reload-bundle",
-                "reference": "cc400703e2228fe01cec6d23b544a4ced830d7c6"
+                "reference": "e44775a259057f871b7e77a823f0a722157a0d11"
             },
             "require": {
                 "php": ">=8.1 <8.6",

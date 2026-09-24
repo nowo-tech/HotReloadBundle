@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-use function dirname;
 use function file_get_contents;
 use function is_file;
 use function is_readable;
@@ -47,7 +46,7 @@ final class HotReloadAssetSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $file = dirname(__DIR__) . '/Resources/public/' . $map[$path];
+        $file = __DIR__ . '/../Resources/public/' . $map[$path];
         if (!is_file($file) || !is_readable($file) || !str_ends_with($file, '.js')) {
             return;
         }

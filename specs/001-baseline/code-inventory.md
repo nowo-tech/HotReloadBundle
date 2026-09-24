@@ -2,7 +2,7 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/hot-reload-bundle`  
-**Last audited**: 2026-08-28
+**Last audited**: 2026-09-24
 
 100% inventory of production PHP and shipped config / public assets under `src/`. Every file maps to at least one FR-* in the baseline product spec.
 
@@ -18,7 +18,7 @@
 
 | File | Responsibility | Spec |
 | --- | --- | --- |
-| `HotReloadAssets.php` | Render gate, Mercure URL resolve, HTML snippet (CDN or bundle client), preserve boot script; marker `data-nowo-hot-reload` | FR-02, FR-03, FR-04, FR-10 |
+| `HotReloadAssets.php` | Render gate, Mercure URL resolve (Request then `$_SERVER`), HTML snippet (CDN or bundle client), preserve boot script; marker `data-nowo-hot-reload` | FR-02, FR-03, FR-04, FR-10, FR-11 |
 
 ## Client modes
 
@@ -53,7 +53,7 @@
 
 | File | Responsibility | Spec |
 | --- | --- | --- |
-| `DataCollector/HotReloadDataCollector.php` | Web Debug Toolbar / Profiler panel (`nowo_hot_reload`): checks, runtime, assets, CSP, Help data + truncated Mercure URL | FR-01, FR-09, FR-10 |
+| `DataCollector/HotReloadDataCollector.php` | Web Debug Toolbar / Profiler panel (`nowo_hot_reload`); `ResetInterface` + `kernel.reset` for worker / `reset_kernel: false` | FR-01, FR-09, FR-10, FR-11 |
 
 ## Twig
 
@@ -75,7 +75,7 @@
 | --- | --- | --- |
 | `Resources/config/services.yaml` | `HotReloadAssets` + subscribers + `HotReloadDiagnostics` wiring | FR-02 … FR-05, FR-07, FR-08, FR-10 |
 | `Resources/config/twig.yaml` | Twig extension service | FR-06 |
-| `Resources/config/profiler.yaml` | Data collector + `@NowoHotReloadBundle` profiler template | FR-01, FR-09 |
+| `Resources/config/profiler.yaml` | Data collector + `@NowoHotReloadBundle` profiler template + `kernel.reset` | FR-01, FR-09, FR-11 |
 | `Resources/config/commands.yaml` | `nowo:hot-reload:check` console command | FR-08 |
 | `Resources/config/packages/nowo_hot_reload.yaml` | Sample / default package config | FR-01 |
 | `Resources/public/hot-reload-client.js` | Bundle Mercure client for `visibility` / `shared_worker` / `always` | FR-10 |

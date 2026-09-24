@@ -105,6 +105,7 @@ Minimum directives:
 - `mercure { anonymous }`
 - `php_server { hot_reload }`
 - Worker mode: `worker { file …; watch }`
+- Worker with Symfony Runtime `reset_kernel: false` is supported (see [FRANKENPHP-WORKER-AUDIT.md](FRANKENPHP-WORKER-AUDIT.md))
 
 Do **not** put `FRANKENPHP_HOT_RELOAD` in `.env`. FrankenPHP sets it on HTTP requests when `hot_reload` is enabled.
 

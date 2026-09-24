@@ -69,6 +69,33 @@ final class HotReloadAssetsTest extends TestCase
     }
 
     #[Test]
+    public function itPrefersRequestServerBagOverProcessSuperglobal(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://stale-from-process.test';
+
+        $request = Request::create('/');
+        $request->server->set('FRANKENPHP_HOT_RELOAD', 'https://from-request.test');
+        $stack = new RequestStack([$request]);
+
+        $assets = $this->createAssets(requestStack: $stack);
+
+        self::assertSame('https://from-request.test', $assets->resolveMercureUrl());
+        self::assertTrue($assets->shouldRender());
+    }
+
+    #[Test]
+    public function itFallsBackToProcessSuperglobalWhenRequestLacksEnv(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://from-process.test';
+
+        $request = Request::create('/');
+        $stack   = new RequestStack([$request]);
+        $assets  = $this->createAssets(requestStack: $stack);
+
+        self::assertSame('https://from-process.test', $assets->resolveMercureUrl());
+    }
+
+    #[Test]
     public function itCanSkipIdiomorphAndPreserveScript(): void
     {
         $assets = $this->createAssets(
