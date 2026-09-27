@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.5.4] - 2026-09-27](#154---2026-09-27)
 - [[1.5.3] - 2026-09-24](#153---2026-09-24)
 - [[1.5.2] - 2026-08-29](#152---2026-08-29)
 - [[1.5.1] - 2026-08-28](#151---2026-08-28)
@@ -25,6 +26,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.4] - 2026-09-27
+
+### Added
+
+- **REQ-CS-008:** `igor-php/igor-php` (require-dev only), root `igor.json`, Composer/`Makefile` `igor` target, and `release-check` wiring for FrankenPHP worker-state audit.
+
+### Changed
+
+- **Worker safety (Igor):** justified `// @igor-ignore` annotations and/or `ResetInterface` / request-scoped fixes so `make igor` passes on package `src/`.
+
+[1.5.4]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.5.4
 
 ## [1.5.3] - 2026-09-24
 

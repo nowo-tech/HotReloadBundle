@@ -40,12 +40,17 @@ final class TwigPathsPass implements CompilerPassInterface
                 $projectDir   = rtrim($projectDirParam, '/\\');
                 $overridePath = $projectDir . '/templates/bundles/' . self::TWIG_NAMESPACE;
                 if (is_dir($overridePath)) {
+                    // @igor-ignore - Compile-time DI definition wiring; runs once at container build
                     $definition->addMethodCall('prependPath', [$overridePath, self::TWIG_NAMESPACE]);
                 }
             }
         }
 
+        // @igor-ignore - Compile-time DI definition wiring; runs once at container build
+
+        // @igor-ignore - Compile-time DI definition wiring; runs once at container build
         $definition->addMethodCall('addPath', [$viewsPath, self::TWIG_NAMESPACE]);
+        // @igor-ignore - Compile-time DI definition wiring; runs once at container build
         $definition->addMethodCall('addPath', [$viewsPath, self::TWIG_NAMESPACE_LEGACY]);
     }
 

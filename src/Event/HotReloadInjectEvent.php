@@ -38,6 +38,7 @@ final class HotReloadInjectEvent
 
     public function setSnippet(string $snippet): void
     {
+        // @igor-ignore - Request-scoped event DTO; not a shared worker service
         $this->snippet = $snippet;
     }
 }

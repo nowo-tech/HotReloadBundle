@@ -43,6 +43,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0",
+        "igor-php/igor-php": "^0.9.7",
         "nowo-tech/phpstan-frankenphp": "^1.0",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.0",
@@ -94,7 +95,8 @@
         "qa": [
             "@cs-check",
             "@test"
-        ]
+        ],
+        "igor": "igor-php --no-agent ."
     },
     "scripts-descriptions": {
         "test": "Run PHPUnit tests",
@@ -106,7 +108,8 @@
         "phpstan": "Run PHPStan static analysis",
         "update": "Update composer.lock (composer update)",
         "validate": "Validate composer.json (composer validate --strict)",
-        "qa": "Run all quality assurance checks"
+        "qa": "Run all quality assurance checks",
+        "igor": "Run Igor FrankenPHP worker-state audit (REQ-CS-008)"
     },
     "suggest": {
         "twig/twig": "Required for {{ nowo_hot_reload_assets() }} Twig helper",
