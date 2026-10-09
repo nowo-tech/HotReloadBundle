@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.5.5] - 2026-10-09](#155---2026-10-09)
 - [[1.5.4] - 2026-09-27](#154---2026-09-27)
 - [[1.5.3] - 2026-09-24](#153---2026-09-24)
 - [[1.5.2] - 2026-08-29](#152---2026-08-29)
@@ -25,6 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[1.0.0] - 2026-08-17](#100---2026-08-17)
 
 ## [Unreleased]
+
+## [1.5.5] - 2026-10-09
+
+### Dependencies
+
+- Bundle lock: Symfony 8.1 components -> v8.1.8, `twig/twig` v3.30.0, polyfills v1.43.
+- Dev tooling: `phpstan/phpstan` 2.3.1, `phpstan/phpstan-symfony` 2.1.0, `rector/rector` 2.7.0, `phpunit/phpunit` 10.5.66, `nowo-tech/phpstan-frankenphp` v1.2.3.
+- Demo (Symfony 8): Symfony v8.1.8, `twig/twig` v3.30.0, `twig/extra-bundle` ^3.29, PHPUnit ^13.4.1, `nowo-tech/password-toggle-bundle` ^2.2.3, `nowo-tech/twig-inspector-bundle` v1.1.7.
 
 ## [1.5.4] - 2026-09-27
 
@@ -220,4 +229,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.0.0
-[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.5.5...HEAD
+[1.5.5]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.5.4...v1.5.5

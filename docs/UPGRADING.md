@@ -3,6 +3,16 @@
 
 ## Unreleased
 
+## To 1.5.5
+
+From **1.5.4** — dependency updates.
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
+
+No breaking changes. No application upgrade steps.
+
 ## To 1.5.4
 
 From **1.5.3** — REQ-CS-008 Igor FrankenPHP worker audit (igor-php require-dev, igor.json, make igor).
@@ -17,6 +27,7 @@ php bin/console cache:clear
 ## Table of contents
 
 
+- [To 1.5.5](#to-155)
 - [From 1.5.2 to 1.5.3](#from-152-to-153)
 - [From 1.5.1 to 1.5.2](#from-151-to-152)
 - [From 1.5.0 to 1.5.1](#from-150-to-151)
