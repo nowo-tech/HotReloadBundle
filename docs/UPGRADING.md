@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.6.1](#to-161)
 - [To 1.6.0](#to-160)
 - [To 1.5.6](#to-156)
 - [To 1.5.5](#to-155)
@@ -34,6 +35,14 @@
   - [Checklist](#checklist-6)
 
 ## Unreleased
+
+## To 1.6.1
+
+From **1.6.0** — CSP augment allows the same-origin bundle client when script-src is 'none'.
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
 
 - Bundle client modes (`visibility`, `shared_worker`, `always`) with `csp_augment_script_src: true`: when the response CSP does not already allow the request origin (e.g. `default-src 'none'` or `script-src 'none'`), the augmented `script-src` / `script-src-elem` now also gets `'self'` so `/_nowo/hot-reload/client.js` loads. Dev-only; no action needed. Set `csp_augment_script_src: false` and manage the policy yourself if you do not want this.
 
