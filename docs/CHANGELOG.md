@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Table of contents
 
 - [[Unreleased]](#unreleased)
+- [[1.5.6] - 2026-10-13](#156---2026-10-13)
 - [[1.5.5] - 2026-10-09](#155---2026-10-09)
 - [[1.5.4] - 2026-09-27](#154---2026-09-27)
 - [[1.5.3] - 2026-09-24](#153---2026-09-24)
@@ -27,10 +28,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.6] - 2026-10-13
+
 ### Changed
 
 - Development: `composer.json` pins `config.platform.php` to 8.2.0 so the committed lock stays installable on the minimum PHP; CI overrides the platform per matrix cell.
 - Dev lock re-resolved for PHP 8.2 (Symfony components 8.1.x -> 7.4.x; `symfony/polyfill-deepclone` dropped). `require.php` still declares `>=8.1`, but the Symfony `^7.4` requirement makes 8.2 the effective floor.
+
+### Dependencies
+
+- `igor-php/igor-php` 0.9.7 → 0.10.1 (require-dev constraint + development lock; #3).
 
 ## [1.5.5] - 2026-10-09
 
@@ -234,5 +241,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [1.2.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nowo-tech/HotReloadBundle/releases/tag/v1.0.0
-[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.5.5...HEAD
+[Unreleased]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.5.6...HEAD
+[1.5.6]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.5.5...v1.5.6
 [1.5.5]: https://github.com/nowo-tech/HotReloadBundle/compare/v1.5.4...v1.5.5

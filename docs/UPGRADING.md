@@ -1,7 +1,16 @@
 # Upgrading
 
-
 ## Unreleased
+
+## To 1.5.6
+
+From **1.5.5** — dependency refresh and repository maintenance.
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
+
+- No breaking changes. No application upgrade steps.
 
 ## To 1.5.5
 
@@ -26,7 +35,7 @@ php bin/console cache:clear
 
 ## Table of contents
 
-
+- [To 1.5.6](#to-156)
 - [To 1.5.5](#to-155)
 - [From 1.5.2 to 1.5.3](#from-152-to-153)
 - [From 1.5.1 to 1.5.2](#from-151-to-152)
