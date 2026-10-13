@@ -16,8 +16,8 @@ All options live under `nowo_hot_reload`:
 | `hot_reload_script_url` | `https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm` | URL of the frankenphp-hot-reload ESM module (version-pinned). |
 | `preserve_selectors` | `['[id^="sfwdt"]', '.sf-toolbar', '.sf-minitoolbar']` | CSS selectors that receive `data-frankenphp-hot-reload-preserve`. |
 | `preserve_observe` | `true` | When `true`, the preserve boot uses `MutationObserver` for late-injected toolbar nodes. |
-| `csp_nonce_request_attribute` | `null` | Request attribute holding the CSP nonce for the inline preserve script (e.g. `_csp_nonce`). |
-| `csp_augment_script_src` | `true` | When `true`, append hosts to an existing response `Content-Security-Policy` `script-src` after injection. |
+| `csp_nonce_request_attribute` | `null` | Request attribute holding the CSP nonce added to every injected `<script>` (e.g. `_csp_nonce`). |
+| `csp_augment_script_src` | `true` | When `true`, append hosts to `script-src` / `script-src-elem` of an existing `Content-Security-Policy` (and `-Report-Only`) header after injection; a missing `script-src` is seeded from `default-src`. |
 | `csp_script_src_hosts` | `['https://cdn.jsdelivr.net']` | Hosts used by CSP augment. Empty list → derive origins from the script URLs. |
 
 ## Render gate

@@ -19,6 +19,8 @@ use function sprintf;
 
 use const ENT_QUOTES;
 use const ENT_SUBSTITUTE;
+use const JSON_HEX_AMP;
+use const JSON_HEX_TAG;
 use const JSON_THROW_ON_ERROR;
 use const JSON_UNESCAPED_SLASHES;
 use const JSON_UNESCAPED_UNICODE;
@@ -31,6 +33,12 @@ use const JSON_UNESCAPED_UNICODE;
 final class HotReloadAssets
 {
     public const MARKER = 'data-nowo-hot-reload';
+
+    /**
+     * JSON flags for values embedded inside a <script> element: `<`, `>` and `&` are escaped so a
+     * configured value containing `</script>` cannot close the element early.
+     */
+    private const JSON_SCRIPT_FLAGS = JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP;
 
     /**
      * @param list<string> $preserveSelectors
@@ -115,6 +123,7 @@ final class HotReloadAssets
         $marker     = self::MARKER;
         $nonce      = $this->resolveCspNonce($cspNonce);
         $mode       = $this->getClientMode();
+        $nonceAttr  = $this->buildNonceAttribute($nonce);
 
         $parts = [
             sprintf('<meta name="frankenphp-hot-reload:url" content="%s" %s>', $escapedUrl, $marker),
@@ -122,7 +131,7 @@ final class HotReloadAssets
 
         if ($this->idiomorph) {
             $idiomorphUrl = htmlspecialchars($this->idiomorphScriptUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $parts[]      = sprintf('<script src="%s" %s></script>', $idiomorphUrl, $marker);
+            $parts[]      = sprintf('<script%s src="%s" %s></script>', $nonceAttr, $idiomorphUrl, $marker);
         }
 
         if ($mode->isBundleClient()) {
@@ -133,20 +142,21 @@ final class HotReloadAssets
                 'preserveSelectors' => $this->preserveSelectors,
                 'preserveObserve'   => $this->preserveObserve,
             ];
-            $json    = json_encode($config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $json    = json_encode($config, self::JSON_SCRIPT_FLAGS);
             $parts[] = sprintf(
-                '<script type="application/json" id="nowo-hot-reload-config" %s>%s</script>',
+                '<script%s type="application/json" id="nowo-hot-reload-config" %s>%s</script>',
+                $nonceAttr,
                 $marker,
                 $json,
             );
             $clientSrc = htmlspecialchars(Configuration::ASSET_PATH_CLIENT, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $parts[]   = sprintf('<script src="%s" %s></script>', $clientSrc, $marker);
+            $parts[]   = sprintf('<script%s src="%s" %s></script>', $nonceAttr, $clientSrc, $marker);
         } else {
             $hotReloadUrl = htmlspecialchars($this->hotReloadScriptUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $parts[]      = sprintf('<script src="%s" type="module" %s></script>', $hotReloadUrl, $marker);
+            $parts[]      = sprintf('<script%s src="%s" type="module" %s></script>', $nonceAttr, $hotReloadUrl, $marker);
 
             if ($this->preserveSelectors !== []) {
-                $parts[] = $this->buildPreserveScript($nonce);
+                $parts[] = $this->buildPreserveScript($nonceAttr);
             }
         }
 
@@ -193,18 +203,23 @@ final class HotReloadAssets
         return is_string($value) && $value !== '' ? $value : null;
     }
 
-    private function buildPreserveScript(?string $cspNonce): string
+    /**
+     * Returns the ` nonce="..."` attribute (with leading space) or an empty string.
+     */
+    private function buildNonceAttribute(?string $cspNonce): string
     {
-        $selectors = json_encode(
-            $this->preserveSelectors,
-            JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
-        );
+        if (!is_string($cspNonce) || $cspNonce === '') {
+            return '';
+        }
+
+        return ' nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
+    }
+
+    private function buildPreserveScript(string $nonceAttr): string
+    {
+        $selectors = json_encode($this->preserveSelectors, self::JSON_SCRIPT_FLAGS);
         $marker    = self::MARKER;
         $observe   = $this->preserveObserve ? 'true' : 'false';
-        $nonceAttr = '';
-        if (is_string($cspNonce) && $cspNonce !== '') {
-            $nonceAttr = ' nonce="' . htmlspecialchars($cspNonce, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
-        }
 
         return <<<HTML
 <script{$nonceAttr} {$marker} data-nowo-hot-reload-preserve-boot>

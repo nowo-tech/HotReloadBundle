@@ -64,7 +64,7 @@ Then load an HTML page and open the Web Debug Toolbar **Hot Reload** panel (same
 
 ## Requirements
 
-- PHP `>=8.1` (<8.6); **Symfony 8.x** requires **PHP 8.4+**
+- PHP `>=8.2` (<8.6); **Symfony 8.x** requires **PHP 8.4+**
 - Symfony **7.4+** and **8.0–8.2** (`symfony/*` `^7.4 || ^8.0`)
 - FrankenPHP with Hot Reload + Mercure configured in the Caddyfile (dev)
 - `twig/extra-bundle` + `twig/string-extra` (REQ-TWIG-004) — required for `{{ nowo_hot_reload_assets() }}` and the profiler panel; enable `TwigExtraBundle` in the host app

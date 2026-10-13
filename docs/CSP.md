@@ -28,11 +28,11 @@ nowo_hot_reload:
     csp_nonce_request_attribute: '_csp_nonce'   # or your host attribute name
 ```
 
-The bundle reads that attribute via `RequestStack` and emits `nonce="…"` on the inline preserve `<script>`.
+The bundle reads that attribute via `RequestStack` and emits `nonce="…"` on **every** `<script>` it injects (Idiomorph, the CDN module or bundle client, the JSON config block and the inline preserve script), so nonce-based (`'strict-dynamic'`) policies work too.
 
 ### 2. Allow the CDN (or self-host)
 
-**Option A — auto-augment (default):** when the response already has a `Content-Security-Policy` header, `HotReloadResponseSubscriber` appends configured hosts to `script-src` (or adds a `script-src` directive):
+**Option A — auto-augment (default):** when the response already has a `Content-Security-Policy` (or `Content-Security-Policy-Report-Only`) header, `HotReloadResponseSubscriber` appends the configured hosts to every `script-src` and `script-src-elem` directive. When the policy has no `script-src` but restricts scripts via `default-src`, a `script-src` is added seeded with the `default-src` sources plus the hosts (e.g. `default-src 'self'` → `script-src 'self' https://cdn.jsdelivr.net`), so same-origin scripts keep working. Policies that do not restrict scripts at all are left untouched:
 
 ```yaml
 nowo_hot_reload:

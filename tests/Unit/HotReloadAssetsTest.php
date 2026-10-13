@@ -247,6 +247,42 @@ final class HotReloadAssetsTest extends TestCase
         self::assertStringNotContainsString('id="nowo-hot-reload-config"', $html);
     }
 
+    #[Test]
+    public function itAddsCspNonceToEveryScriptTagInCdnMode(): void
+    {
+        $html = $this->createAssets(mercureUrl: 'https://hub.test')->renderHtml('n0nce');
+
+        self::assertSame(3, preg_match_all('/<script\b/', $html));
+        self::assertSame(3, preg_match_all('/<script nonce="n0nce"[ >]/', $html));
+    }
+
+    #[Test]
+    public function itAddsCspNonceToEveryScriptTagInBundleClientMode(): void
+    {
+        $html = $this->createAssets(mercureUrl: 'https://hub.test', clientMode: 'shared_worker')->renderHtml('n0nce');
+
+        self::assertSame(3, preg_match_all('/<script\b/', $html));
+        self::assertSame(3, preg_match_all('/<script nonce="n0nce"[ >]/', $html));
+    }
+
+    #[Test]
+    public function itEscapesScriptBreakoutInEmbeddedJson(): void
+    {
+        $payload = '</script><script>alert(1)</script>&';
+
+        $cdn = $this->createAssets(mercureUrl: 'https://hub.test', preserveSelectors: [$payload])->renderHtml();
+        self::assertStringNotContainsString('</script><script>alert(1)', $cdn);
+        self::assertStringContainsString('\u003C/script\u003E\u003Cscript\u003Ealert(1)\u003C/script\u003E\u0026', $cdn);
+
+        $client = $this->createAssets(
+            mercureUrl: 'https://hub.test',
+            preserveSelectors: [$payload],
+            clientMode: 'shared_worker',
+        )->renderHtml();
+        self::assertStringNotContainsString('</script><script>alert(1)', $client);
+        self::assertStringContainsString('\u003C/script\u003E', $client);
+    }
+
     /**
      * @param list<string> $preserveSelectors
      */

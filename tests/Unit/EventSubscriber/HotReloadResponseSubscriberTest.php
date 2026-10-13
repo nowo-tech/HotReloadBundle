@@ -258,8 +258,121 @@ final class HotReloadResponseSubscriberTest extends TestCase
         ]);
         $this->createSubscriber()->onKernelResponse($this->createEvent($response));
 
-        $csp = (string) $response->headers->get('Content-Security-Policy');
-        self::assertStringContainsString("default-src 'self'; script-src https://cdn.jsdelivr.net", $csp);
+        // The new script-src must keep the default-src sources, otherwise same-origin scripts are blocked.
+        self::assertSame(
+            "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net",
+            $response->headers->get('Content-Security-Policy'),
+        );
+    }
+
+    #[Test]
+    public function itLeavesCspWithoutScriptRestrictionsUntouched(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $csp      = "img-src 'self'; frame-ancestors 'none'";
+        $response = $this->createCspResponse(['Content-Security-Policy' => $csp]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame($csp, $response->headers->get('Content-Security-Policy'));
+    }
+
+    #[Test]
+    public function itReplacesNoneWhenSeedingScriptSrcFromDefaultSrc(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse(['Content-Security-Policy' => "default-src 'none'"]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame(
+            "default-src 'none'; script-src https://cdn.jsdelivr.net",
+            $response->headers->get('Content-Security-Policy'),
+        );
+    }
+
+    #[Test]
+    public function itAugmentsScriptSrcAndScriptSrcElem(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse([
+            'Content-Security-Policy' => "script-src-elem 'self'; default-src 'self'; script-src 'self' 'nonce-abc'",
+        ]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame(
+            "script-src-elem 'self' https://cdn.jsdelivr.net; default-src 'self'; script-src 'self' 'nonce-abc' https://cdn.jsdelivr.net",
+            $response->headers->get('Content-Security-Policy'),
+        );
+    }
+
+    #[Test]
+    public function itSeedsScriptSrcWhenOnlyScriptSrcElemIsPresent(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse([
+            'Content-Security-Policy' => "default-src 'self' data:; script-src-elem 'self'",
+        ]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame(
+            "default-src 'self' data:; script-src-elem 'self' https://cdn.jsdelivr.net; script-src 'self' data: https://cdn.jsdelivr.net",
+            $response->headers->get('Content-Security-Policy'),
+        );
+    }
+
+    #[Test]
+    public function itDoesNotTreatHostPrefixAsAlreadyAllowed(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse([
+            'Content-Security-Policy' => "script-src 'self' https://cdn.jsdelivr.net.evil.test",
+        ]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame(
+            "script-src 'self' https://cdn.jsdelivr.net.evil.test https://cdn.jsdelivr.net",
+            $response->headers->get('Content-Security-Policy'),
+        );
+    }
+
+    #[Test]
+    public function itAugmentsReportOnlyPolicyConsistently(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse([
+            'Content-Security-Policy'             => "default-src 'self'",
+            'Content-Security-Policy-Report-Only' => "default-src 'self'; report-uri /csp; ",
+        ]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame(
+            "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net",
+            $response->headers->get('Content-Security-Policy'),
+        );
+        self::assertSame(
+            "default-src 'self'; report-uri /csp; script-src 'self' https://cdn.jsdelivr.net",
+            $response->headers->get('Content-Security-Policy-Report-Only'),
+        );
+    }
+
+    #[Test]
+    public function itAugmentsEveryCspHeaderValue(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse([]);
+        $response->headers->set('Content-Security-Policy', ["script-src 'self'", "frame-ancestors 'none'", '']);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame(
+            ["script-src 'self' https://cdn.jsdelivr.net", "frame-ancestors 'none'", ''],
+            $response->headers->all('Content-Security-Policy'),
+        );
     }
 
     #[Test]
@@ -338,6 +451,14 @@ final class HotReloadResponseSubscriberTest extends TestCase
         $this->createSubscriber()->onKernelResponse($this->createEvent($response));
 
         self::assertSame($csp, $response->headers->get('Content-Security-Policy'));
+    }
+
+    /**
+     * @param array<string, string> $headers
+     */
+    private function createCspResponse(array $headers): Response
+    {
+        return new Response('<html><head></head><body>ok</body></html>', 200, ['Content-Type' => 'text/html'] + $headers);
     }
 
     /**

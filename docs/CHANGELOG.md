@@ -28,6 +28,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Injected JSON (bundle client config, preserve selectors) is encoded with `JSON_HEX_TAG | JSON_HEX_AMP`, so a configured value containing `</script>` can no longer break out of the `<script>` element.
+
+### Fixed
+
+- CSP augment: a policy without `script-src` (e.g. `default-src 'self'`) now gets `script-src` seeded with the `default-src` sources plus the CDN hosts, instead of `script-src <cdn>` alone, which blocked same-origin scripts including the bundle client.
+- CSP augment now updates every `script-src` and `script-src-elem` directive (not only the first match), handles `Content-Security-Policy-Report-Only` and multiple CSP header values the same way, and compares hosts as whole source tokens.
+- The configured CSP nonce is now added to every injected `<script>` tag (Idiomorph, CDN module / bundle client, JSON config), not only to the inline preserve script.
+
+### Changed
+
+- `require.php` is now `>=8.2 <8.6` (the effective floor already imposed by Symfony `^7.4`).
+
 ## [1.5.6] - 2026-10-13
 
 ### Changed

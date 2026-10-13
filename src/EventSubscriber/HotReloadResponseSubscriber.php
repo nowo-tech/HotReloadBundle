@@ -13,12 +13,18 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+use function in_array;
+
+use const PREG_SPLIT_NO_EMPTY;
+
 /**
  * Injects FrankenPHP Hot Reload client assets into HTML responses.
  */
 final class HotReloadResponseSubscriber implements EventSubscriberInterface
 {
     public const REQUEST_ATTR_INJECTED = '_nowo_hot_reload_injected';
+
+    private const CSP_HEADERS = ['Content-Security-Policy', 'Content-Security-Policy-Report-Only'];
 
     /**
      * @param list<string> $cspScriptSrcHosts
@@ -154,39 +160,105 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $csp = $response->headers->get('Content-Security-Policy');
-        if ($csp === null || $csp === '') {
-            return;
-        }
+        foreach (self::CSP_HEADERS as $headerName) {
+            $policies = $response->headers->all($headerName);
+            if ($policies === []) {
+                continue;
+            }
 
-        $updated = $this->mergeScriptSrcHosts($csp, array_values($hosts));
-        if ($updated !== $csp) {
-            $response->headers->set('Content-Security-Policy', $updated);
+            $changed = false;
+            $updated = [];
+            foreach ($policies as $policy) {
+                $policy    = (string) $policy;
+                $merged    = $policy === '' ? $policy : $this->mergeScriptSrcHosts($policy, array_values($hosts));
+                $changed   = $changed || $merged !== $policy;
+                $updated[] = $merged;
+            }
+
+            if ($changed) {
+                $response->headers->set($headerName, $updated);
+            }
         }
     }
 
     /**
+     * Adds the asset hosts to every script-src / script-src-elem directive of a policy.
+     *
+     * When the policy has no script-src but restricts scripts through default-src, a new
+     * script-src is seeded with the default-src sources so same-origin scripts (including the
+     * bundle client) stay allowed. Policies that do not restrict scripts at all are left untouched.
+     *
      * @param list<string> $hosts
      */
     private function mergeScriptSrcHosts(string $csp, array $hosts): string
     {
-        if (preg_match('/script-src([^;]*)/i', $csp, $matches) === 1) {
-            $directive = $matches[1];
-            $missing   = [];
-            foreach ($hosts as $host) {
-                if (!str_contains($directive, $host)) {
-                    $missing[] = $host;
-                }
+        /** @var list<array{name: string, sources: list<string>}> $directives */
+        $directives = [];
+        foreach (explode(';', $csp) as $rawDirective) {
+            $tokens = preg_split('/\s+/', trim($rawDirective), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            if ($tokens === []) {
+                continue;
             }
-            if ($missing === []) {
-                return $csp;
-            }
-
-            $replacement = 'script-src' . rtrim($directive) . ' ' . implode(' ', $missing);
-
-            return preg_replace('/script-src[^;]*/i', $replacement, $csp, 1) ?? $csp;
+            $name         = strtolower(array_shift($tokens));
+            $directives[] = ['name' => $name, 'sources' => $tokens];
         }
 
-        return rtrim($csp, '; ') . '; script-src ' . implode(' ', $hosts);
+        $changed       = false;
+        $hasScriptSrc  = false;
+        $defaultSource = null;
+        foreach ($directives as $index => $directive) {
+            if ($directive['name'] === 'default-src' && $defaultSource === null) {
+                $defaultSource = $directive['sources'];
+            }
+            if ($directive['name'] !== 'script-src' && $directive['name'] !== 'script-src-elem') {
+                continue;
+            }
+            $hasScriptSrc = $hasScriptSrc || $directive['name'] === 'script-src';
+            $sources      = $this->addMissingSources($directive['sources'], $hosts);
+            if ($sources !== $directive['sources']) {
+                $directives[$index]['sources'] = $sources;
+                $changed                       = true;
+            }
+        }
+
+        if (!$hasScriptSrc && $defaultSource !== null) {
+            $directives[] = ['name' => 'script-src', 'sources' => $this->addMissingSources($defaultSource, $hosts)];
+            $changed      = true;
+        }
+
+        if (!$changed) {
+            return $csp;
+        }
+
+        return implode('; ', array_map(
+            static fn (array $directive): string => implode(' ', [$directive['name'], ...$directive['sources']]),
+            $directives,
+        ));
+    }
+
+    /**
+     * @param list<string> $sources
+     * @param list<string> $hosts
+     *
+     * @return list<string>
+     */
+    private function addMissingSources(array $sources, array $hosts): array
+    {
+        $known   = array_map('strtolower', $sources);
+        $missing = [];
+        foreach ($hosts as $host) {
+            if (!in_array(strtolower($host), $known, true)) {
+                $known[]   = strtolower($host);
+                $missing[] = $host;
+            }
+        }
+        if ($missing === []) {
+            return $sources;
+        }
+
+        // 'none' cannot be combined with other source expressions.
+        $sources = array_values(array_filter($sources, static fn (string $source): bool => strtolower($source) !== "'none'"));
+
+        return [...$sources, ...$missing];
     }
 }
