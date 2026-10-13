@@ -32,7 +32,7 @@ The bundle reads that attribute via `RequestStack` and emits `nonce="…"` on **
 
 ### 2. Allow the CDN (or self-host)
 
-**Option A — auto-augment (default):** when the response already has a `Content-Security-Policy` (or `Content-Security-Policy-Report-Only`) header, `HotReloadResponseSubscriber` appends the configured hosts to every `script-src` and `script-src-elem` directive. When the policy has no `script-src` but restricts scripts via `default-src`, a `script-src` is added seeded with the `default-src` sources plus the hosts (e.g. `default-src 'self'` → `script-src 'self' https://cdn.jsdelivr.net`), so same-origin scripts keep working. Policies that do not restrict scripts at all are left untouched:
+**Option A — auto-augment (default):** when the response already has a `Content-Security-Policy` (or `Content-Security-Policy-Report-Only`) header, `HotReloadResponseSubscriber` appends the configured hosts to every `script-src` and `script-src-elem` directive. When the policy has no `script-src` but restricts scripts via `default-src`, a `script-src` is added seeded with the `default-src` sources plus the hosts (e.g. `default-src 'self'` → `script-src 'self' https://cdn.jsdelivr.net`), so same-origin scripts keep working. In bundle client modes (`visibility`, `shared_worker`, `always`) `'self'` is also added when the directive does not already allow the request origin (e.g. `default-src 'none'` → `script-src https://cdn.jsdelivr.net 'self'`), because `/_nowo/hot-reload/client.js` is served same-origin. Policies that do not restrict scripts at all are left untouched:
 
 ```yaml
 nowo_hot_reload:

@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- CSP augment in bundle client modes (`visibility`, `shared_worker`, `always`): `'self'` is now added to the augmented `script-src` / `script-src-elem` when the policy does not already allow the request origin (e.g. `default-src 'none'` or an explicit `script-src 'none'`). Previously `'none'` was dropped but nothing allowed the same-origin `/_nowo/hot-reload/client.js`, so the client stayed blocked. Policies that already allow `'self'`, the request origin, its scheme or `*` are not changed; `cdn` mode is unaffected.
+
 ## [1.6.0] - 2026-10-13
 
 ### Security

@@ -35,6 +35,8 @@
 
 ## Unreleased
 
+- Bundle client modes (`visibility`, `shared_worker`, `always`) with `csp_augment_script_src: true`: when the response CSP does not already allow the request origin (e.g. `default-src 'none'` or `script-src 'none'`), the augmented `script-src` / `script-src-elem` now also gets `'self'` so `/_nowo/hot-reload/client.js` loads. Dev-only; no action needed. Set `csp_augment_script_src: false` and manage the policy yourself if you do not want this.
+
 ## To 1.6.0
 
 From **1.5.6** — CSP augment keeps same-origin scripts, nonce on every injected script, JSON_HEX_TAG.

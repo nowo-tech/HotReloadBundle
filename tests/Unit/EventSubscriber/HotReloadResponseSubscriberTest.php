@@ -7,6 +7,7 @@ namespace Nowo\HotReloadBundle\Tests\Unit\EventSubscriber;
 use Nowo\HotReloadBundle\Event\HotReloadInjectEvent;
 use Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber;
 use Nowo\HotReloadBundle\HotReloadAssets;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -340,6 +341,110 @@ final class HotReloadResponseSubscriberTest extends TestCase
     }
 
     #[Test]
+    public function itAddsSelfForBundleClientWhenDefaultSrcIsNone(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse(['Content-Security-Policy' => "default-src 'none'"]);
+        $this->createSubscriber(clientMode: 'visibility')->onKernelResponse($this->createEvent($response));
+
+        // /_nowo/hot-reload/client.js is same-origin: 'self' must be allowed or the client is blocked.
+        self::assertSame(
+            "default-src 'none'; script-src https://cdn.jsdelivr.net 'self'",
+            $response->headers->get('Content-Security-Policy'),
+        );
+    }
+
+    #[Test]
+    public function itAddsSelfForBundleClientWhenScriptSrcIsNone(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse([
+            'Content-Security-Policy' => "default-src 'self'; script-src 'none'; script-src-elem 'none'",
+        ]);
+        $this->createSubscriber(clientMode: 'shared_worker')->onKernelResponse($this->createEvent($response));
+
+        self::assertSame(
+            "default-src 'self'; script-src https://cdn.jsdelivr.net 'self'; script-src-elem https://cdn.jsdelivr.net 'self'",
+            $response->headers->get('Content-Security-Policy'),
+        );
+    }
+
+    #[Test]
+    public function itDoesNotDuplicateSelfForBundleClient(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse([
+            'Content-Security-Policy' => "default-src 'self'; script-src 'self' 'nonce-abc'",
+        ]);
+        $this->createSubscriber(clientMode: 'always')->onKernelResponse($this->createEvent($response));
+
+        self::assertSame(
+            "default-src 'self'; script-src 'self' 'nonce-abc' https://cdn.jsdelivr.net",
+            $response->headers->get('Content-Security-Policy'),
+        );
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function sameOriginAllowedProvider(): iterable
+    {
+        yield 'origin' => ['script-src http://localhost'];
+        yield 'origin trailing slash' => ['script-src HTTP://LOCALHOST/'];
+        yield 'host only' => ['script-src localhost'];
+        yield 'scheme' => ['script-src http:'];
+        yield 'wildcard' => ['script-src *'];
+    }
+
+    #[Test]
+    #[DataProvider('sameOriginAllowedProvider')]
+    public function itDoesNotAddSelfWhenRequestOriginIsAlreadyAllowed(string $policy): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse(['Content-Security-Policy' => $policy]);
+        $this->createSubscriber(clientMode: 'visibility')->onKernelResponse($this->createEvent($response));
+
+        self::assertSame($policy . ' https://cdn.jsdelivr.net', $response->headers->get('Content-Security-Policy'));
+    }
+
+    #[Test]
+    public function itAddsSelfForBundleClientEvenWithoutCdnHosts(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $assets = new HotReloadAssets(
+            enabled: true,
+            requireFrankenphpEnv: true,
+            mercureUrl: null,
+            idiomorph: false,
+            idiomorphScriptUrl: '/local/idiomorph.js',
+            hotReloadScriptUrl: '/local/hot-reload.js',
+            preserveSelectors: [],
+            clientMode: 'visibility',
+        );
+        $subscriber = new HotReloadResponseSubscriber($assets, true, null, true, [], []);
+        $response   = $this->createCspResponse(['Content-Security-Policy' => "script-src 'none'"]);
+        $subscriber->onKernelResponse($this->createEvent($response));
+
+        self::assertSame("script-src 'self'", $response->headers->get('Content-Security-Policy'));
+    }
+
+    #[Test]
+    public function itDoesNotAddSelfInCdnMode(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = $this->createCspResponse(['Content-Security-Policy' => "script-src 'none'"]);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($response));
+
+        self::assertSame('script-src https://cdn.jsdelivr.net', $response->headers->get('Content-Security-Policy'));
+    }
+
+    #[Test]
     public function itAugmentsReportOnlyPolicyConsistently(): void
     {
         $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
@@ -469,6 +574,7 @@ final class HotReloadResponseSubscriberTest extends TestCase
         ?EventDispatcher $eventDispatcher = null,
         bool $cspAugmentScriptSrc = true,
         array $ignorePathPrefixes = ['/_wdt', '/_profiler'],
+        string $clientMode = 'cdn',
     ): HotReloadResponseSubscriber {
         $assets = new HotReloadAssets(
             enabled: true,
@@ -478,6 +584,7 @@ final class HotReloadResponseSubscriberTest extends TestCase
             idiomorphScriptUrl: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4',
             hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm',
             preserveSelectors: [],
+            clientMode: $clientMode,
         );
 
         return new HotReloadResponseSubscriber(

@@ -98,7 +98,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
 
         $response->setContent($content);
         $event->getRequest()->attributes->set(self::REQUEST_ATTR_INJECTED, true);
-        $this->augmentContentSecurityPolicy($response);
+        $this->augmentContentSecurityPolicy($response, $request);
     }
 
     /**
@@ -146,7 +146,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         ) === 1;
     }
 
-    private function augmentContentSecurityPolicy(Response $response): void
+    private function augmentContentSecurityPolicy(Response $response, Request $request): void
     {
         if (!$this->cspAugmentScriptSrc) {
             return;
@@ -156,7 +156,14 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         if ($hosts === []) {
             $hosts = $this->assets->getCspScriptSrcHostsHint();
         }
-        if ($hosts === []) {
+
+        // Bundle client modes load /_nowo/hot-reload/client.js (and its SharedWorker) from the
+        // application origin, so the augmented script-src must allow same-origin scripts.
+        $sameOrigin = $this->assets->getClientMode()->isBundleClient()
+            ? ['scheme' => strtolower($request->getScheme()), 'origin' => strtolower($request->getSchemeAndHttpHost())]
+            : null;
+
+        if ($hosts === [] && $sameOrigin === null) {
             return;
         }
 
@@ -170,7 +177,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             $updated = [];
             foreach ($policies as $policy) {
                 $policy    = (string) $policy;
-                $merged    = $policy === '' ? $policy : $this->mergeScriptSrcHosts($policy, array_values($hosts));
+                $merged    = $policy === '' ? $policy : $this->mergeScriptSrcHosts($policy, array_values($hosts), $sameOrigin);
                 $changed   = $changed || $merged !== $policy;
                 $updated[] = $merged;
             }
@@ -188,9 +195,13 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
      * script-src is seeded with the default-src sources so same-origin scripts (including the
      * bundle client) stay allowed. Policies that do not restrict scripts at all are left untouched.
      *
+     * When $sameOrigin is given (bundle client modes), 'self' is also added to each augmented
+     * directive that does not already allow the request origin (e.g. `default-src 'none'`).
+     *
      * @param list<string> $hosts
+     * @param array{scheme: string, origin: string}|null $sameOrigin
      */
-    private function mergeScriptSrcHosts(string $csp, array $hosts): string
+    private function mergeScriptSrcHosts(string $csp, array $hosts, ?array $sameOrigin): string
     {
         /** @var list<array{name: string, sources: list<string>}> $directives */
         $directives = [];
@@ -214,7 +225,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
                 continue;
             }
             $hasScriptSrc = $hasScriptSrc || $directive['name'] === 'script-src';
-            $sources      = $this->addMissingSources($directive['sources'], $hosts);
+            $sources      = $this->addMissingSources($directive['sources'], $this->requiredSources($directive['sources'], $hosts, $sameOrigin));
             if ($sources !== $directive['sources']) {
                 $directives[$index]['sources'] = $sources;
                 $changed                       = true;
@@ -222,7 +233,7 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         }
 
         if (!$hasScriptSrc && $defaultSource !== null) {
-            $directives[] = ['name' => 'script-src', 'sources' => $this->addMissingSources($defaultSource, $hosts)];
+            $directives[] = ['name' => 'script-src', 'sources' => $this->addMissingSources($defaultSource, $this->requiredSources($defaultSource, $hosts, $sameOrigin))];
             $changed      = true;
         }
 
@@ -234,6 +245,47 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             static fn (array $directive): string => implode(' ', [$directive['name'], ...$directive['sources']]),
             $directives,
         ));
+    }
+
+    /**
+     * Sources the directive must allow: the asset hosts, plus 'self' when same-origin scripts are
+     * required and the directive does not already allow the request origin.
+     *
+     * @param list<string> $sources
+     * @param list<string> $hosts
+     * @param array{scheme: string, origin: string}|null $sameOrigin
+     *
+     * @return list<string>
+     */
+    private function requiredSources(array $sources, array $hosts, ?array $sameOrigin): array
+    {
+        if ($sameOrigin === null || $this->allowsOrigin($sources, $sameOrigin)) {
+            return $hosts;
+        }
+
+        return [...$hosts, "'self'"];
+    }
+
+    /**
+     * @param list<string> $sources
+     * @param array{scheme: string, origin: string} $sameOrigin
+     */
+    private function allowsOrigin(array $sources, array $sameOrigin): bool
+    {
+        $host = (string) preg_replace('#^[a-z][a-z0-9+.-]*://#', '', $sameOrigin['origin']);
+        foreach ($sources as $source) {
+            $source = rtrim(strtolower($source), '/');
+            if ($source === "'self'"
+                || $source === $sameOrigin['origin']
+                || $source === $sameOrigin['scheme'] . ':'
+                || $source === $host
+                || ($source === '*' && in_array($sameOrigin['scheme'], ['http', 'https'], true))
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
