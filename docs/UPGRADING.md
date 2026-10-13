@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## To 1.6.0
+
+From **1.5.6** — CSP augment keeps same-origin scripts, nonce on every injected script, JSON_HEX_TAG.
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
+
+- The CSP augment now builds `script-src` from `default-src` (instead of overriding it), also updates `script-src-elem` and `Content-Security-Policy-Report-Only`, and matches hosts as whole tokens.
+- `composer.json` now requires PHP `>=8.2 <8.6` (8.1 was never installable with Symfony ^7.4).
+
 ## To 1.5.6
 
 From **1.5.5** — dependency refresh and repository maintenance.
@@ -35,6 +46,7 @@ php bin/console cache:clear
 
 ## Table of contents
 
+- [To 1.6.0](#to-160)
 - [To 1.5.6](#to-156)
 - [To 1.5.5](#to-155)
 - [From 1.5.2 to 1.5.3](#from-152-to-153)
