@@ -1,5 +1,38 @@
 # Upgrading
 
+## Table of contents
+
+- [Unreleased](#unreleased)
+- [To 1.6.0](#to-160)
+- [To 1.5.6](#to-156)
+- [To 1.5.5](#to-155)
+- [To 1.5.4](#to-154)
+- [From 1.5.2 to 1.5.3](#from-152-to-153)
+  - [Notes](#notes)
+- [From 1.5.1 to 1.5.2](#from-151-to-152)
+  - [Notes](#notes-1)
+- [From 1.5.0 to 1.5.1](#from-150-to-151)
+  - [Notes](#notes-2)
+- [From 1.4.2 to 1.5.0](#from-142-to-150)
+  - [Checklist](#checklist)
+- [From 1.4.1 to 1.4.2](#from-141-to-142)
+- [From 1.4.0 → 1.4.1](#from-140--141)
+- [From 1.3.2 → 1.4.0](#from-132--140)
+  - [Checklist](#checklist-1)
+- [From 1.3.1 → 1.3.2](#from-131--132)
+- [From 1.3.0 → 1.3.1](#from-130--131)
+  - [Checklist](#checklist-2)
+- [From 1.2.1 → 1.3.0](#from-121--130)
+  - [Checklist](#checklist-3)
+- [From 1.2.0 → 1.2.1](#from-120--121)
+- [From 1.1.0 → 1.2.0](#from-110--120)
+  - [Checklist](#checklist-4)
+- [From 1.0.0 → 1.1.0](#from-100--110)
+  - [Checklist](#checklist-5)
+- [From nothing → 1.0.0](#from-nothing--100)
+  - [Install](#install)
+  - [Checklist](#checklist-6)
+
 ## Unreleased
 
 ## To 1.6.0
@@ -43,26 +76,6 @@ php bin/console cache:clear
 ```
 
 - No application upgrade steps for require-dev Igor tooling (REQ-CS-008). Consumers do not pull `igor-php/igor-php` transitively.
-
-## Table of contents
-
-- [To 1.6.0](#to-160)
-- [To 1.5.6](#to-156)
-- [To 1.5.5](#to-155)
-- [From 1.5.2 to 1.5.3](#from-152-to-153)
-- [From 1.5.1 to 1.5.2](#from-151-to-152)
-- [From 1.5.0 to 1.5.1](#from-150-to-151)
-- [From 1.4.2 to 1.5.0](#from-142-to-150)
-- [From 1.4.1 to 1.4.2](#from-141-to-142)
-- [From 1.4.0 → 1.4.1](#from-140--141)
-- [From 1.3.2 → 1.4.0](#from-132--140)
-- [From 1.3.1 → 1.3.2](#from-131--132)
-- [From 1.3.0 → 1.3.1](#from-130--131)
-- [From 1.2.1 → 1.3.0](#from-121--130)
-- [From 1.2.0 → 1.2.1](#from-120--121)
-- [From 1.1.0 → 1.2.0](#from-110--120)
-- [From 1.0.0 → 1.1.0](#from-100--110)
-- [From nothing → 1.0.0](#from-nothing--100)
 
 ## From 1.5.2 to 1.5.3
 
