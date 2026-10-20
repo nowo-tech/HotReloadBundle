@@ -2,6 +2,15 @@
 
 Hot Reload injects **third-party** (or self-hosted) scripts into HTML in **development only**. Strict CSP policies (`script-src 'self'` without CDNs, and nonce-only inline scripts) need a small host adjustment.
 
+## Table of contents
+
+- [What is injected](#what-is-injected)
+- [Recommended host setup](#recommended-host-setup)
+  - [1. CSP nonce for the preserve boot script](#1-csp-nonce-for-the-preserve-boot-script)
+  - [2. Allow the CDN (or self-host)](#2-allow-the-cdn-or-self-host)
+- [Event hook](#event-hook)
+- [Production](#production)
+
 ## What is injected
 
 When the render gate is open:

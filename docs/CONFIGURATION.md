@@ -20,6 +20,13 @@ All options live under `nowo_hot_reload`:
 | `csp_augment_script_src` | `true` | When `true`, append hosts to `script-src` / `script-src-elem` of an existing `Content-Security-Policy` (and `-Report-Only`) header after injection; a missing `script-src` is seeded from `default-src`. |
 | `csp_script_src_hosts` | `['https://cdn.jsdelivr.net']` | Hosts used by CSP augment. Empty list → derive origins from the script URLs. |
 
+## Table of contents
+
+- [Render gate](#render-gate)
+- [CSP](#csp)
+- [HTML detection](#html-detection)
+- [Web Debug Toolbar](#web-debug-toolbar)
+
 ## Render gate
 
 Assets are rendered only when **all** of the following hold:

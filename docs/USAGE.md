@@ -6,7 +6,7 @@ This bundle injects FrankenPHP Hot Reload **client** assets into HTML. The **ser
 
 ## Table of contents
 
-- [Diagnose setup](#diagnose-setup-nowohot-reloadcheck)
+- [Diagnose setup (`nowo:hot-reload:check`)](#diagnose-setup-nowohot-reloadcheck)
 - [Auto-inject (default)](#auto-inject-default)
 - [Multi-tab client modes](#multi-tab-client-modes)
 - [Twig manual inject](#twig-manual-inject)
@@ -14,6 +14,8 @@ This bundle injects FrankenPHP Hot Reload **client** assets into HTML. The **ser
 - [Optional: explicit Mercure URL](#optional-explicit-mercure-url)
 - [Preserve toolbar / custom DOM](#preserve-toolbar--custom-dom)
 - [Overriding templates (REQ-TWIG-001)](#overriding-templates-req-twig-001)
+  - [Overridable subpaths](#overridable-subpaths)
+  - [Procedure](#procedure)
 
 ## Diagnose setup (`nowo:hot-reload:check`)
 

@@ -14,13 +14,14 @@ Official references: [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-rel
 - [2. Symfony YAML](#2-symfony-yaml)
 - [3. Caddyfile — classic](#3-caddyfile--classic)
 - [4. Caddyfile — worker + watch](#4-caddyfile--worker--watch)
-- [Worker with `reset_kernel: false`](#worker-with-reset_kernel-false)
+  - [Worker with `reset_kernel: false`](#worker-with-reset_kernel-false)
 - [5. `FRANKENPHP_HOT_RELOAD` (do not put this in `.env`)](#5-frankenphp_hot_reload-do-not-put-this-in-env)
 - [6. Optional `mercure_url`](#6-optional-mercure_url)
 - [7. Docker / Compose](#7-docker--compose)
 - [Validate the setup](#validate-the-setup)
 - [Confirm it works in the browser](#confirm-it-works-in-the-browser)
 - [Troubleshooting](#troubleshooting)
+- [Multi-tab and HTTP/1.1](#multi-tab-and-http11)
 
 ## How the pieces fit
 

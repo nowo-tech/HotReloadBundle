@@ -8,6 +8,18 @@
 | Method | Manual review of every file under `src/` (services, subscribers, data collector, Twig extension, command, DI extension, compiler pass, YAML config) and `NowoHotReloadBundle.php`; PHPStan classic + worker + hardening |
 | **Verdict** | ✅ **100% compatible** with FrankenPHP worker mode and **`reset_kernel: false`** (scenario B below) |
 
+## Table of contents
+
+- [Execution model assumed](#execution-model-assumed)
+- [Summary](#summary)
+- [Services reviewed](#services-reviewed)
+- [Findings](#findings)
+  - [W-01 — Profiler data collector keeps the last request in properties (Mitigated)](#w-01--profiler-data-collector-keeps-the-last-request-in-properties-mitigated)
+  - [W-02 — Filesystem reads on each request (Low)](#w-02--filesystem-reads-on-each-request-low)
+  - [W-03 — `$_SERVER` read at runtime (Info)](#w-03--_server-read-at-runtime-info)
+- [Usage recommendations in worker mode](#usage-recommendations-in-worker-mode)
+- [Re-audit triggers](#re-audit-triggers)
+
 ## Execution model assumed
 
 FrankenPHP worker mode boots the Symfony kernel once per worker and serves many requests with the same container. This audit assumes the **strict** variant: the kernel is **not** rebooted between requests, so every shared service, static property and PHP global survives from one request to the next. Two scenarios are evaluated:
