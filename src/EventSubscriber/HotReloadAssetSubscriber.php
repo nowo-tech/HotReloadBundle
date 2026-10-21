@@ -46,12 +46,8 @@ final class HotReloadAssetSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $file = __DIR__ . '/../Resources/public/' . $map[$path];
-        if (!is_file($file) || !is_readable($file) || !str_ends_with($file, '.js')) {
-            return;
-        }
-
-        $contents = file_get_contents($file);
+        $file     = __DIR__ . '/../Resources/public/' . $map[$path];
+        $contents = is_file($file) && is_readable($file) && str_ends_with($file, '.js') ? file_get_contents($file) : false;
         if ($contents === false) {
             return;
         }

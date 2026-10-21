@@ -1,6 +1,8 @@
 services:
+    # REQ-SF-003: #[AsCommand] + autoconfiguration register the command (no manual console.command tag).
+    _defaults:
+        autoconfigure: true
+
     Nowo\HotReloadBundle\Command\HotReloadCheckCommand:
         arguments:
             $diagnostics: '@Nowo\HotReloadBundle\Diagnostics\HotReloadDiagnostics'
-        tags:
-            - { name: console.command }

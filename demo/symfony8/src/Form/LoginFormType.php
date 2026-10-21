@@ -25,6 +25,7 @@ final class LoginFormType extends AbstractType
             ])
             ->add('_password', TogglePasswordType::class, [
                 'label' => 'Password',
+                'help'  => 'Password toggle powered by PasswordToggleBundle.',
                 'attr'  => [
                     'autocomplete' => 'current-password',
                     'class'        => 'form-control',
@@ -37,7 +38,10 @@ final class LoginFormType extends AbstractType
         $resolver->setDefaults([
             'action'          => '/login',
             'method'          => 'POST',
-            'csrf_protection' => false,
+            // form_login (enable_csrf) reads _csrf_token with the "authenticate" token id.
+            'csrf_protection' => true,
+            'csrf_field_name' => '_csrf_token',
+            'csrf_token_id'   => 'authenticate',
         ]);
     }
 

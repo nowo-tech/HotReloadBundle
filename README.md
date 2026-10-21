@@ -1,6 +1,6 @@
 # Hot Reload Bundle
 
-[![CI](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/hot-reload-bundle.svg?style=flat)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/hot-reload-bundle.svg)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-7.4%20%7C%208.0%20%7C%208.1%20%7C%208.2-000000?logo=symfony)](https://symfony.com) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/hot-reload-bundle.svg?style=social&label=Star)](https://github.com/nowo-tech/HotReloadBundle) [![Coverage](https://img.shields.io/badge/Coverage-99.8%25-brightgreen)](#tests-and-coverage)
+[![CI](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml/badge.svg)](https://github.com/nowo-tech/HotReloadBundle/actions/workflows/ci.yml) [![Packagist Version](https://img.shields.io/packagist/v/nowo-tech/hot-reload-bundle.svg?style=flat)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![Packagist Downloads](https://img.shields.io/packagist/dt/nowo-tech/hot-reload-bundle.svg)](https://packagist.org/packages/nowo-tech/hot-reload-bundle) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?logo=php)](https://php.net) [![Symfony](https://img.shields.io/badge/Symfony-7.4%20%7C%208.0%20%7C%208.1%20%7C%208.2-000000?logo=symfony)](https://symfony.com) [![GitHub stars](https://img.shields.io/github/stars/nowo-tech/hot-reload-bundle.svg?style=social&label=Star)](https://github.com/nowo-tech/HotReloadBundle) [![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen)](#tests-and-coverage)
 
 > ⭐ **Found this useful?** [Install from Packagist](https://packagist.org/packages/nowo-tech/hot-reload-bundle) · Give it a **star** on [GitHub](https://github.com/nowo-tech/HotReloadBundle) so more developers can find it.
 
@@ -153,7 +153,7 @@ make release-check
 ## Tests and coverage
 
 - Tests: PHPUnit (PHP)
-- PHP: **99.8%** lines (1171/1173, measured with `make test-coverage`)
+- PHP: **100%** lines (1168/1168, measured with `make test-coverage`; `make test-coverage` and CI fail below 100%)
 
 ## License and author
 

@@ -32,6 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Services are autoconfigured: the response / asset subscribers and `nowo:hot-reload:check` are registered through `EventSubscriberInterface` / `#[AsCommand]` instead of manual tags (REQ-SF-003).
+- PHP line coverage 100% (two defensive branches folded into covered expressions); `make test-coverage` and the CI coverage job fail below 100% (`.scripts/coverage-fail-under.sh`) (REQ-TEST-003/007).
+- Makefile: canonical `help`; `release-check` starts with `ensure-up` and adds `check-open-prs` and `check-no-raw-html-form` (REQ-MAKE-001/002).
+- Rector targets PHP 8.2 (the package floor) and runs with at most 2 workers (REQ-CS-003).
+- Demo: login form renders its CSRF token through `LoginFormType` (`csrf_field_name` `_csrf_token`, token id `authenticate`) with the child-row loop, no raw `<input>`; successful login redirects to `homepage` (the old `demo_debug` target route did not exist and returned 500) (REQ-DEMO-001, REQ-TWIG-003/005).
+- `.scripts/check-no-cursor-coauthor.sh` accepts git worktrees (REQ-GIT-001).
 - Dependencies refreshed (Composer and pnpm/npm lock files of the bundle and its demos, campaign 2026-10-19).
 - `.php-cs-fixer.dist.php`: `new ParallelConfig(2)` (REQ-CS-001).
 - Documentation: wave-1 REQ compliance — README documentation list (plain links, extras under Additional documentation), GitHub stars and Coverage badges, canonical issue templates, CONTRIBUTING Cursor Agent queue settings, post-commit co-author check in RELEASE/CONTRIBUTING, TOCs for long docs.

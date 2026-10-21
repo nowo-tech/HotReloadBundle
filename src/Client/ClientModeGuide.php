@@ -114,13 +114,8 @@ final class ClientModeGuide
      */
     public static function requirementsForMode(ClientMode $mode): array
     {
-        foreach (self::getApproaches() as $approach) {
-            if ($approach['id'] === $mode->value) {
-                return $approach['requirements'];
-            }
-        }
-
-        return []; // @codeCoverageIgnore — defensive: every ClientMode id is listed in getApproaches()
+        // Every ClientMode id is listed in getApproaches(); the fallback only guards a future enum case.
+        return array_column(self::getApproaches(), 'requirements', 'id')[$mode->value] ?? [];
     }
 
     /**

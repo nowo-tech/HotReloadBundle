@@ -1,4 +1,8 @@
 services:
+    # REQ-SF-003: subscribers are tagged by autoconfiguration (EventSubscriberInterface), not by hand.
+    _defaults:
+        autoconfigure: true
+
     Nowo\HotReloadBundle\HotReloadAssets:
         arguments:
             $enabled: '%nowo.hot_reload.enabled%'
@@ -21,8 +25,6 @@ services:
             $cspAugmentScriptSrc: '%nowo.hot_reload.csp_augment_script_src%'
             $cspScriptSrcHosts: '%nowo.hot_reload.csp_script_src_hosts%'
             $ignorePathPrefixes: '%nowo.hot_reload.ignore_path_prefixes%'
-        tags:
-            - { name: kernel.event_subscriber }
 
     Nowo\HotReloadBundle\Diagnostics\HotReloadDiagnostics:
         arguments:
@@ -39,6 +41,4 @@ services:
             $projectDir: '%kernel.project_dir%'
             $clientMode: '%nowo.hot_reload.client_mode%'
 
-    Nowo\HotReloadBundle\EventSubscriber\HotReloadAssetSubscriber:
-        tags:
-            - { name: kernel.event_subscriber }
+    Nowo\HotReloadBundle\EventSubscriber\HotReloadAssetSubscriber: ~

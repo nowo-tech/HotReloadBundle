@@ -7,44 +7,66 @@ DOCKER_BIN  := $(shell command -v docker 2>/dev/null)
 COMPOSE_BIN := $(if $(DOCKER_BIN),$(shell $(DOCKER_BIN) compose version >/dev/null 2>&1 && echo "$(DOCKER_BIN) compose" || echo "docker-compose"),docker-compose)
 COMPOSE     := $(COMPOSE_BIN) -f $(COMPOSE_FILE)
 SERVICE_PHP := php
+# REQ-TEST-003 line-coverage gate (percent).
+COVERAGE_MIN ?= 100
+SHELL := /bin/bash
 
-.PHONY: help up down down-dev build shell install ensure-up test test-coverage coverage-php-percent cs-check cs-fix qa clean release-check release-check-demos demo-smoke composer-sync rector rector-dry phpstan igor update validate assets setup-hooks check-no-cursor-coauthor strip-cursor-coauthor-from-history check-twig-extra
+.PHONY: help up down down-dev build shell install ensure-up test test-coverage coverage-php-percent cs-check cs-fix qa clean release-check release-check-demos demo-smoke composer-sync rector rector-dry phpstan igor update validate assets setup-hooks check-no-cursor-coauthor strip-cursor-coauthor-from-history check-twig-extra \
+	check-no-raw-html-form check-open-prs
 
 help:
 	@echo "Hot Reload Bundle - Development Commands"
 	@echo ""
 	@echo "Usage: make <target>"
 	@echo ""
-	@echo "Targets:"
-	@echo "  up            Start Docker container"
-	@echo "  down          Stop Docker container"
-	@echo "  down-dev      Stop root $(COMPOSE) (dev) and remove orphans"
-	@echo "  build         Rebuild Docker image (no cache)"
-	@echo "  shell         Open shell in container"
-	@echo "  install       Install Composer dependencies"
-	@echo "  assets        No-op (no frontend in this bundle)"
-	@echo "  test          Run PHPUnit tests (starts container if needed)"
-	@echo "  test-coverage Run tests with code coverage (starts container if needed)"
-	@echo "  cs-check      Check code style"
-	@echo "  cs-fix        Fix code style"
-	@echo "  rector        Apply Rector refactoring"
-	@echo "  rector-dry    Run Rector in dry-run mode"
-	@echo "  phpstan       Run PHPStan static analysis"
-	@echo "  igor          Run Igor worker-state audit (REQ-CS-008)"
-	@echo "  qa            Run all QA checks (cs-check + test)"
+	@echo "Container:"
+	@echo "  up                Start Docker container"
+	@echo "  down              Stop Docker container"
+	@echo "  build             Rebuild Docker image (no cache)"
+	@echo "  shell             Open shell in container"
+	@echo ""
+	@echo "Dependencies:"
+	@echo "  install           Install Composer dependencies"
+	@echo ""
+	@echo "Assets:"
+	@echo "  assets            No-op (no frontend build in this bundle)"
+	@echo ""
+	@echo "Tests:"
+	@echo "  test              Run PHPUnit tests"
+	@echo "  test-coverage     Run tests with coverage; fails below the line-coverage gate (REQ-TEST-003)"
+	@echo ""
+	@echo "Quality:"
+	@echo "  cs-check          Check code style"
+	@echo "  cs-fix            Fix code style"
+	@echo "  rector            Apply Rector refactoring"
+	@echo "  rector-dry        Run Rector in dry-run mode"
+	@echo "  phpstan           Run PHPStan static analysis"
+	@echo "  igor              Run Igor worker-state audit (REQ-CS-008)"
+	@echo "  qa                Run cs-check and tests"
+	@echo ""
+	@echo "Release:"
+	@echo "  release-check     Pre-release chain (REQ-MAKE-002), then demo release-check"
+	@echo "  composer-sync     Validate composer.json and align composer.lock"
+	@echo ""
+	@echo "Cleanup:"
+	@echo "  clean             Remove vendor and cache"
+	@echo ""
+	@echo "Composer:"
+	@echo "  update            Update composer.lock (composer update)"
+	@echo "  validate          Run composer validate --strict"
+	@echo ""
+	@echo "Bundle-specific:"
 	@echo "  check-twig-extra  Fail if Twig Extra is missing (REQ-TWIG-004)"
-	@echo "  release-check Pre-release: Cursor trailer check, Twig Extra, cs-fix, cs-check, rector-dry, phpstan, igor, test-coverage, demos"
-	@echo "  demo-smoke    Boot demo/symfony8 and assert HTTP 200 (REQ-TEST-011)"
-	@echo "  setup-hooks   Install git hooks (.githooks — REQ-MAKE-006 / REQ-GIT-001)"
-	@echo "  check-no-cursor-coauthor  Fail if Cursor co-author trailers exist in history"
+	@echo "  check-no-raw-html-form  Fail on raw <form>/<input>/<textarea>/<select> in Twig (REQ-TWIG-005)"
+	@echo "  check-no-cursor-coauthor  Fail if Cursor co-author trailers exist in history (REQ-GIT-001)"
+	@echo "  check-open-prs    Fail if unresolved open GitHub PRs remain (REQ-REL-003)"
 	@echo "  strip-cursor-coauthor-from-history  Rewrite history to remove Cursor trailers"
-	@echo "  composer-sync Validate composer.json and align composer.lock (no install)"
-	@echo "  clean         Remove vendor and cache"
-	@echo "  update        Update composer.lock (composer update)"
-	@echo "  validate      Run composer validate --strict"
+	@echo "  setup-hooks       Install git hooks (.githooks)"
+	@echo "  down-dev          Stop root container and remove orphans"
 	@echo ""
-	@echo "Demos: make -C demo (when demos exist)"
-	@echo ""
+	@echo "Demos:"
+	@echo "  demo-smoke        Boot demo/symfony8 and assert HTTP 200 (REQ-TEST-011)"
+	@echo "  make -C demo      Demo targets"
 
 build:
 	$(COMPOSE) build --no-cache
@@ -81,8 +103,9 @@ test: ensure-up
 	$(COMPOSE) exec $(SERVICE_PHP) composer test
 
 test-coverage: ensure-up
-	$(COMPOSE) exec $(SERVICE_PHP) composer test-coverage | tee coverage-php.txt
-	sh .scripts/php-coverage-percent.sh coverage-php.txt
+	@set -o pipefail; $(COMPOSE) exec -T $(SERVICE_PHP) composer test-coverage | tee coverage-php.txt
+	@sh .scripts/php-coverage-percent.sh coverage-php.txt
+	@sh .scripts/coverage-fail-under.sh coverage-php.txt $(COVERAGE_MIN)
 
 cs-check: ensure-up
 	$(COMPOSE) exec -T $(SERVICE_PHP) composer cs-check
@@ -115,8 +138,16 @@ check-twig-extra:
 
 # Run Igor worker-state audit (REQ-CS-008)
 igor: ensure-up
-	$(COMPOSE) exec -T php composer igor
-release-check: check-no-cursor-coauthor check-twig-extra ensure-up composer-sync cs-fix cs-check rector-dry phpstan igor test-coverage release-check-demos
+	@$(COMPOSE) exec -T $(SERVICE_PHP) composer igor
+
+check-no-raw-html-form:
+	@bash .scripts/check-no-raw-html-form.sh
+
+check-open-prs:
+	@bash .scripts/check-open-prs.sh
+
+# REQ-MAKE-002 order.
+release-check: ensure-up check-no-cursor-coauthor check-open-prs check-twig-extra check-no-raw-html-form composer-sync cs-fix cs-check rector-dry phpstan igor test-coverage release-check-demos
 
 # REQ-TEST-011 — boot demo stack and assert one HTTP 200
 demo-smoke:

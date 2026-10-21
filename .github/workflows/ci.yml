@@ -261,7 +261,12 @@ jobs:
           ./.scripts/retry.sh -- composer update "symfony/*" --with-all-dependencies --no-interaction --prefer-dist --no-progress
 
       - name: Run tests with coverage
-        run: composer test-coverage
+        run: |
+          set -o pipefail
+          composer test-coverage | tee coverage-php.txt
+
+      - name: Enforce line coverage gate (REQ-TEST-003)
+        run: sh .scripts/coverage-fail-under.sh coverage-php.txt 100
 
       - name: Validate coverage file
         run: |
