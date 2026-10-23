@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "828655537800bbac174263ac1e916f76",
+    "content-hash": "614a8a6e7bf808b640a89129254c98e7",
     "packages": [
         {
             "name": "nowo-tech/hot-reload-bundle",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "/var/hot-reload-bundle",
-                "reference": "79c06e218419450dd245aaf505d27907635e08c1"
+                "reference": "cf84e69a6f93f95f06876638337f9f792b2bcb0a"
             },
             "require": {
                 "php": ">=8.2 <8.6",
@@ -142,20 +142,21 @@
         },
         {
             "name": "nowo-tech/password-toggle-bundle",
-            "version": "v2.4.1",
+            "version": "v2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nowo-tech/PasswordToggleBundle.git",
-                "reference": "8048d9ff58d98ec255db4ed0834625fd012b431c"
+                "reference": "997ebdcb9362f0d3ee558ee88b59855332dc367a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nowo-tech/PasswordToggleBundle/zipball/8048d9ff58d98ec255db4ed0834625fd012b431c",
-                "reference": "8048d9ff58d98ec255db4ed0834625fd012b431c",
+                "url": "https://api.github.com/repos/nowo-tech/PasswordToggleBundle/zipball/997ebdcb9362f0d3ee558ee88b59855332dc367a",
+                "reference": "997ebdcb9362f0d3ee558ee88b59855332dc367a",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.2 <8.6",
+                "psr/log": "^1.1 || ^2.0 || ^3.0",
                 "symfony/form": "^7.4 || ^8.0",
                 "symfony/framework-bundle": "^7.4 || ^8.0",
                 "symfony/twig-bundle": "^7.4 || ^8.0",
@@ -170,7 +171,6 @@
                 "phpstan/phpstan-phpunit": "^2.0",
                 "phpstan/phpstan-symfony": "^2.0",
                 "phpunit/phpunit": "^10.0",
-                "psr/log": "^3.0",
                 "rector/rector": "^2.0",
                 "symfony/asset": "^7.4 || ^8.0",
                 "symfony/console": "^7.4 || ^8.0",
@@ -221,6 +221,7 @@
                 "visibility"
             ],
             "support": {
+                "docs": "https://github.com/nowo-tech/PasswordToggleBundle/tree/main/docs",
                 "issues": "https://github.com/nowo-tech/PasswordToggleBundle/issues",
                 "source": "https://github.com/nowo-tech/PasswordToggleBundle"
             },
@@ -230,7 +231,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-13T12:06:37+00:00"
+            "time": "2026-10-22T06:00:18+00:00"
         },
         {
             "name": "pentatrion/vite-bundle",
@@ -6230,28 +6231,28 @@
         },
         {
             "name": "sebastian/git-state",
-            "version": "1.0.0",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/git-state.git",
-                "reference": "792a952e0eba55b6960a48aeceb9f371aad1f76b"
+                "reference": "31a565f463686f0eefa85f899549256bf5805985"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/git-state/zipball/792a952e0eba55b6960a48aeceb9f371aad1f76b",
-                "reference": "792a952e0eba55b6960a48aeceb9f371aad1f76b",
+                "url": "https://api.github.com/repos/sebastianbergmann/git-state/zipball/31a565f463686f0eefa85f899549256bf5805985",
+                "reference": "31a565f463686f0eefa85f899549256bf5805985",
                 "shasum": ""
             },
             "require": {
                 "php": ">=8.4"
             },
             "require-dev": {
-                "phpunit/phpunit": "^13.0"
+                "phpunit/phpunit": "^13.4.3"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.0-dev"
+                    "dev-main": "1.1-dev"
                 }
             },
             "autoload": {
@@ -6275,7 +6276,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/git-state/issues",
                 "security": "https://github.com/sebastianbergmann/git-state/security/policy",
-                "source": "https://github.com/sebastianbergmann/git-state/tree/1.0.0"
+                "source": "https://github.com/sebastianbergmann/git-state/tree/1.1.0"
             },
             "funding": [
                 {
@@ -6295,7 +6296,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-21T12:54:28+00:00"
+            "time": "2026-10-21T05:59:52+00:00"
         },
         {
             "name": "sebastian/global-state",
