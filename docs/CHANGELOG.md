@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Docs: `SECURITY.md` attack surface covers the v1.5.0 `/_nowo/hot-reload/*` asset routes, client modes and CSP augmentation; REQ-SEC-004 re-audit 2026-10-26 (v1.6.2) — Pass (good), Low, with the accepted residuals.
+
 ## [1.6.2] - 2026-10-21
 
 Wave-2 REQ compliance: autoconfigured services, 100% coverage gate, full release-check chain, demo login fixes. See [UPGRADING](UPGRADING.md#to-162).

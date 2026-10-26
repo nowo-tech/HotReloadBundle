@@ -22,6 +22,9 @@ HotReloadBundle injects FrankenPHP Hot Reload **client** scripts and a Mercure h
 - **Injected scripts** — Idiomorph (optional), frankenphp-hot-reload ESM, and a small preserve-selector helper, marked with `data-nowo-hot-reload`.
 - **Meta tag** — `frankenphp-hot-reload:url` with the Mercure hub URL from config or `FRANKENPHP_HOT_RELOAD`.
 - **Configuration** (`nowo_hot_reload.*`) and CDN script URLs in the host application.
+- **Bundle client assets (v1.5.0+)** — two same-origin static routes, `/_nowo/hot-reload/client.js` and `/_nowo/hot-reload/shared-worker.js`, answered on `kernel.request` (priority 34, before the router and the firewall) from a fixed two-entry map: no request input reaches the filesystem, no mutations, and the files are the public bundle JavaScript (no configuration or secrets). They are unauthenticated by design.
+- **Client modes** — `shared_worker` (one EventSource for all tabs), `visibility` (closes while hidden) and `always` (one connection per tab); the browser connects to the Mercure hub, the bundle hosts no streaming endpoint.
+- **CSP augmentation** — with `csp_augment_script_src: true` (default) dev responses get `'self'` and `https://cdn.jsdelivr.net` added to `script-src` (`'none'` is removed). See [CSP.md](CSP.md).
 - **Server side** (outside this package) — Mercure `anonymous` and `php_server { hot_reload }` in the Caddyfile. Setup: [ENVIRONMENT.md](ENVIRONMENT.md).
 
 ## Threats and mitigations
@@ -74,14 +77,16 @@ Record confirmation in the release PR or tag notes.
 
 | Field | Value |
 |-------|--------|
-| **Date** | 2026-08-17 |
-| **Method** | Campaign static review of `src/`, package config, demos, and this document |
-| **Grade** | **Pass (conditional)** |
+| **Date** | 2026-10-26 (re-audit of v1.6.2; previous: 2026-08-17, Pass (conditional)) |
+| **Method** | Claude Code security review (static, `src/` + Flex recipe + client assets + docs) |
+| **Grade** | **Pass (good)** |
 | **Overall residual risk** | **Low** |
 
 ### Residuals (accepted)
 
-- Integrator enabling the bundle or Caddy `hot_reload` in production — **application-owned**.
-- Loading third-party CDN scripts when Idiomorph / hot-reload URLs are left at defaults — residual Medium for strict CSP environments; mitigate by self-hosting URLs.
+- Integrator enabling the bundle or Caddy `hot_reload` in production — **application-owned**. The prod guard (`allow_production: false`) only applies to the environment named `prod`: do not register the bundle in other production-like environments (`staging`, `production`, …).
+- The two `/_nowo/hot-reload/*.js` asset routes are served regardless of `enabled` / `client_mode` once the bundle is registered (public bundle code only).
+- CSP auto-augment widens `script-src` with `'self'` and `https://cdn.jsdelivr.net` on dev responses; set `csp_augment_script_src: false` or self-host the scripts for strict policies.
+- Loading third-party CDN scripts when Idiomorph / hot-reload URLs are left at defaults (no Subresource Integrity) — residual Medium for strict CSP environments; mitigate by self-hosting URLs.
 
 No Critical/High findings remain open for shipping.
