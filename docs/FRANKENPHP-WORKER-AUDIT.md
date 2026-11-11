@@ -18,6 +18,7 @@
   - [W-02 — Filesystem reads on each request (Low)](#w-02--filesystem-reads-on-each-request-low)
   - [W-03 — `$_SERVER` read at runtime (Info)](#w-03--_server-read-at-runtime-info)
 - [Usage recommendations in worker mode](#usage-recommendations-in-worker-mode)
+- [Igor findings triage (2026-11-11)](#igor-findings-triage-2026-11-11)
 - [Re-audit triggers](#re-audit-triggers)
 
 ## Execution model assumed
@@ -90,6 +91,17 @@ No other findings.
 - Keep the bundle registered for `dev` only; it is not meant for production workers.
 - Listeners of `HotReloadInjectEvent` must not store the `Request`/`Response` from the event in their own properties.
 - If you extend or decorate `HotReloadAssets`, keep it stateless (or implement `ResetInterface`).
+
+## Igor findings triage (2026-11-11)
+
+`composer igor` (igor-php 0.10.1) reported 2 warnings on `main` (3 `$_SERVER` reads); all false positives. Igor now
+runs in CI (`igor` job) and reports 0 KO / 0 WARN.
+
+| Finding | Verdict | Resolution |
+|---------|---------|------------|
+| `HotReloadAssets::resolveMercureUrl()` reads `$_SERVER['FRANKENPHP_HOT_RELOAD']` | False positive | Fallback after the current request's server bag (CLI / no request); read per call, never stored. Annotated `@igor-ignore`. |
+| `HotReloadDiagnostics` reads `$_SERVER['FRANKENPHP_MODE']` | False positive | Process-level flag set by FrankenPHP, read per call for the diagnostics page, never stored. Annotated. |
+| `HotReloadDiagnostics` reads `$_SERVER['FRANKENPHP_HOT_RELOAD']` | False positive | Same request-first, per-call fallback as above. Annotated. |
 
 ## Re-audit triggers
 

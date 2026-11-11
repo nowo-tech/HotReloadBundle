@@ -486,6 +486,7 @@ final class HotReloadDiagnostics
 
     private function readFrankenphpMode(): ?string
     {
+        // @igor-ignore - Process-level runtime flag set by FrankenPHP itself (not request data), read per call and never cached.
         $value = $_SERVER['FRANKENPHP_MODE'] ?? null;
 
         return is_string($value) && $value !== '' ? $value : null;
@@ -500,6 +501,7 @@ final class HotReloadDiagnostics
             }
         }
 
+        // @igor-ignore - Process env fallback (CLI / no request), read per call and never cached; the request copy wins above.
         $fromServer = $_SERVER['FRANKENPHP_HOT_RELOAD'] ?? null;
 
         return $this->nonEmpty($fromServer);

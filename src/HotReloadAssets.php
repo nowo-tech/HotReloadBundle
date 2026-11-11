@@ -84,6 +84,7 @@ final class HotReloadAssets
             }
         }
 
+        // @igor-ignore - Process env fallback (CLI / no request), read per call and never cached; the request copy wins above.
         $fromServer = $_SERVER['FRANKENPHP_HOT_RELOAD'] ?? null;
 
         return is_string($fromServer) && $fromServer !== '' ? $fromServer : null;
