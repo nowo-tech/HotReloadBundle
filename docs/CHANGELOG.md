@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Docs: USAGE section "Using it from a DDD / hexagonal application" (dev-only edge tooling, same setup for both host kinds, inject event as the extension point).
 - Docs: `SECURITY.md` attack surface covers the v1.5.0 `/_nowo/hot-reload/*` asset routes, client modes and CSP augmentation; REQ-SEC-004 re-audit 2026-10-26 (v1.6.2) — Pass (good), Low, with the accepted residuals.
 
 ## [1.6.2] - 2026-10-21

@@ -16,6 +16,7 @@ This bundle injects FrankenPHP Hot Reload **client** assets into HTML. The **ser
 - [Overriding templates (REQ-TWIG-001)](#overriding-templates-req-twig-001)
   - [Overridable subpaths](#overridable-subpaths)
   - [Procedure](#procedure)
+- [Using it from a DDD / hexagonal application](#using-it-from-a-ddd--hexagonal-application)
 
 ## Diagnose setup (`nowo:hot-reload:check`)
 
@@ -161,3 +162,24 @@ templates/bundles/NowoHotReloadBundle/Icon/hot-reload.svg
 ```
 
 Logical names in PHP and Twig are `@NowoHotReloadBundle/<subpath>`. The Symfony-stripped namespace `@NowoHotReload/...` remains registered as a BC alias for this major; new overrides and references should use `@NowoHotReloadBundle`.
+
+## Using it from a DDD / hexagonal application
+
+HotReloadBundle is **developer tooling at the presentation edge**: in development it adds the FrankenPHP hot-reload
+client to HTML responses and adjusts the CSP header. It has no entities, no Doctrine dependency and no services your
+application code calls, so nothing in your domain or application layer depends on it. The configuration is the same
+for a standard Symfony project and a DDD / hexagonal one; register the bundle for the `dev` environment only.
+
+Integration stays in the delivery layer:
+
+- automatic injection on `kernel.response`, or `{{ nowo_hot_reload_assets() }}` in your base layout with
+  `auto_inject: false`;
+- **extension point:** listen to `Nowo\HotReloadBundle\Event\HotReloadInjectEvent` to change or cancel
+  (`setSnippet('')`) the snippet per response. The event carries the HTTP `Request` / `Response` on purpose (it is an
+  HTTP-edge, dev-only event), so subscribe to it from Infrastructure / UI code, never from the domain;
+- template overrides (see [Overriding templates](#overriding-templates-req-twig-001)).
+
+There are no ports to implement, no IDs to map and no domain events. If you enforce layer rules (e.g. deptrac), the
+`Nowo\HotReloadBundle\` namespace belongs to the presentation/dev-tooling layer.
+
+There are no known limitations for hexagonal applications.
