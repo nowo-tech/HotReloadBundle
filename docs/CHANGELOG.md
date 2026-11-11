@@ -31,6 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+### Changed
+
+- FrankenPHP worker audit (igor): the per-call `$_SERVER` fallbacks of `HotReloadAssets` and `HotReloadDiagnostics` are annotated; the igor warnings were false positives (values are read per call after the request's server bag and never cached). See `docs/FRANKENPHP-WORKER-AUDIT.md`.
+- CI: new standalone `igor` job runs `composer igor` (REQ-CS-008).
+
 ### Changed
 
 - Docs: USAGE section "Using it from a DDD / hexagonal application" (dev-only edge tooling, same setup for both host kinds, inject event as the extension point).
