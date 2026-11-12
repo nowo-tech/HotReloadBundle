@@ -4,12 +4,14 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "nowo-tech/form-kit-bundle": "^2.22",
         "nowo-tech/hot-reload-bundle": "@dev",
         "nowo-tech/password-toggle-bundle": "^2.4.1",
+        "nowo-tech/ui-kit-bundle": "^2.49",
         "pentatrion/vite-bundle": "^8.2.4",
+        "php": ">=8.4",
         "symfony/asset": "8.1.*",
         "symfony/console": "8.1.*",
         "symfony/dotenv": "8.1.*",
@@ -21,10 +23,10 @@
         "symfony/security-bundle": "8.1.*",
         "symfony/twig-bundle": "8.1.*",
         "symfony/ux-icons": "^2.36.1",
-        "twig/extra-bundle": "^3.29",
-        "twig/string-extra": "^3.12",
         "symfony/validator": "8.1.*",
-        "symfony/yaml": "8.1.*"
+        "symfony/yaml": "8.1.*",
+        "twig/extra-bundle": "^3.29",
+        "twig/string-extra": "^3.12"
     },
     "config": {
         "allow-plugins": {
