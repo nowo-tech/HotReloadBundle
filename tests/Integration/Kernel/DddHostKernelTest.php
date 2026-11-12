@@ -89,6 +89,25 @@ final class DddHostKernelTest extends TestCase
         $kernel->shutdown();
     }
 
+    /** Audit MW-R-L2: getPath() is raw request data; the host listener escapes it before writing it into HTML. */
+    #[Test]
+    public function hostListenerEscapesTheRawPath(): void
+    {
+        $kernel = new DddHostKernel($this->baseDir);
+        $kernel->boot();
+        $httpKernel = $kernel->getContainer()->get('http_kernel');
+        self::assertInstanceOf(HttpKernelInterface::class, $httpKernel);
+
+        $request = Request::create('/x');
+        $request->server->set('REQUEST_URI', '/a"><b>');
+        $content = (string) $httpKernel->handle($request)->getContent();
+
+        self::assertStringContainsString('data-banner="/a&quot;&gt;&lt;b&gt;|', $content);
+        self::assertStringNotContainsString('"><b>', $content);
+
+        $kernel->shutdown();
+    }
+
     #[Test]
     public function hostListenerImportsNoFrameworkType(): void
     {

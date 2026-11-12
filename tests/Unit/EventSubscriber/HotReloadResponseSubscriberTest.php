@@ -614,6 +614,45 @@ final class HotReloadResponseSubscriberTest extends TestCase
         self::assertSame($legacyResponse->headers->all(), $newResponse->headers->all());
     }
 
+    /** Audit MW-R-L1: a listener that empties the body gets an empty response, not a lone snippet. */
+    #[Test]
+    public function itSkipsInjectionWhenAListenerEmptiesTheBody(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(HotReloadInjectEvent::class, static function (HotReloadInjectEvent $event): void {
+            $event->setBody('');
+        });
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, ['Content-Type' => 'text/html']);
+        $event    = $this->createEvent($response);
+        $this->createSubscriber(eventDispatcher: $dispatcher)->onKernelResponse($event);
+
+        self::assertSame('', $response->getContent());
+        self::assertFalse($event->getRequest()->attributes->getBoolean(HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED));
+    }
+
+    /** Audit MW-R-L1: a listener that already put the assets in the body gets no second copy. */
+    #[Test]
+    public function itDoesNotInjectTwiceWhenAListenerAddsTheAssets(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(HotReloadInjectEvent::class, static function (HotReloadInjectEvent $event): void {
+            $event->setBody(str_replace('</head>', $event->getSnippet() . '</head>', $event->getBody()));
+        });
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, ['Content-Type' => 'text/html']);
+        $event    = $this->createEvent($response);
+        $this->createSubscriber(eventDispatcher: $dispatcher)->onKernelResponse($event);
+
+        $content = (string) $response->getContent();
+        self::assertSame(1, substr_count($content, '<meta name="frankenphp-hot-reload:url"'), $content);
+        self::assertTrue($event->getRequest()->attributes->getBoolean(HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED));
+    }
+
     #[Test]
     public function itInjectsTheSameWithAndWithoutAListener(): void
     {

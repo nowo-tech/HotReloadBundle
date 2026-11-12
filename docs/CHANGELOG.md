@@ -41,6 +41,7 @@ Target: **1.7.0** (minor). REQ-ARCH-001 rule 3: framework-free accessors on the 
 - The event keeps the request, the response and the body outside its properties (internal `WeakMap`,
   `HotReloadInjectEventState`): VarDumper, `var_export()`, `print_r()`, `(array)`, `json_encode()` and `serialize()`
   of the event show only the path, the content type and the snippet.
+- `getPath()` documents that it returns raw, unescaped request data (escape it before writing it into HTML).
 - Docs: "Inject event", "Standard Symfony host" and "DDD / hexagonal host" sections in `docs/USAGE.md`, linked from
   the README.
 
@@ -66,6 +67,7 @@ Target: **1.7.0** (minor). REQ-ARCH-001 rule 3: framework-free accessors on the 
 - The subscriber injects the snippet into the body as the listeners left it (`setBody()`, or the deprecated
   `getResponse()->setContent()`). Before, a listener's body change through `getResponse()->setContent()` was
   overwritten by the injection. Without body changes the output is unchanged.
+  When a listener empties the body, or already put the assets in it, the subscriber injects nothing (audit MW).
 - FrankenPHP worker audit (igor): the per-call `$_SERVER` fallbacks of `HotReloadAssets` and `HotReloadDiagnostics` are annotated; the igor warnings were false positives (values are read per call after the request's server bag and never cached). See `docs/FRANKENPHP-WORKER-AUDIT.md`.
 - CI: new standalone `igor` job runs `composer igor` (REQ-CS-008).
 - Docs: USAGE section "Using it from a DDD / hexagonal application" (dev-only edge tooling, same setup for both host kinds, inject event as the extension point).

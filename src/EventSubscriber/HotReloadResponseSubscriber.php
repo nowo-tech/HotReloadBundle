@@ -87,6 +87,16 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             // Since 1.7.0 the snippet goes into the body as the listeners left it (setBody(), or the deprecated
             // getResponse()->setContent()).
             $content = $injectEvent->getBody();
+
+            // A listener emptied the body, or already put the assets in it: nothing to inject (audit MW-R-L1).
+            if ($content === '') {
+                return;
+            }
+            if ($this->hasInjectedAssets($content)) {
+                $request->attributes->set(self::REQUEST_ATTR_INJECTED, true);
+
+                return;
+            }
         }
 
         // Empty snippet = host listener cancelled injection (e.g. HotReloadInjectEvent::setSnippet('')).

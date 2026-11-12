@@ -57,7 +57,12 @@ final class HotReloadInjectEvent
         return $event;
     }
 
-    /** The request path (path info, no query string). Since 1.7.0. */
+    /**
+     * The request path (path info, no query string). Since 1.7.0.
+     *
+     * Raw, unescaped request data chosen by the client: escape it (e.g. `htmlspecialchars($path, ENT_QUOTES |
+     * ENT_SUBSTITUTE, 'UTF-8')`) before writing it into the body or the snippet.
+     */
     public function getPath(): string
     {
         return $this->path;
