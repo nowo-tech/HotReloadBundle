@@ -3,8 +3,8 @@
 | Field | Value |
 |-------|-------|
 | Package | `nowo-tech/hot-reload-bundle` (`symfony-bundle`) |
-| Audited revision | `v1.5.3` |
-| Audit date | 2026-09-24 |
+| Audited revision | `v1.7.0` (first audit `v1.5.3`; 1.7.0 event state in a `WeakMap`, see [Usage recommendations](#usage-recommendations-in-worker-mode)) |
+| Audit date | 2026-09-24; header refreshed for 1.7.0 on 2026-11-12 (REQ-RUNTIME-002 re-audit) |
 | Method | Manual review of every file under `src/` (services, subscribers, data collector, Twig extension, command, DI extension, compiler pass, YAML config) and `NowoHotReloadBundle.php`; PHPStan classic + worker + hardening |
 | **Verdict** | ✅ **100% compatible** with FrankenPHP worker mode and **`reset_kernel: false`** (scenario B below) |
 
