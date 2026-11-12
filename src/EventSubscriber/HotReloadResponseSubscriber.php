@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Nowo\HotReloadBundle\EventSubscriber;
 
 use Nowo\HotReloadBundle\Event\HotReloadInjectEvent;
+use Nowo\HotReloadBundle\Event\HotReloadInjectEventState;
 use Nowo\HotReloadBundle\HotReloadAssets;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -78,9 +79,14 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
         $snippet = $this->assets->renderHtml();
 
         if ($this->eventDispatcher instanceof EventDispatcherInterface) {
-            $injectEvent = new HotReloadInjectEvent($request, $response, $snippet);
+            $injectEvent = HotReloadInjectEvent::fromContent($request->getPathInfo(), $response->headers->get('Content-Type'), '', $snippet);
+            // The deprecated getRequest() / getResponse() return these objects; setBody() writes to the response.
+            HotReloadInjectEventState::attach($injectEvent, $request, $response, '');
             $this->eventDispatcher->dispatch($injectEvent);
             $snippet = $injectEvent->getSnippet();
+            // Since 1.7.0 the snippet goes into the body as the listeners left it (setBody(), or the deprecated
+            // getResponse()->setContent()).
+            $content = $injectEvent->getBody();
         }
 
         // Empty snippet = host listener cancelled injection (e.g. HotReloadInjectEvent::setSnippet('')).

@@ -8,6 +8,7 @@ use Nowo\HotReloadBundle\Event\HotReloadInjectEvent;
 use Nowo\HotReloadBundle\EventSubscriber\HotReloadResponseSubscriber;
 use Nowo\HotReloadBundle\HotReloadAssets;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -564,6 +565,72 @@ final class HotReloadResponseSubscriberTest extends TestCase
     private function createCspResponse(array $headers): Response
     {
         return new Response('<html><head></head><body>ok</body></html>', 200, ['Content-Type' => 'text/html'] + $headers);
+    }
+
+    /**
+     * 1.7.0 equivalence: a listener on the framework-free accessors (getPath(), getContentType(), setBody()) and a
+     * listener on the deprecated getRequest() / getResponse() produce the same response.
+     *
+     * @return iterable<string, array{string, string}>
+     */
+    public static function bodyEditCases(): iterable
+    {
+        yield 'head' => ['/', '<html><head></head><body>ok</body></html>'];
+        yield 'body only' => ['/page', '<html><body>ok</body></html>'];
+        yield 'fragment' => ['/frag', '<html>ok fragment'];
+    }
+
+    #[Test]
+    #[DataProvider('bodyEditCases')]
+    #[IgnoreDeprecations]
+    public function itAppliesNewAndDeprecatedListenerEditsTheSameWay(string $path, string $html): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $seen   = [];
+        $legacy = new EventDispatcher();
+        $legacy->addListener(HotReloadInjectEvent::class, static function (HotReloadInjectEvent $event) use (&$seen): void {
+            $seen['legacy'] = [$event->getRequest()->getPathInfo(), $event->getResponse()->headers->get('Content-Type')];
+            $event->getResponse()->setContent(str_replace('ok', 'edited', (string) $event->getResponse()->getContent()));
+            $event->setSnippet('<!--snippet-->');
+        });
+        $new = new EventDispatcher();
+        $new->addListener(HotReloadInjectEvent::class, static function (HotReloadInjectEvent $event) use (&$seen): void {
+            $seen['new'] = [$event->getPath(), $event->getContentType()];
+            $event->setBody(str_replace('ok', 'edited', $event->getBody()));
+            $event->setSnippet('<!--snippet-->');
+        });
+
+        $legacyResponse = new Response($html, 200, ['Content-Type' => 'text/html']);
+        $newResponse    = new Response($html, 200, ['Content-Type' => 'text/html']);
+        $this->createSubscriber(eventDispatcher: $legacy)->onKernelResponse($this->createEvent($legacyResponse, path: $path));
+        $this->createSubscriber(eventDispatcher: $new)->onKernelResponse($this->createEvent($newResponse, path: $path));
+
+        self::assertSame([$path, 'text/html'], $seen['new']);
+        self::assertSame($seen['legacy'], $seen['new']);
+        self::assertSame($legacyResponse->getContent(), $newResponse->getContent());
+        self::assertStringContainsString('edited', (string) $newResponse->getContent());
+        self::assertStringContainsString('<!--snippet-->', (string) $newResponse->getContent());
+        self::assertSame($legacyResponse->headers->all(), $newResponse->headers->all());
+    }
+
+    #[Test]
+    public function itInjectsTheSameWithAndWithoutAListener(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $dispatcher = new EventDispatcher();
+        $dispatcher->addListener(HotReloadInjectEvent::class, static function (HotReloadInjectEvent $event): void {
+        });
+
+        $html    = '<html><head></head><body>ok</body></html>';
+        $without = new Response($html, 200, ['Content-Type' => 'text/html']);
+        $with    = new Response($html, 200, ['Content-Type' => 'text/html']);
+        $this->createSubscriber()->onKernelResponse($this->createEvent($without));
+        $this->createSubscriber(eventDispatcher: $dispatcher)->onKernelResponse($this->createEvent($with));
+
+        self::assertSame($without->getContent(), $with->getContent());
+        self::assertSame($without->headers->all(), $with->headers->all());
     }
 
     /**

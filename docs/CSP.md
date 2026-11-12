@@ -63,7 +63,7 @@ nowo_hot_reload:
 
 ## Event hook
 
-Listen to `Nowo\HotReloadBundle\Event\HotReloadInjectEvent` to mutate the snippet or the response headers right before injection. Calling `setSnippet('')` cancels injection for that response.
+Listen to `Nowo\HotReloadBundle\Event\HotReloadInjectEvent` to change the snippet or the HTML body right before injection (see [USAGE.md](USAGE.md#inject-event)). Calling `setSnippet('')` cancels injection for that response. Changing response headers through the deprecated `getResponse()` still works in 1.x; use the `csp_*` options or your own `kernel.response` listener instead.
 
 Auto-inject already skips `/_wdt` and `/_profiler` via `ignore_path_prefixes` (see [CONFIGURATION.md](CONFIGURATION.md)).
 

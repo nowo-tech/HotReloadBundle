@@ -16,7 +16,9 @@ This bundle injects FrankenPHP Hot Reload **client** assets into HTML. The **ser
 - [Overriding templates (REQ-TWIG-001)](#overriding-templates-req-twig-001)
   - [Overridable subpaths](#overridable-subpaths)
   - [Procedure](#procedure)
-- [Using it from a DDD / hexagonal application](#using-it-from-a-ddd--hexagonal-application)
+- [Inject event](#inject-event)
+- [Standard Symfony host](#standard-symfony-host)
+- [DDD / hexagonal host](#ddd--hexagonal-host)
 
 ## Diagnose setup (`nowo:hot-reload:check`)
 
@@ -163,23 +165,60 @@ templates/bundles/NowoHotReloadBundle/Icon/hot-reload.svg
 
 Logical names in PHP and Twig are `@NowoHotReloadBundle/<subpath>`. The Symfony-stripped namespace `@NowoHotReload/...` remains registered as a BC alias for this major; new overrides and references should use `@NowoHotReloadBundle`.
 
-## Using it from a DDD / hexagonal application
+## Inject event
+
+`Nowo\HotReloadBundle\Event\HotReloadInjectEvent` is dispatched right before the snippet is written into an HTML
+response. Since 1.7.0 its accessors carry scalars only (REQ-ARCH-001 rule 3):
+
+| Accessor | Since | Use |
+|---|---|---|
+| `getPath(): string` | 1.7.0 | request path (path info, no query string) |
+| `getContentType(): ?string` | 1.7.0 | response `Content-Type` header |
+| `getBody(): string` / `setBody(string)` | 1.7.0 | HTML body; the snippet is injected into the body you leave |
+| `getSnippet(): string` / `setSnippet(string)` | 1.0 | the snippet; `setSnippet('')` cancels the injection |
+| `getRequest()` / `getResponse()` | 1.0, **deprecated 1.7.0** | removed in 2.0 (see [UPGRADING](UPGRADING.md#to-170)) |
+
+```php
+use Nowo\HotReloadBundle\Event\HotReloadInjectEvent;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+
+#[AsEventListener]
+final class SkipAdminHotReload
+{
+    public function __invoke(HotReloadInjectEvent $event): void
+    {
+        if (str_starts_with($event->getPath(), '/admin')) {
+            $event->setSnippet('');
+        }
+    }
+}
+```
+
+Response headers (CSP) are not part of the event: use the `csp_*` options (see [CSP.md](CSP.md)) or your own
+`kernel.response` listener. Dumping the event (VarDumper, `var_export()`, `(array)`, `serialize()`) shows only the
+path, the content type and the snippet: the request, the response and the body are kept outside its properties.
+To unit test a listener, build the event with `HotReloadInjectEvent::fromContent($path, $contentType, $body, $snippet)`.
+
+## Standard Symfony host
+
+Zero configuration beyond `config/packages/dev/nowo_hot_reload.yaml`: register the bundle for `dev` only, keep
+`auto_inject: true` (or call `{{ nowo_hot_reload_assets() }}` in your base layout with `auto_inject: false`) and,
+when needed, listen to the [inject event](#inject-event) or override the templates (see
+[Overriding templates](#overriding-templates-req-twig-001)).
+
+## DDD / hexagonal host
 
 HotReloadBundle is **developer tooling at the presentation edge**: in development it adds the FrankenPHP hot-reload
 client to HTML responses and adjusts the CSP header. It has no entities, no Doctrine dependency and no services your
 application code calls, so nothing in your domain or application layer depends on it. The configuration is the same
-for a standard Symfony project and a DDD / hexagonal one; register the bundle for the `dev` environment only.
+as for a standard Symfony host.
 
-Integration stays in the delivery layer:
-
-- automatic injection on `kernel.response`, or `{{ nowo_hot_reload_assets() }}` in your base layout with
-  `auto_inject: false`;
-- **extension point:** listen to `Nowo\HotReloadBundle\Event\HotReloadInjectEvent` to change or cancel
-  (`setSnippet('')`) the snippet per response. The event carries the HTTP `Request` / `Response` on purpose (it is an
-  HTTP-edge, dev-only event), so subscribe to it from Infrastructure / UI code, never from the domain;
-- template overrides (see [Overriding templates](#overriding-templates-req-twig-001)).
-
-There are no ports to implement, no IDs to map and no domain events. If you enforce layer rules (e.g. deptrac), the
-`Nowo\HotReloadBundle\` namespace belongs to the presentation/dev-tooling layer.
+- The only extension point is the [inject event](#inject-event). Since 1.7.0 a listener needs no HttpFoundation type
+  (`getPath()`, `getContentType()`, `getBody()` / `setBody()`, `setSnippet()`); keep it in your UI / infrastructure
+  layer anyway, never in the domain.
+- There are no ports to implement, no IDs to map and no domain events. If you enforce layer rules (e.g. deptrac), the
+  `Nowo\HotReloadBundle\` namespace belongs to the presentation/dev-tooling layer.
+- Tested: `tests/Integration/Kernel/DddHostKernelTest.php` boots a host kernel whose listener uses only the
+  framework-free accessors and serves 600 requests through one kept-alive `http_kernel` (no services resetter).
 
 There are no known limitations for hexagonal applications.

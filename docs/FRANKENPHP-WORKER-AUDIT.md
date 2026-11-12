@@ -89,7 +89,7 @@ No other findings.
 
 - No special bundle YAML is needed for `reset_kernel: false`. Use `worker { watch }` in the Caddyfile so workers restart when PHP files change; `nowo:hot-reload:check` already warns if `watch` is missing.
 - Keep the bundle registered for `dev` only; it is not meant for production workers.
-- Listeners of `HotReloadInjectEvent` must not store the `Request`/`Response` from the event in their own properties.
+- Listeners of `HotReloadInjectEvent` must not store the event, its body or (deprecated) its `Request`/`Response` in their own properties. Since 1.7.0 the event keeps the request, the response and the body in `HotReloadInjectEventState`, a `WeakMap` keyed by the event: each entry is collected with its event, so nothing outlives the response. `tests/Integration/Kernel/DddHostKernelTest.php` serves 600 requests (3 paths, one listener) through one kept-alive `http_kernel` without the services resetter and checks per-path output and flat memory (< 2 MiB growth).
 - If you extend or decorate `HotReloadAssets`, keep it stateless (or implement `ResetInterface`).
 
 ## Igor findings triage (2026-11-11)
