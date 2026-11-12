@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.7.0](#to-170)
 - [To 1.6.2](#to-162)
 - [To 1.6.1](#to-161)
 - [To 1.6.0](#to-160)
@@ -36,6 +37,28 @@
   - [Checklist](#checklist-6)
 
 ## Unreleased
+
+## To 1.7.0
+
+From **1.6.x**: no breaking change.
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
+
+`HotReloadInjectEvent` gets framework-free accessors (REQ-ARCH-001 rule 3); the HttpFoundation getters are deprecated
+and removed in **2.0**:
+
+| Deprecated (1.x) | Since 1.7.0 |
+|---|---|
+| `$event->getRequest()->getPathInfo()` | `$event->getPath()` |
+| `$event->getResponse()->headers->get('Content-Type')` | `$event->getContentType()` |
+| `$event->getResponse()->getContent()` / `setContent()` | `$event->getBody()` / `setBody()` |
+| `$event->getResponse()->headers->set(...)` (CSP) | `csp_*` options, or your own `kernel.response` listener |
+| `new HotReloadInjectEvent($request, $response, $snippet)` (tests) | `HotReloadInjectEvent::fromContent($path, $contentType, $body, $snippet)` |
+
+Behaviour note: the snippet is now injected into the body as the listeners left it. A listener that changed the body
+through `getResponse()->setContent()` used to see its change overwritten; it is now kept.
 
 ## To 1.6.2
 

@@ -129,7 +129,7 @@ make release-check
 
 - [Installation](docs/INSTALLATION.md)
 - [Configuration](docs/CONFIGURATION.md)
-- [Usage](docs/USAGE.md)
+- [Usage](docs/USAGE.md) ([Standard Symfony host](docs/USAGE.md#standard-symfony-host), [DDD / hexagonal host](docs/USAGE.md#ddd--hexagonal-host))
 - [Contributing](docs/CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Changelog](docs/CHANGELOG.md)

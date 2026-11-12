@@ -31,14 +31,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Target: **1.7.0** (minor). REQ-ARCH-001 rule 3: framework-free accessors on the inject event. See
+[UPGRADING](UPGRADING.md#to-170).
+
+### Added
+
+- `HotReloadInjectEvent::getPath()`, `getContentType()`, `getBody()` / `setBody()` (scalars only) and the
+  framework-free factory `HotReloadInjectEvent::fromContent($path, $contentType, $body, $snippet)`.
+- The event keeps the request, the response and the body outside its properties (internal `WeakMap`,
+  `HotReloadInjectEventState`): VarDumper, `var_export()`, `print_r()`, `(array)`, `json_encode()` and `serialize()`
+  of the event show only the path, the content type and the snippet.
+- `getPath()` documents that it returns raw, unescaped request data (escape it before writing it into HTML).
+- Docs: "Inject event", "Standard Symfony host" and "DDD / hexagonal host" sections in `docs/USAGE.md`, linked from
+  the README.
+
+### Deprecated
+
+- `HotReloadInjectEvent::getRequest()` / `getResponse()` and constructing the event with a `Request` and a `Response`
+  (use `fromContent()`): removed in 2.0. Response headers: use the `csp_*` options or a `kernel.response` listener.
+
+### Tests
+
+- `HotReloadInjectEventTest`: new accessors equal the deprecated getters, `setBody()` and `getResponse()->setContent()`
+  edit the same body, no dump shows the request cookie, the `Authorization` header or the body; clones and
+  unserialized copies carry no HTTP state.
+- `HotReloadResponseSubscriberTest`: a listener on the new accessors and one on the deprecated getters produce the
+  same response (3 HTML shapes); an empty listener changes nothing.
+- `Kernel\DddHostKernelTest`: host kernel with a framework-free listener, `lint:container`, 600 requests through one
+  kept-alive `http_kernel` without the services resetter (per-path output, memory growth < 2 MiB).
+- `symfony/deprecation-contracts` is now a direct requirement (it was already installed); `symfony/console` and
+  `symfony/var-dumper` are dev requirements for the tests.
 
 ### Changed
 
+- The subscriber injects the snippet into the body as the listeners left it (`setBody()`, or the deprecated
+  `getResponse()->setContent()`). Before, a listener's body change through `getResponse()->setContent()` was
+  overwritten by the injection. Without body changes the output is unchanged.
+  When a listener empties the body, or already put the assets in it, the subscriber injects nothing (audit MW).
 - FrankenPHP worker audit (igor): the per-call `$_SERVER` fallbacks of `HotReloadAssets` and `HotReloadDiagnostics` are annotated; the igor warnings were false positives (values are read per call after the request's server bag and never cached). See `docs/FRANKENPHP-WORKER-AUDIT.md`.
 - CI: new standalone `igor` job runs `composer igor` (REQ-CS-008).
-
-### Changed
-
 - Docs: USAGE section "Using it from a DDD / hexagonal application" (dev-only edge tooling, same setup for both host kinds, inject event as the extension point).
 - Docs: `SECURITY.md` attack surface covers the v1.5.0 `/_nowo/hot-reload/*` asset routes, client modes and CSP augmentation; REQ-SEC-004 re-audit 2026-10-26 (v1.6.2) — Pass (good), Low, with the accepted residuals.
 
