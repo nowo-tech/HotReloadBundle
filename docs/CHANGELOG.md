@@ -32,6 +32,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Demo uses the UiKit base style and FormKit forms (REQ-DEMO-014/015)
+
 ## [1.7.0] - 2026-11-12
 
 Target: **1.7.0** (minor). REQ-ARCH-001 rule 3: framework-free accessors on the inject event. See
