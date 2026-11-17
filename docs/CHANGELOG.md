@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Demo uses the UiKit base style and FormKit forms (REQ-DEMO-014/015)
+- `specs/001-baseline`: the code inventory maps `Event/HotReloadInjectEventState.php` (23/23) and the spec gains FR-12 for the 1.7.0 scalar event accessors and `fromContent()` (REQ-SPECKIT-001, REQ-SPECKIT-003)
 
 ### Fixed
 
