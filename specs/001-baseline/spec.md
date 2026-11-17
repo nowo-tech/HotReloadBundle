@@ -23,6 +23,7 @@ HotReloadBundle injects [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-
 | FR-09 | **`HotReloadDataCollector`** stores the same diagnostic checks (serializable). The profiler panel uses Symfony **`sf-tabs`**: **Environment checks**, **Runtime**, **Client assets**, **CSP**, and **Help** (multi-tab modes comparison). Environment checks lists status, detail, and what to do (badge when fail/warn). The toolbar truncates long Mercure URLs (`/.well-known/mercure?...`) with the full value in the hover `title`. |
 | FR-10 | **`client_mode`** selects the browser Mercure strategy. Non-`cdn` modes serve same-origin scripts at `/_nowo/hot-reload/client.js` and (for `shared_worker`) `/_nowo/hot-reload/shared-worker.js` via `HotReloadAssetSubscriber`. Default remains `cdn`. |
 | FR-11 | **FrankenPHP worker / `reset_kernel: false`:** shared services hold no mutable request state except the profiler collector. `HotReloadAssets` resolves `FRANKENPHP_HOT_RELOAD` from the current `Request` (via `RequestStack`) before falling back to `$_SERVER`. `HotReloadDataCollector` implements `ResetInterface`, is tagged `kernel.reset`, and `collect()` fully replaces prior request data so no leak occurs even if reset is skipped. |
+| FR-12 | **`HotReloadInjectEvent`** (1.7.0) exposes scalars only: `getPath()`, `getContentType()`, `getBody()` / `setBody()`, `getSnippet()` / `setSnippet()` (`''` cancels the injection) and is built with `HotReloadInjectEvent::fromContent()`. The constructor with a `Request` and a `Response`, `getRequest()` and `getResponse()` are deprecated (removed in 2.0). `HotReloadInjectEventState` keeps the HTTP objects and the body in a `WeakMap` keyed by the event, so a dump of the event shows no cookies, session or response body and nothing outlives the response in a worker. |
 
 ## User scenarios
 
@@ -91,6 +92,7 @@ HotReloadBundle injects [FrankenPHP Hot Reload](https://frankenphp.dev/docs/hot-
 - FR-01: `tests/Unit/DependencyInjection/ConfigurationTest.php`, `tests/Integration/DependencyInjection/HotReloadExtensionIntegrationTest.php`
 - FR-02 … FR-04: `tests/Unit/HotReloadAssetsTest.php`
 - FR-05, FR-07: `tests/Unit/EventSubscriber/HotReloadResponseSubscriberTest.php`
+- FR-12: `tests/Unit/Event/HotReloadInjectEventTest.php`
 - FR-06: `tests/Unit/Twig/HotReloadTwigExtensionTest.php`
 - FR-08: `tests/Unit/Command/HotReloadCheckCommandTest.php`, `tests/Unit/Diagnostics/HotReloadDiagnosticsTest.php`
 - FR-09: `tests/Unit/DataCollector/HotReloadDataCollectorTest.php`

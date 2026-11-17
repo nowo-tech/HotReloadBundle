@@ -2,11 +2,11 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/hot-reload-bundle`  
-**Last audited**: 2026-09-24
+**Last audited**: 2026-11-17
 
 100% inventory of production PHP and shipped config / public assets under `src/`. Every file maps to at least one FR-* in the baseline product spec.
 
-**Total production sources under `src/`:** 22 (matches `find src -type f | wc -l`).
+**Total production sources under `src/`:** 23 (matches `find src -type f | wc -l`).
 
 ## Bundle entry
 
@@ -33,7 +33,8 @@
 | --- | --- | --- |
 | `EventSubscriber/HotReloadResponseSubscriber.php` | Auto-inject into HTML responses before `</head>` / `</body>` | FR-05, FR-07 |
 | `EventSubscriber/HotReloadAssetSubscriber.php` | Serves `/_nowo/hot-reload/client.js` and `shared-worker.js` | FR-10 |
-| `Event/HotReloadInjectEvent.php` | Dispatched before HTML injection so hosts can mutate snippet/headers | FR-05 |
+| `Event/HotReloadInjectEvent.php` | Dispatched before HTML injection so hosts can mutate snippet/body; scalar accessors (`getPath()`, `getContentType()`, `getBody()`/`setBody()`, `getSnippet()`/`setSnippet()`) and `fromContent()` since 1.7.0 | FR-05, FR-12 |
+| `Event/HotReloadInjectEventState.php` | Keeps the request, response and body of each inject event in a `WeakMap` outside the event's properties (no leak through a dump, no state in a worker) | FR-05, FR-11, FR-12 |
 
 ## Diagnostics
 
