@@ -1,23 +1,22 @@
-{#- REQ-DEMO-014: the demo shell is UiKit's admin layout with UiKit's default theme (nowo-ui.css from the bundle's own
-    asset package, no CSS framework, no CDN). The password-toggle stylesheet is the PasswordToggle bundle's own. -#}
-{% extends '@NowoUiKit/layout/admin.html.twig' %}
-
+{#- REQ-DEMO-014: the demo runs inside UiKit's shared demo platform shell. This file only declares the demo.
+    The password-toggle stylesheet is the PasswordToggle bundle's own. -#}
+{% extends '@NowoUiKit/demo_platform/layout.html.twig' %}
+{% set nowo_ui_demo_platform = {
+    bundle: 'Hot Reload',
+    home_route: 'homepage',
+    repository: 'https://github.com/nowo-tech/HotReloadBundle',
+    translation_domain: false,
+    auth: {login_route: 'login', logout_route: 'logout'},
+    nav: [
+        {label: 'Home', route: 'homepage', section: 'Hot Reload'},
+        {label: 'Live page', route: 'demo_live', section: 'Hot Reload'},
+    ],
+} %}
 {% block nowo_ui_document_title %}{% block title %}Hot Reload Demo{% endblock %}{% endblock %}
 
 {% block nowo_ui_styles %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('bundles/nowopasswordtoggle/css/toggle_password.css') }}">
-{% endblock %}
-
-{% block nowo_ui_navigation %}
-    {% set _route = app.request.attributes.get('_route') %}
-    <header class="nowo-ui-header" data-testid="demo-masthead">
-        <a class="nowo-ui-brand" href="{{ path('homepage') }}">Hot Reload Bundle</a>
-        <nav class="nowo-ui-menu" aria-label="Demo">
-            <a class="nowo-ui-link" href="{{ path('homepage') }}"{% if _route == 'homepage' %} aria-current="page"{% endif %}>Home</a>
-            <a class="nowo-ui-link" href="{{ path('demo_live') }}"{% if _route == 'demo_live' %} aria-current="page"{% endif %}>Live page</a>
-        </nav>
-    </header>
 {% endblock %}
 
 {% block nowo_ui_content %}{% block body %}{% endblock %}{% endblock %}
