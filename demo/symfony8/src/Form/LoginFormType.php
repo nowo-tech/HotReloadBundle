@@ -7,7 +7,6 @@ namespace App\Form;
 use Nowo\FormKitBundle\Attribute\FormKitConfig;
 use Nowo\FormKitBundle\Form\FormOptionsTrait;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -36,10 +35,6 @@ final class LoginFormType extends AbstractType
             'placeholder' => false,
             'help'        => 'Password toggle powered by PasswordToggleBundle.',
             'attr'        => ['autocomplete' => 'current-password'],
-        ]);
-        $this->addWithDefaults($builder, 'submit', SubmitType::class, [
-            'label' => 'Sign in',
-            'attr'  => ['class' => 'nowo-ui-btn nowo-ui-btn--primary'],
         ]);
     }
 

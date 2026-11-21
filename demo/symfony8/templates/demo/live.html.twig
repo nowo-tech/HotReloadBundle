@@ -7,13 +7,9 @@
 {% endblock %}
 
 {% block body %}
-    <section class="nowo-ui-card">
-        <div class="nowo-ui-card__body">
-            <p class="nowo-ui-muted">Server render timestamp</p>
+    {% embed '@NowoUiKit/demo_platform/_section.html.twig' with {title: 'Server render timestamp', intro: 'View source / DevTools: look for data-nowo-hot-reload and the frankenphp-hot-reload:url meta tag.', kind: 'detail'} %}
+        {% block section_body %}
             <p><code class="nowo-ui-code" id="generated-at">{{ generatedAt }}</code></p>
-        </div>
-    </section>
-    <p class="nowo-ui-muted">
-        View source / DevTools: look for <code class="nowo-ui-code">data-nowo-hot-reload</code> and the <code class="nowo-ui-code">frankenphp-hot-reload:url</code> meta tag.
-    </p>
+        {% endblock %}
+    {% endembed %}
 {% endblock %}

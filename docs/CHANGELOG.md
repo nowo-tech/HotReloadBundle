@@ -34,13 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Demo: runs in UiKit's demo platform shell (`nowo-tech/ui-kit-bundle` ^2.60); the demo's own header is gone and the pages use the shell page headers and section cards. The login form's submit button moved to the form card footer; a minimal Playwright suite (`make test-e2e`: layout rules, axe, sign-in) covers the demo; Hot Reload dev config turns the jsDelivr idiomorph script off (`client_mode: visibility`). Demo only, no bundle change.
 - Demo uses the UiKit base style and FormKit forms (REQ-DEMO-014/015)
 - `specs/001-baseline`: the code inventory maps `Event/HotReloadInjectEventState.php` (23/23) and the spec gains FR-12 for the 1.7.0 scalar event accessors and `fromContent()` (REQ-SPECKIT-001, REQ-SPECKIT-003)
 
 ### Fixed
 
 - Demo forms render a CSRF token
-
 
 ## [1.7.0] - 2026-11-12
 

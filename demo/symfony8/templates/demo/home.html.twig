@@ -3,38 +3,42 @@
 {% block title %}Hot Reload · Home{% endblock %}
 
 {% block nowo_ui_page_header %}
-    {{ include(nowo_ui_partial('page_header'), { title: 'FrankenPHP Hot Reload demo' }) }}
+    {% set _toolbar %}
+        <a class="nowo-ui-btn nowo-ui-btn--primary" href="{{ path('demo_live') }}">Open live page</a>
+    {% endset %}
+    {{ include(nowo_ui_partial('page_header'), {
+        title: 'FrankenPHP Hot Reload demo',
+        intro: 'This Symfony app uses Nowo HotReloadBundle to inject the Dunglas/FrankenPHP hot-reload client when FRANKENPHP_HOT_RELOAD is set by the server.',
+        toolbar: _toolbar,
+    }) }}
 {% endblock %}
 
 {% block body %}
-    <p>This Symfony app uses <strong>Nowo HotReloadBundle</strong> to inject the Dunglas/FrankenPHP hot-reload client when <code class="nowo-ui-code">FRANKENPHP_HOT_RELOAD</code> is set by the server.</p>
+    {% embed '@NowoUiKit/demo_platform/_section.html.twig' with {title: 'Hot reload status', kind: 'detail'} %}
+        {% block section_body %}
+            <dl class="nowo-ui-dl">
+                <div><dt>Rendered at</dt><dd><code class="nowo-ui-code" data-testid="demo-rendered-at">{{ generatedAt }}</code></dd></div>
+                <div>
+                    <dt>FRANKENPHP_HOT_RELOAD</dt>
+                    <dd>
+                        {% if frankenphpHotReload %}
+                            <code class="nowo-ui-code">{{ frankenphpHotReload }}</code>
+                        {% else %}
+                            <span class="nowo-ui-badge nowo-ui-badge--warning">not set</span> (assets will not inject until Mercure + <code class="nowo-ui-code">hot_reload</code> are enabled in Caddy)
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        {% endblock %}
+    {% endembed %}
 
-    <section class="nowo-ui-card">
-        <div class="nowo-ui-card__body">
-            <div><strong>Rendered at:</strong> <code class="nowo-ui-code">{{ generatedAt }}</code></div>
-            <div>
-                <strong>FRANKENPHP_HOT_RELOAD:</strong>
-                {% if frankenphpHotReload %}
-                    <code class="nowo-ui-code">{{ frankenphpHotReload }}</code>
-                {% else %}
-                    <span class="nowo-ui-badge nowo-ui-badge--warning">not set</span> (assets will not inject until Mercure + <code class="nowo-ui-code">hot_reload</code> are enabled in Caddy)
-                {% endif %}
-            </div>
-        </div>
-    </section>
-
-    <div class="nowo-ui-page-actions">
-        <a class="nowo-ui-btn nowo-ui-btn--primary" href="{{ path('demo_live') }}">Open live page</a>
-    </div>
-
-    <section class="nowo-ui-card">
-        <header class="nowo-ui-card__header"><h2 class="nowo-ui-card__title">Try it</h2></header>
-        <div class="nowo-ui-card__body">
+    {% embed '@NowoUiKit/demo_platform/_section.html.twig' with {title: 'Try it', kind: 'list'} %}
+        {% block section_body %}
             <ol>
                 <li>Ensure the demo Caddyfile has <code class="nowo-ui-code">mercure</code> + <code class="nowo-ui-code">hot_reload</code> (and <code class="nowo-ui-code">worker.watch</code> in worker mode).</li>
                 <li>Open the live page.</li>
                 <li>Edit <code class="nowo-ui-code">templates/demo/live.html.twig</code> and save — the browser should morph/reload.</li>
             </ol>
-        </div>
-    </section>
+        {% endblock %}
+    {% endembed %}
 {% endblock %}
