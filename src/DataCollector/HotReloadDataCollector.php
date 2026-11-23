@@ -17,6 +17,7 @@ use Symfony\Component\HttpKernel\DataCollector\DataCollectorInterface;
 use Symfony\Component\HttpKernel\DataCollector\LateDataCollectorInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use Throwable;
+use WeakReference;
 
 use function is_array;
 use function is_string;
@@ -40,7 +41,13 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
     /** @var array<string, mixed> */
     private array $data = [];
 
-    private ?Request $request = null;
+    /**
+     * The request being profiled, read again by {@see self::lateCollect()} once the response subscriber has run. A weak
+     * reference (REQ-RUNTIME-002, Igor 0.11): this shared service never keeps a request alive between worker requests.
+     *
+     * @var WeakReference<Request>|null
+     */
+    private ?WeakReference $request = null;
 
     /**
      * @param list<string> $preserveSelectors
@@ -83,7 +90,7 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
 
     public function collect(Request $request, Response $response, ?Throwable $exception = null): void
     {
-        $this->request = $request;
+        $this->request = WeakReference::create($request);
 
         $frankenphpEnv = $request->server->get('FRANKENPHP_HOT_RELOAD');
         $frankenphpEnv = is_string($frankenphpEnv) && $frankenphpEnv !== '' ? $frankenphpEnv : null;
@@ -114,24 +121,25 @@ final class HotReloadDataCollector implements DataCollectorInterface, LateDataCo
             'compare_table'               => ClientModeGuide::compareTableRows(),
         ];
 
-        $this->storeDiagnosticReport(false);
+        $this->storeDiagnosticReport($request, false);
     }
 
     public function lateCollect(): void
     {
-        if ($this->request instanceof Request) {
-            $this->data['injected'] = $this->request->attributes->getBoolean(
+        $request = $this->request?->get();
+        if ($request instanceof Request) {
+            $this->data['injected'] = $request->attributes->getBoolean(
                 HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED,
             );
-            $this->storeDiagnosticReport((bool) $this->data['injected']);
+            $this->storeDiagnosticReport($request, (bool) $this->data['injected']);
         }
 
         $this->request = null;
     }
 
-    private function storeDiagnosticReport(bool $injected): void
+    private function storeDiagnosticReport(Request $request, bool $injected): void
     {
-        $report                           = $this->diagnostics->evaluate($this->request, $injected);
+        $report                           = $this->diagnostics->evaluate($request, $injected);
         $this->data['checks']             = $report->toArray()['checks'];
         $this->data['diagnostic_status']  = $report->getOverallStatus();
         $this->data['diagnostic_summary'] = $report->getSummary();

@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Worker mode (REQ-RUNTIME-002, Igor 0.11): the Web Debug Toolbar collector (`HotReloadDataCollector`) holds the profiled request through a `WeakReference`, so the shared service never keeps a request alive between FrankenPHP worker requests. `lateCollect()` still reads the injected flag of the request being profiled; a request already gone leaves the collected data unchanged.
 - Demo forms render a CSRF token
 
 ## [1.7.0] - 2026-11-12

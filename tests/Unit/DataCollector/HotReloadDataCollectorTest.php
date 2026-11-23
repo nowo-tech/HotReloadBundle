@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use WeakReference;
 
 use function str_repeat;
 use function strlen;
@@ -274,6 +275,27 @@ final class HotReloadDataCollectorTest extends TestCase
         self::assertSame([], $collector->getData());
         self::assertSame('disabled', $collector->getStatus());
         self::assertNull($collector->getMercureUrl());
+    }
+
+    #[Test]
+    public function itNeverKeepsTheRequestAlive(): void
+    {
+        // REQ-RUNTIME-002 (Igor 0.11): the shared collector holds the request weakly, so a FrankenPHP worker never
+        // keeps the previous request; a request already gone leaves the collected data as it is.
+        $collector = $this->createCollector();
+        $request   = Request::create('/');
+        $request->server->set('FRANKENPHP_HOT_RELOAD', 'https://hub.test');
+        $request->attributes->set(HotReloadResponseSubscriber::REQUEST_ATTR_INJECTED, true);
+        $weak = WeakReference::create($request);
+        $collector->collect($request, new Response(''));
+        unset($request);
+
+        self::assertNull($weak->get());
+
+        $collector->lateCollect();
+
+        self::assertFalse($collector->isInjected());
+        self::assertSame('https://hub.test', $collector->getFrankenphpHotReloadEnv());
     }
 
     private function createCollector(bool $enabled = true): HotReloadDataCollector
