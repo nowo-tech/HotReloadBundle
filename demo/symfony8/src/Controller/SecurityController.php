@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Form\LoginFormType;
+use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -29,6 +30,6 @@ final class SecurityController extends AbstractController
     #[Route(path: '/logout', name: 'logout', methods: ['GET'])]
     public function logout(): void
     {
-        throw new \LogicException('Logout is handled by the firewall.');
+        throw new LogicException('Logout is handled by the firewall.');
     }
 }
