@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Unreleased](#unreleased)
+- [To 1.8.0](#to-180)
 - [To 1.7.0](#to-170)
 - [To 1.7.0](#to-170-1)
 - [To 1.6.2](#to-162)
@@ -38,6 +39,14 @@
   - [Checklist](#checklist-6)
 
 ## Unreleased
+
+## To 1.8.0
+
+From **1.7.0**:
+
+```bash
+composer update nowo-tech/hot-reload-bundle
+```
 
 ## To 1.7.0
 
