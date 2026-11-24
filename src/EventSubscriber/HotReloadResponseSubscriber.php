@@ -172,10 +172,13 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
     private function nonceFromResponse(Response $response): ?string
     {
         foreach (self::CSP_HEADERS as $headerName) {
-            foreach ($response->headers->all($headerName) as $policy) {
-                $nonce = $this->nonceFromPolicy((string) $policy);
-                if ($nonce !== null) {
-                    return $nonce;
+            foreach ($response->headers->all($headerName) as $headerValue) {
+                // One header value may hold several comma-separated policies; each is evaluated on its own.
+                foreach (explode(',', (string) $headerValue) as $policy) {
+                    $nonce = $this->nonceFromPolicy($policy);
+                    if ($nonce !== null) {
+                        return $nonce;
+                    }
                 }
             }
         }

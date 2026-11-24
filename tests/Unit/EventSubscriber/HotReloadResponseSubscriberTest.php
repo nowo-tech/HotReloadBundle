@@ -685,6 +685,8 @@ final class HotReloadResponseSubscriberTest extends TestCase
             'enforced before report-only'     => [['Content-Security-Policy' => "script-src 'nonce-enf'", 'Content-Security-Policy-Report-Only' => "script-src 'nonce-ro'"], 'enf'],
             'malformed'                       => [['Content-Security-Policy' => "script-src 'self' 'nonce-a\"b<c' 'nonce-' nonce-plain"], null],
             'nonce outside script directives' => [['Content-Security-Policy' => "style-src 'nonce-sty'; script-src 'self'"], null],
+            'several comma-separated policies' => [['Content-Security-Policy' => "style-src 'nonce-sty', script-src 'self' 'nonce-scr'"], 'scr'],
+            'only a style nonce in a multi-policy header' => [['Content-Security-Policy' => "style-src 'nonce-sty', default-src 'self'"], null],
             'no csp'                          => [[], null],
         ];
     }
