@@ -45,9 +45,9 @@ final class LoginFormType extends AbstractType
             'method'             => 'POST',
             'translation_domain' => false,
             // form_login (enable_csrf) reads _csrf_token with the "authenticate" token id.
-            'csrf_protection'    => true,
-            'csrf_field_name'    => '_csrf_token',
-            'csrf_token_id'      => 'authenticate',
+            'csrf_protection' => true,
+            'csrf_field_name' => '_csrf_token',
+            'csrf_token_id'   => 'authenticate',
         ]);
     }
 
