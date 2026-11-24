@@ -2,7 +2,7 @@
 
 **Baseline spec**: [`spec.md`](spec.md)  
 **Package**: `nowo-tech/hot-reload-bundle`  
-**Last audited**: 2026-11-17
+**Last audited**: 2026-11-24
 
 100% inventory of production PHP and shipped config / public assets under `src/`. Every file maps to at least one FR-* in the baseline product spec.
 
@@ -18,7 +18,7 @@
 
 | File | Responsibility | Spec |
 | --- | --- | --- |
-| `HotReloadAssets.php` | Render gate, Mercure URL resolve (Request then `$_SERVER`), HTML snippet (CDN or bundle client), preserve boot script; marker `data-nowo-hot-reload` | FR-02, FR-03, FR-04, FR-10, FR-11 |
+| `HotReloadAssets.php` | Render gate, Mercure URL resolve (Request then `$_SERVER`), request-attribute CSP nonce (`resolveRequestNonce()`), HTML snippet (CDN or bundle client), preserve boot script; marker `data-nowo-hot-reload` | FR-02, FR-03, FR-04, FR-10, FR-11 |
 
 ## Client modes
 
@@ -31,7 +31,7 @@
 
 | File | Responsibility | Spec |
 | --- | --- | --- |
-| `EventSubscriber/HotReloadResponseSubscriber.php` | Auto-inject into HTML responses before `</head>` / `</body>` | FR-05, FR-07 |
+| `EventSubscriber/HotReloadResponseSubscriber.php` | Auto-inject into HTML responses before `</head>` / `</body>`; reuses the script nonce already in the response CSP when no request-attribute nonce resolves | FR-05, FR-07 |
 | `EventSubscriber/HotReloadAssetSubscriber.php` | Serves `/_nowo/hot-reload/client.js` and `shared-worker.js` | FR-10 |
 | `Event/HotReloadInjectEvent.php` | Dispatched before HTML injection so hosts can mutate snippet/body; scalar accessors (`getPath()`, `getContentType()`, `getBody()`/`setBody()`, `getSnippet()`/`setSnippet()`) and `fromContent()` since 1.7.0 | FR-05, FR-12 |
 | `Event/HotReloadInjectEventState.php` | Keeps the request, response and body of each inject event in a `WeakMap` outside the event's properties (no leak through a dump, no state in a worker) | FR-05, FR-11, FR-12 |
@@ -86,5 +86,5 @@
 
 | File | Responsibility | Spec |
 | --- | --- | --- |
-| `templates/Collector/hot_reload.html.twig` | Profiler panel (`sf-tabs`: Environment checks, Runtime, Client assets, CSP, Help) | FR-09 |
+| `templates/Collector/hot_reload.html.twig` | Profiler panel (`sf-tabs`: Environment checks, Runtime, Client assets, CSP, Help); no inline `style=` (nonced `<style>` class) | FR-09 |
 | `templates/Icon/hot-reload.svg` | Toolbar / menu icon | FR-09 |
