@@ -23,7 +23,7 @@ This project follows the [Contributor Covenant Code of Conduct](../CODE_OF_CONDU
 
 ## Code style
 
-- PHP-CS-Fixer (PSR-12 + Symfony): `make cs-fix` / `make cs-check`.
+- PHP-CS-Fixer (PER-CS + Symfony): `make cs-fix` / `make cs-check`.
 - PHPStan (level 8+) including **`nowo-tech/phpstan-frankenphp`** classic + worker rulesets (`make phpstan`). Dev-only — never a runtime dependency of consuming apps (REQ-CS-005).
 - PHPDoc and Markdown docs in **English**.
 - Strict types in all PHP files.
