@@ -36,9 +36,8 @@
             <div class="sf-toolbar-info-piece">
                 <b>Mercure</b>
                 <span
-                    class="sf-toolbar-status sf-toolbar-status-{{ collector.injected ? 'green' : 'normal' }}"
+                    class="nowo-hot-reload-ellipsis sf-toolbar-status sf-toolbar-status-{{ collector.injected ? 'green' : 'normal' }}"
                     title="{{ collector.mercureUrl }}"
-                    style="display:inline-block;max-width:16rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;"
                 >{{ collector.mercureUrlShort }}</span>
             </div>
         {% endif %}
@@ -49,13 +48,16 @@
         <div class="sf-toolbar-info-piece">
             <b>Checks</b>
             <span
-                class="sf-toolbar-status sf-toolbar-status-{{ collector.diagnosticStatus == 'fail' ? 'red' : (collector.diagnosticStatus == 'warn' ? 'yellow' : 'green') }}"
+                class="nowo-hot-reload-ellipsis sf-toolbar-status sf-toolbar-status-{{ collector.diagnosticStatus == 'fail' ? 'red' : (collector.diagnosticStatus == 'warn' ? 'yellow' : 'green') }}"
                 title="{{ collector.diagnosticSummary }}"
-                style="display:inline-block;max-width:16rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;"
             >{{ collector.diagnosticSummary }}</span>
         </div>
     {% endset %}
 
+    {# No inline style attribute (style-src-attr 'none'): the class lives in a <style> carrying the profiler style nonce. #}
+    <style{% if csp_style_nonce|default(null) %} nonce="{{ csp_style_nonce }}"{% endif %}>
+        .nowo-hot-reload-ellipsis { display: inline-block; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+    </style>
     {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: true, status: status_color }) }}
 {% endblock %}
 

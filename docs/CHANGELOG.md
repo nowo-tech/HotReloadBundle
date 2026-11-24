@@ -32,6 +32,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **CSP nonce from the response.** In dev the Web Profiler adds a script nonce to the response CSP (making the browser ignore `'unsafe-inline'`) after which this bundle injected its inline preserve boot script without a nonce, so the browser blocked it. When no nonce resolves from `csp_nonce_request_attribute`, the bundle now reuses the `'nonce-<base64>'` token already present in the response `Content-Security-Policy` / `-Report-Only` `script-src-elem` / `script-src` for every tag it injects. The request attribute still wins; malformed tokens are ignored; `'unsafe-inline'` is never added.
+- **Profiler panel inline styles.** `templates/Collector/hot_reload.html.twig` no longer uses `style=` attributes (they broke `style-src-attr 'none'`); a class in a `<style>` block with the profiler style nonce replaces them.
+
+### Changed
+
+- Code style: `@PER-CS` + `@PER-CS:risky` replace `@PSR12` (REQ-CS-009), formatting only.
+
 ### Changed
 
 - Demo: runs in UiKit's demo platform shell (`nowo-tech/ui-kit-bundle` ^2.60); the demo's own header is gone and the pages use the shell page headers and section cards. The login form's submit button moved to the form card footer; a minimal Playwright suite (`make test-e2e`: layout rules, axe, sign-in) covers the demo; Hot Reload dev config turns the jsDelivr idiomorph script off (`client_mode: visibility`). Demo only, no bundle change.

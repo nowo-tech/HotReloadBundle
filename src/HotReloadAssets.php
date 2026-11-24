@@ -190,6 +190,14 @@ final class HotReloadAssets
             return $explicit;
         }
 
+        return $this->resolveRequestNonce();
+    }
+
+    /**
+     * CSP nonce held by the configured request attribute of the current request, or null when none resolves.
+     */
+    public function resolveRequestNonce(): ?string
+    {
         if ($this->cspNonceRequestAttribute === null || $this->cspNonceRequestAttribute === '') {
             return null;
         }
