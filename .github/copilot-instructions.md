@@ -10,7 +10,7 @@ Use this when suggesting code, tests, documentation, or CI changes for this repo
 
 ### Code
 
-- Follow **PSR-12** and project conventions in `.php-cs-fixer.dist.php`.
+- Follow **PER-CS** and project conventions in `.php-cs-fixer.dist.php`.
 - Use **strict comparison** (`===`) where appropriate.
 - Keep changes **minimal** and consistent with existing patterns in `src/` and `tests/`.
 - Align with `composer cs-check`, `composer phpstan`, and `composer test` expectations.

@@ -13,7 +13,7 @@ Fixes # (issue number)
 
 ## Checklist
 
-- [ ] My code follows the project's coding standards (PSR-12)
+- [ ] My code follows the project's coding standards (PER-CS)
 - [ ] I have performed a self-review of my code
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit/integration tests pass locally with my changes
