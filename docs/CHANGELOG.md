@@ -32,17 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
-- **CSP nonce from the response.** In dev the Web Profiler adds a script nonce to the response CSP (making the browser ignore `'unsafe-inline'`) after which this bundle injected its inline preserve boot script without a nonce, so the browser blocked it. When no nonce resolves from `csp_nonce_request_attribute`, the bundle now reuses the `'nonce-<base64>'` token already present in the response `Content-Security-Policy` / `-Report-Only` `script-src-elem` / `script-src` for every tag it injects. The request attribute still wins; malformed tokens are ignored; `'unsafe-inline'` is never added.
-- **Profiler panel inline styles.** `templates/Collector/hot_reload.html.twig` no longer uses `style=` attributes (they broke `style-src-attr 'none'`); a class in a `<style>` block with the profiler style nonce replaces them.
+- `HotReloadAssets::resolveRequestNonce()` is public API: it returns the CSP nonce held by the configured request attribute of the current request, or `null`. The response subscriber uses it to decide whether the response CSP nonce is needed.
 
 ### Changed
 
 - Code style: `@PER-CS` + `@PER-CS:risky` replace `@PSR12` (REQ-CS-009), formatting only.
-
-### Changed
-
 - Demo: runs in UiKit's demo platform shell (`nowo-tech/ui-kit-bundle` ^2.60); the demo's own header is gone and the pages use the shell page headers and section cards. The login form's submit button moved to the form card footer; a minimal Playwright suite (`make test-e2e`: layout rules, axe, sign-in) covers the demo; Hot Reload dev config turns the jsDelivr idiomorph script off (`client_mode: visibility`). Demo only, no bundle change.
 - Demo uses the UiKit base style and FormKit forms (REQ-DEMO-014/015)
 - `specs/001-baseline`: the code inventory maps `Event/HotReloadInjectEventState.php` (23/23) and the spec gains FR-12 for the 1.7.0 scalar event accessors and `fromContent()` (REQ-SPECKIT-001, REQ-SPECKIT-003)
@@ -51,6 +47,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **CSP nonce from the response.** In dev the Web Profiler adds a script nonce to the response CSP (making the browser ignore `'unsafe-inline'`) after which this bundle injected its inline preserve boot script without a nonce, so the browser blocked it. When no nonce resolves from `csp_nonce_request_attribute`, the bundle now reuses the `'nonce-<base64>'` token already present in the response `Content-Security-Policy` / `-Report-Only` `script-src-elem` / `script-src` for every tag it injects. The request attribute still wins; malformed tokens are ignored; `'unsafe-inline'` is never added.
+- **Profiler panel inline styles.** `templates/Collector/hot_reload.html.twig` no longer uses `style=` attributes (they broke `style-src-attr 'none'`); a class in a `<style>` block with the profiler style nonce replaces them.
 - Worker mode (REQ-RUNTIME-002, Igor 0.11): the Web Debug Toolbar collector (`HotReloadDataCollector`) holds the profiled request through a `WeakReference`, so the shared service never keeps a request alive between FrankenPHP worker requests. `lateCollect()` still reads the injected flag of the request being profiled; a request already gone leaves the collected data unchanged.
 - Demo forms render a CSRF token
 

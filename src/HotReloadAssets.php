@@ -195,6 +195,8 @@ final class HotReloadAssets
 
     /**
      * CSP nonce held by the configured request attribute of the current request, or null when none resolves.
+     *
+     * Public API since 1.8.0.
      */
     public function resolveRequestNonce(): ?string
     {
