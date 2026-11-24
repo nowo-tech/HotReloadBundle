@@ -194,7 +194,7 @@ final class SkipAdminHotReload
 }
 ```
 
-Response headers (CSP) are not part of the event: use the `csp_*` options (see [CSP.md](CSP.md)) or your own
+Response headers (CSP) are not part of the event: use the `csp_*` options (see [CSP.md](CSP.md); the injected tags reuse the nonce of the response CSP when no request attribute is set) or your own
 `kernel.response` listener. Dumping the event (VarDumper, `var_export()`, `(array)`, `serialize()`) shows only the
 path, the content type and the snippet: the request, the response and the body are kept outside its properties.
 To unit test a listener, build the event with `HotReloadInjectEvent::fromContent($path, $contentType, $body, $snippet)`.

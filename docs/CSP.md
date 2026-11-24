@@ -39,6 +39,10 @@ nowo_hot_reload:
 
 The bundle reads that attribute via `RequestStack` and emits `nonce="…"` on **every** `<script>` it injects (Idiomorph, the CDN module or bundle client, the JSON config block and the inline preserve script), so nonce-based (`'strict-dynamic'`) policies work too.
 
+**No attribute configured (e.g. the Web Profiler in dev):** the Web Profiler toolbar listener adds a script nonce to the response CSP, and a nonce makes the browser ignore `'unsafe-inline'`. When no nonce resolves from the request attribute, the bundle reads the `'nonce-…'` token already present in the response `Content-Security-Policy` (or `-Report-Only`) `script-src-elem` / `script-src` and uses it on every tag it injects. The request attribute always wins when set. Only a `'nonce-<base64>'` token is accepted (a malformed one is ignored), and the bundle never adds `'unsafe-inline'` or otherwise weakens the policy.
+
+The profiler panel itself ships no inline `style=` attribute (`style-src-attr 'none'` safe): its one rule lives in a `<style>` block carrying the profiler style nonce.
+
 ### 2. Allow the CDN (or self-host)
 
 **Option A — auto-augment (default):** when the response already has a `Content-Security-Policy` (or `Content-Security-Policy-Report-Only`) header, `HotReloadResponseSubscriber` appends the configured hosts to every `script-src` and `script-src-elem` directive. When the policy has no `script-src` but restricts scripts via `default-src`, a `script-src` is added seeded with the `default-src` sources plus the hosts (e.g. `default-src 'self'` → `script-src 'self' https://cdn.jsdelivr.net`), so same-origin scripts keep working. In bundle client modes (`visibility`, `shared_worker`, `always`) `'self'` is also added when the directive does not already allow the request origin (e.g. `default-src 'none'` → `script-src https://cdn.jsdelivr.net 'self'`), because `/_nowo/hot-reload/client.js` is served same-origin. Policies that do not restrict scripts at all are left untouched:

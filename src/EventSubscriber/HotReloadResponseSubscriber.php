@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+use function array_key_exists;
 use function in_array;
 
 use const PREG_SPLIT_NO_EMPTY;
@@ -76,7 +77,8 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $snippet = $this->assets->renderHtml();
+        // The request attribute wins; otherwise reuse the nonce another listener (e.g. the Web Profiler toolbar) already put in the response CSP.
+        $snippet = $this->assets->renderHtml($this->assets->resolveRequestNonce() === null ? $this->nonceFromResponse($response) : null);
 
         if ($this->eventDispatcher instanceof EventDispatcherInterface) {
             $injectEvent = HotReloadInjectEvent::fromContent($request->getPathInfo(), $response->headers->get('Content-Type'), '', $snippet);
@@ -160,6 +162,45 @@ final class HotReloadResponseSubscriber implements EventSubscriberInterface
             '/<(?:meta|script)\b[^>]*\b' . preg_quote(HotReloadAssets::MARKER, '/') . '\b/i',
             $content,
         ) === 1;
+    }
+
+    /**
+     * Script nonce already present in the response CSP (enforced header first, then Report-Only).
+     *
+     * Only a strict `'nonce-<base64>'` token of script-src-elem / script-src is accepted; the policy is never modified.
+     */
+    private function nonceFromResponse(Response $response): ?string
+    {
+        foreach (self::CSP_HEADERS as $headerName) {
+            foreach ($response->headers->all($headerName) as $policy) {
+                $nonce = $this->nonceFromPolicy((string) $policy);
+                if ($nonce !== null) {
+                    return $nonce;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function nonceFromPolicy(string $policy): ?string
+    {
+        $found = ['script-src-elem' => null, 'script-src' => null];
+        foreach (explode(';', $policy) as $rawDirective) {
+            $tokens = preg_split('/\s+/', trim($rawDirective), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $name   = strtolower((string) array_shift($tokens));
+            if (!array_key_exists($name, $found) || $found[$name] !== null) {
+                continue;
+            }
+            foreach ($tokens as $token) {
+                if (preg_match('/^\'nonce-([A-Za-z0-9+\/_-]+={0,2})\'$/i', $token, $matches) === 1) {
+                    $found[$name] = $matches[1];
+                    break;
+                }
+            }
+        }
+
+        return $found['script-src-elem'] ?? $found['script-src'];
     }
 
     private function augmentContentSecurityPolicy(Response $response, Request $request): void

@@ -13,6 +13,7 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -673,15 +674,57 @@ final class HotReloadResponseSubscriberTest extends TestCase
     }
 
     /**
-     * @param list<string> $ignorePathPrefixes
+     * @return array<string, array{array<string, string>, string|null}>
      */
-    private function createSubscriber(
-        bool $autoInject = true,
-        ?EventDispatcher $eventDispatcher = null,
-        bool $cspAugmentScriptSrc = true,
-        array $ignorePathPrefixes = ['/_wdt', '/_profiler'],
-        string $clientMode = 'cdn',
-    ): HotReloadResponseSubscriber {
+    public static function responseNonceProvider(): array
+    {
+        return [
+            'script-src'                      => [['Content-Security-Policy' => "default-src 'self'; script-src 'self' 'nonce-AbC+/_-1=='"], 'AbC+/_-1=='],
+            'script-src-elem wins'            => [['Content-Security-Policy' => "script-src 'nonce-aaa'; script-src-elem 'nonce-bbb'"], 'bbb'],
+            'report-only'                     => [['Content-Security-Policy-Report-Only' => "script-src 'self' 'nonce-ro1'"], 'ro1'],
+            'enforced before report-only'     => [['Content-Security-Policy' => "script-src 'nonce-enf'", 'Content-Security-Policy-Report-Only' => "script-src 'nonce-ro'"], 'enf'],
+            'malformed'                       => [['Content-Security-Policy' => "script-src 'self' 'nonce-a\"b<c' 'nonce-' nonce-plain"], null],
+            'nonce outside script directives' => [['Content-Security-Policy' => "style-src 'nonce-sty'; script-src 'self'"], null],
+            'no csp'                          => [[], null],
+        ];
+    }
+
+    /**
+     * @param array<string, string> $headers
+     */
+    #[Test]
+    #[DataProvider('responseNonceProvider')]
+    public function itReusesTheNonceOfTheResponseCsp(array $headers, ?string $expected): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $response = new Response('<html><head></head><body>ok</body></html>', 200, ['Content-Type' => 'text/html'] + $headers);
+        $this->createSubscriber(cspAugmentScriptSrc: false, preserveSelectors: ['.sf-toolbar'])->onKernelResponse($this->createEvent($response));
+
+        $content = (string) $response->getContent();
+        if ($expected === null) {
+            self::assertStringNotContainsString('nonce="', $content);
+            self::assertStringContainsString('data-nowo-hot-reload-preserve-boot', $content);
+
+            return;
+        }
+
+        self::assertSame(substr_count($content, '<script'), substr_count($content, 'nonce="' . $expected . '"'));
+        self::assertStringContainsString('<script nonce="' . $expected . '" data-nowo-hot-reload data-nowo-hot-reload-preserve-boot>', $content);
+        foreach ($headers as $name => $value) {
+            self::assertSame($value, $response->headers->get($name), 'CSP is never modified');
+            self::assertStringNotContainsString('unsafe-inline', $response->headers->get($name));
+        }
+    }
+
+    #[Test]
+    public function itPrefersTheRequestAttributeNonceOverTheResponseCsp(): void
+    {
+        $_SERVER['FRANKENPHP_HOT_RELOAD'] = 'https://hub.test';
+
+        $request = Request::create('/');
+        $request->attributes->set('_csp_nonce', 'fromrequest');
+        $stack  = new RequestStack([$request]);
         $assets = new HotReloadAssets(
             enabled: true,
             requireFrankenphpEnv: true,
@@ -690,6 +733,42 @@ final class HotReloadResponseSubscriberTest extends TestCase
             idiomorphScriptUrl: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4',
             hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm',
             preserveSelectors: [],
+            cspNonceRequestAttribute: '_csp_nonce',
+            requestStack: $stack,
+        );
+        $response = new Response('<html><head></head></html>', 200, [
+            'Content-Type'            => 'text/html',
+            'Content-Security-Policy' => "script-src 'nonce-fromresponse'",
+        ]);
+        $event = new ResponseEvent($this->createMock(KernelInterface::class), $request, HttpKernelInterface::MAIN_REQUEST, $response);
+
+        (new HotReloadResponseSubscriber($assets, true, null, false))->onKernelResponse($event);
+
+        $content = (string) $response->getContent();
+        self::assertStringContainsString('nonce="fromrequest"', $content);
+        self::assertStringNotContainsString('nonce="fromresponse"', $content);
+    }
+
+    /**
+     * @param list<string> $ignorePathPrefixes
+     * @param list<string> $preserveSelectors
+     */
+    private function createSubscriber(
+        bool $autoInject = true,
+        ?EventDispatcher $eventDispatcher = null,
+        bool $cspAugmentScriptSrc = true,
+        array $ignorePathPrefixes = ['/_wdt', '/_profiler'],
+        string $clientMode = 'cdn',
+        array $preserveSelectors = [],
+    ): HotReloadResponseSubscriber {
+        $assets = new HotReloadAssets(
+            enabled: true,
+            requireFrankenphpEnv: true,
+            mercureUrl: null,
+            idiomorph: true,
+            idiomorphScriptUrl: 'https://cdn.jsdelivr.net/npm/idiomorph@0.7.4',
+            hotReloadScriptUrl: 'https://cdn.jsdelivr.net/npm/frankenphp-hot-reload@1.0.1/+esm',
+            preserveSelectors: $preserveSelectors,
             clientMode: $clientMode,
         );
 
