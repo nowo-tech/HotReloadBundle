@@ -153,7 +153,7 @@ make release-check
 ## Tests and coverage
 
 - Tests: PHPUnit (PHP)
-- PHP: **100%** lines (1168/1168, measured with `make test-coverage`; `make test-coverage` and CI fail below 100%)
+- PHP: **100%** lines (1229/1229, measured with `make test-coverage`; `make test-coverage` and CI fail below 100%)
 
 ## License and author
 
